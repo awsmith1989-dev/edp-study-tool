@@ -724,12 +724,17 @@ function renderQuizQ(){
       <div>${t}</div>
     </label>`).join('');
 
+  const chapterChip = (q.chapter !== '' && q.chapter != null)
+    ? `<span class="chip">Chapter: <strong>${q.chapter}</strong></span>` : '';
+  const manualChip = `<span class="chip">Manual: <strong>${manualKey(q)}</strong></span>`;
+
   $('qwrap').innerHTML = `
     <div class="quiz-progress">
       <span>Question ${index + 1} of ${QUIZ_LENGTH}</span>
       <span>${state.quiz.score} correct</span>
     </div>
     <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
+    <div class="meta">${manualChip}${chapterChip}</div>
     <h3>${q.question}</h3>
     <div class="options">${opts}</div>
     <div id="feedback" class="small"></div>
