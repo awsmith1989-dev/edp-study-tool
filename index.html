@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EDP Study Tool</title>
+  <style>
+    :root{
+      --bg:#14405f;
+      --card:#1b5277;
+      --ink:#ffffff;
+      --muted:#cdd7e3;
+      --acc:#ffcf24;
+      --good:#45d07c;
+      --bad:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+    .wrap{max-width:980px;margin:32px auto;padding:0 16px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:12px}
+    h1{font-size:clamp(20px,3.5vw,28px);margin:0;color:var(--acc)}
+    .card{background:var(--card);border:1px solid #1f274a;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:18px}
+    .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+    .btn{appearance:none;border:1px solid #2a3771;background:#0f2c40;color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer}
+    .btn:hover{background:#12364d}
+    .btn.primary{background:var(--acc);color:#0b1020;border-color:#e6b500}
+    .btn.primary:hover{filter:brightness(1.05)}
+    .btn.sm{padding:8px 10px;border-radius:10px;font-size:13px}
+    label{font-weight:600;color:var(--acc)}
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #2a3771;border-radius:100px;background:#0f2c40;color:var(--ink);font-size:13px}
+    .muted{color:var(--muted)}
+    .options{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0}
+    .opt{display:flex;gap:10px;align-items:flex-start;background:#0f2c40;border:1px solid #2a3771;padding:10px;border-radius:12px;cursor:pointer;color:var(--ink)}
+    .opt input{margin-top:4px}
+    .opt.correct{border-color:#34b466;background:#0f1f19}
+    .opt.incorrect{border-color:#ff4d4d;background:#2a0d0d}
+    .grid{display:grid;gap:12px}
+    @media(min-width:900px){.grid{grid-template-columns:2fr 1fr}}
+    .stat{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed #26305e;color:var(--ink)}
+    .pill{padding:4px 8px;border-radius:999px;font-weight:700}
+    .pill.good{background:#0f1f19;color:#78e3aa;border:1px solid #1f6a45}
+    .pill.bad{background:#2a0d0d;color:#ffb3b3;border:1px solid #803333}
+    .small{font-size:13px}
+    h3{color:var(--ink)}
+    strong,em{color:var(--acc)}
+
+    .status{border:1px solid #2a3771;background:#0f2c40;border-radius:12px;padding:10px 12px;margin:10px 0 0;color:var(--muted);display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .status strong{color:var(--acc)}
+
+    .quiz-hero{background:#0f2c40;border:1px solid #2a3771;border-radius:16px;padding:16px;margin-bottom:14px}
+    .quiz-hero h3{margin:10px 0 0;font-size:1.52rem;line-height:1.32;letter-spacing:.1px}
+
+    .meta{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;opacity:.92}
+    .chip.meta-chip{font-size:10px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:var(--muted);line-height:1.2}
+    .chip.meta-chip strong{color:var(--acc)}
+
+    details.filters{border:1px solid #2a3771;background:#0f2c40;border-radius:16px;padding:12px}
+    details.filters summary{cursor:pointer;list-style:none;font-weight:700;color:var(--acc);display:flex;align-items:center;justify-content:space-between;gap:10px;user-select:none}
+    details.filters summary::-webkit-details-marker{display:none}
+    details.filters summary .muted{font-weight:600}
+    .filters-body{margin-top:12px}
+
+    .progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px}
+
+    .check-group{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+    .check-row{display:flex;align-items:center;gap:8px;background:#162e41;border:1px solid #2a3771;border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .15s,border-color .15s;color:var(--ink);font-weight:400;font-size:14px;user-select:none}
+    .check-row:hover{background:#1a3a50;border-color:#3a4f80}
+    .check-row input[type="checkbox"],.check-row input[type="radio"]{accent-color:var(--acc);width:15px;height:15px;flex-shrink:0;cursor:pointer}
+    .check-row.checked{background:#1c3a28;border-color:#2e6644}
+    .check-row.checked-radio{background:#2a2000;border-color:#7a5c00}
+
+    .filter-cols{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+    .filter-col{flex:1;min-width:220px}
+    .filter-col-label{font-weight:700;color:var(--acc);font-size:13px;margin-bottom:6px;display:block}
+    .manual-scroll{max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a3771 transparent}
+    .manual-scroll::-webkit-scrollbar{width:5px}
+    .manual-scroll::-webkit-scrollbar-thumb{background:#2a3771;border-radius:4px}
+
+    .select-all-row{display:flex;gap:8px;margin-bottom:6px}
+    .select-all-row button{font-size:11px;padding:3px 8px;border-radius:8px;border:1px solid #2a3771;background:#0f2c40;color:var(--muted);cursor:pointer}
+    .select-all-row button:hover{color:var(--ink);background:#162e41}
+
+    /* ── Feedback row ── */
+    .feedback-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+
+    /* ── Next button (appears on wrong answer) ── */
+    .btn.next-inline{
+      background:#0f2c40;
+      border:1px solid #2a3771;
+      color:var(--muted);
+      padding:7px 14px;
+      border-radius:10px;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .btn.next-inline:hover{background:#12364d;color:var(--ink)}
+
+    /* ── Explain This button ── */
+    .btn.explain-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:#1a2510;
+      border:1px solid #c8941a;
+      color:#ffcf24;
+      padding:7px 14px;
+      border-radius:10px;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      transition:background .15s,opacity .15s;
+    }
+    .btn.explain-btn:hover{background:#22340f}
+    .btn.explain-btn:disabled{opacity:.45;cursor:not-allowed}
+
+    /* ── AI explanation box ── */
+    #explanationBox{
+      margin-top:14px;
+      border:1px solid #c8941a55;
+      background:#111d0b;
+      border-radius:14px;
+      padding:14px 16px;
+      animation:slideDown .22s ease;
+    }
+    #explanationBox.loading{
+      border-color:#2a3771;
+      background:#0d1e2c;
+    }
+    @keyframes slideDown{
+      from{opacity:0;transform:translateY(-6px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .explain-header{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:10px;
+      font-size:11px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      color:#c8941a;
+    }
+    .explain-dot{
+      width:7px;height:7px;border-radius:50%;background:#c8941a;flex-shrink:0;
+    }
+    .explain-dot.pulse{animation:pulse 1s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+
+    #explanationText{
+      font-size:14.5px;
+      line-height:1.75;
+      color:#c8e8a8;
+      white-space:pre-wrap;
+    }
+    #explanationText.thinking{color:#4a7090;font-style:italic}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>EDP Study Tool <span class="muted small">(for 75Strong)</span></h1>
+  </header>
+
+  <div class="grid">
+    <section class="card" id="quizCard">
+
+      <div class="quiz-hero" aria-live="polite">
+        <div id="qwrap">
+          <div class="muted">Click <em>Begin Quiz</em> to start.</div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="nextBtn">Begin Quiz</button>
+        </div>
+      </div>
+
+      <details class="filters" id="filtersPanel">
+        <summary>
+          <span>Filters &amp; Settings</span>
+          <span class="muted small" id="filtersSummary">Pool: —</span>
+        </summary>
+
+        <div class="filters-body">
+          <div class="filter-cols">
+
+            <div class="filter-col">
+              <span class="filter-col-label">Manuals in play</span>
+              <div class="select-all-row">
+                <button id="selectAllBtn">Select all</button>
+                <button id="selectNoneBtn">Clear</button>
+              </div>
+              <div class="manual-scroll" id="manualsGroup"></div>
+              <div class="status" id="statusLine" aria-live="polite">
+                <div><strong>Status:</strong> <span id="statusText">Loading question bank…</span></div>
+                <div class="small" id="poolInfo">Pool: —</div>
+              </div>
+            </div>
+
+            <div class="filter-col">
+              <span class="filter-col-label">Mode</span>
+              <div class="check-group" id="modeGroup">
+                <label class="check-row checked-radio">
+                  <input type="radio" name="mode" value="random" checked /> Random
+                </label>
+                <label class="check-row">
+                  <input type="radio" name="mode" value="spaced" /> Spaced review (least-seen)
+                </label>
+                <label class="check-row">
+                  <input type="radio" name="mode" value="missed" /> Review missed
+                </label>
+              </div>
+
+              <div style="margin-top:16px">
+                <button class="btn" id="resetBtn">Reset Progress</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+    </section>
+
+    <aside class="card">
+      <div class="progress-head">
+        <h3 style="margin:0">Progress</h3>
+        <button class="btn sm" id="resetBtn2" title="Reset all quiz progress">Reset Progress</button>
+      </div>
+
+      <div id="stats"></div>
+      <div class="small muted" style="margin-top:8px">Progress is stored locally in your browser (no account needed).</div>
+      <div class="small muted" style="margin-top:8px" id="missedInfo"></div>
+    </aside>
+  </div>
+
+  <footer class="muted small" style="margin-top:16px">v2.5 · AI explanations powered by Claude</footer>
+</div>
+
+<script>
+const STORAGE_KEY = 'iedc-edp-quiz-v1';
+const BANK_URL_PRIMARY = 'https://cdn.jsdelivr.net/gh/awsmith1989-dev/iedc@main/iedc_edp_questions.cleaned.json';
+const BANK_URL_FALLBACK = 'https://raw.githubusercontent.com/awsmith1989-dev/iedc/refs/heads/main/iedc_edp_questions.cleaned.json';
+const BANK_FETCH_TIMEOUT_MS = 8000;
+const AUTO_ADVANCE_MS = 1200;
+
+function $(id){ return document.getElementById(id); }
+
+const state = loadState();
+
+function loadState(){
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  return {
+    bank: saved.bank || [],
+    progress: saved.progress || { attempts:0, correct:0, perManual:{}, seen:{}, missed:{} },
+    settings: saved.settings || { manuals:[], mode:'random' },
+    lastQ: null,
+    selectedIndex: null,
+    checked: false,
+    lastPickedId: null,
+    started: false,
+    autoAdvanceTimer: null
+  };
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    bank: state.bank, progress: state.progress, settings: state.settings
+  }));
+}
+
+function setStatus(msg, kind){
+  const el = $('statusText'); if (el) el.textContent = msg;
+  const box = $('statusLine');
+  if (box) box.style.borderColor = (kind === 'error') ? '#ff4d4d' : '#2a3771';
+}
+function manualKey(q){ return q?.title || q?.manual || 'Unknown Manual'; }
+function uniqueManuals(){ return [...new Set(state.bank.map(manualKey))].sort(); }
+
+function filteredBank(){
+  const chosenManuals = state.settings.manuals?.length
+    ? new Set(state.settings.manuals)
+    : new Set(uniqueManuals());
+  return state.bank.filter(q => chosenManuals.has(manualKey(q)));
+}
+
+function updatePoolInfo(){
+  const el = $('poolInfo'); if (!el) return;
+  const n = filteredBank().length;
+  el.textContent = `Pool: ${n}`;
+  const sum = $('filtersSummary');
+  if (sum) sum.textContent = `Pool: ${n}`;
+}
+function updateMissedInfo(){
+  const el = $('missedInfo'); if (!el) return;
+  const missedIds = Object.keys(state.progress.missed || {}).filter(id => (state.progress.missed[id]||0) > 0);
+  el.textContent = `Missed queue: ${missedIds.length} questions`;
+}
+function setNextButtonLabel(){
+  const btn = $('nextBtn');
+  if (!btn) return;
+  btn.textContent = state.started ? 'New Question' : 'Begin Quiz';
+}
+
+function stableIdFrom(q){
+  const s = [q.title||q.manual||'', q.chapter||'', q.chapter_tag||'', q.difficulty||'', q.type||'', q.question||''].join('|');
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return 'q-' + (h >>> 0).toString(16).padStart(8,'0');
+}
+function sanitizeJsonText(input){
+  let text = input.replace(/^\uFEFF/, '');
+  text = text.replace(/\/\*[\s\S]*?\*\//g, '');
+  text = text.replace(/(^|\s)\/\/.*$/gm, '$1');
+  let out = '';
+  let inString = false;
+  let escape = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (!inString){
+      if (c === '"'){ inString = true; out += c; continue; }
+      out += c; continue;
+    }
+    if (escape){ out += c; escape = false; continue; }
+    if (c === '\\'){ out += c; escape = true; continue; }
+    if (c === '"'){ inString = false; out += c; continue; }
+    if (c === '\r') continue;
+    if (c === '\n'){ out += '\\n'; continue; }
+    out += c;
+  }
+  return out;
+}
+function normalizeBankPayload(parsed){
+  let arr = null;
+  if (Array.isArray(parsed)) arr = parsed;
+  else if (parsed && Array.isArray(parsed.questions)) arr = parsed.questions;
+  else if (parsed && Array.isArray(parsed.bank)) arr = parsed.bank;
+  else if (parsed && Array.isArray(parsed.items)) arr = parsed.items;
+  if (!Array.isArray(arr)) throw new Error('Bank must be an array or an object with questions[].');
+  const fixed = arr.map((q, idx) => {
+    const qq = { ...q };
+    if (!qq.title && qq.manual) qq.title = qq.manual;
+    if (!Array.isArray(qq.options)) throw new Error(`Question at index ${idx} missing options[]`);
+    if (qq.answerIndex == null && typeof qq.answer === 'string'){
+      const ai = qq.options.indexOf(qq.answer);
+      if (ai !== -1) qq.answerIndex = ai;
+    }
+    if (qq.answerIndex == null) throw new Error(`Question at index ${idx} missing answerIndex`);
+    if (!qq.question) throw new Error(`Question at index ${idx} missing question`);
+    if (!qq.id) qq.id = stableIdFrom(qq);
+    qq.question = String(qq.question);
+    if (!qq.type) qq.type = 'standard';
+    if (qq.chapter == null) qq.chapter = '';
+    return qq;
+  });
+  const seen = new Set();
+  for (let i = 0; i < fixed.length; i++){
+    const id = fixed[i].id;
+    if (seen.has(id)) fixed[i].id = id + '-' + i;
+    seen.add(fixed[i].id);
+  }
+  return fixed;
+}
+
+function buildManualCheckboxes(){
+  const group = $('manualsGroup'); if (!group) return;
+  group.innerHTML = '';
+  const allManuals = uniqueManuals();
+  const chosen = new Set(state.settings.manuals.length ? state.settings.manuals : allManuals);
+  allManuals.forEach(m => {
+    const isChecked = chosen.has(m);
+    const lbl = document.createElement('label');
+    lbl.className = 'check-row' + (isChecked ? ' checked' : '');
+    lbl.innerHTML = `<input type="checkbox" value="${m}" ${isChecked ? 'checked' : ''} /> ${m}`;
+    lbl.addEventListener('change', () => {
+      lbl.classList.toggle('checked', lbl.querySelector('input').checked);
+      syncManualState();
+    });
+    group.appendChild(lbl);
+  });
+  updatePoolInfo();
+}
+
+function syncManualState(){
+  const checked = [...document.querySelectorAll('#manualsGroup input[type="checkbox"]:checked')].map(i => i.value);
+  state.settings.manuals = checked;
+  saveState();
+  updatePoolInfo();
+}
+
+function buildModeRadios(){
+  const group = $('modeGroup'); if (!group) return;
+  const currentMode = state.settings.mode || 'random';
+  group.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.checked = (r.value === currentMode);
+    r.closest('.check-row').classList.toggle('checked-radio', r.checked);
+  });
+  group.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+      group.querySelectorAll('.check-row').forEach(row => row.classList.remove('checked-radio'));
+      r.closest('.check-row').classList.add('checked-radio');
+      state.settings.mode = r.value;
+      saveState();
+    });
+  });
+}
+
+function renderQ(q){
+  const wrap = $('qwrap');
+  if (!q || !q.options){
+    wrap.innerHTML = `<div class="muted">${q ? (q.question||'') : ''}</div>`;
+    return;
+  }
+  const opts = q.options.map((t,i) => `
+    <label class="opt" data-index="${i}">
+      <input type="radio" name="opt" ${state.selectedIndex===i ? 'checked' : ''}/>
+      <div>${t}</div>
+    </label>`).join('');
+
+  const chapterLabel = (q.chapter !== '' && q.chapter != null)
+    ? `<span class="chip meta-chip">Chapter: <strong>${q.chapter}</strong></span>` : '';
+  const manualLabel = `<span class="chip meta-chip">Manual: <strong>${manualKey(q)}</strong></span>`;
+
+  wrap.innerHTML = `
+    <div class="meta" aria-label="Question metadata">
+      ${manualLabel}${chapterLabel}
+    </div>
+    <h3>${q.question}</h3>
+    <div class="options">${opts}</div>
+    <div id="feedback" class="small"></div>
+  `;
+
+  document.querySelectorAll('.opt').forEach(el => {
+    el.addEventListener('click', () => {
+      if (state.checked) return;
+      if (state.autoAdvanceTimer){ clearTimeout(state.autoAdvanceTimer); state.autoAdvanceTimer = null; }
+      state.selectedIndex = +el.dataset.index;
+      document.querySelectorAll('.opt').forEach(e => e.classList.remove('correct','incorrect'));
+      const radio = el.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+      checkAndMaybeAdvance();
+      renderStats();
+    });
+  });
+}
+
+function renderStats(){
+  const s = state.progress;
+  const pct = s.attempts ? Math.round(100*s.correct/s.attempts) : 0;
+  let html = `<div class="stat"><div>Total</div><div class="muted">${s.correct}/${s.attempts} correct</div><div class="pill ${pct>=70?'good':'bad'}">${pct}%</div></div>`;
+  const per = s.perManual || {};
+  Object.entries(per).sort().forEach(([m,v]) => {
+    const p = v.attempts ? Math.round(100*v.correct/v.attempts) : 0;
+    html += `<div class="stat"><div class="small">${m}</div><div class="muted">${v.correct}/${v.attempts}</div><div class="pill ${p>=70?'good':'bad'}">${p}%</div></div>`;
+  });
+  $('stats').innerHTML = html;
+  updateMissedInfo();
+}
+
+function pickQuestion(){
+  state.started = true;
+  setNextButtonLabel();
+  const pool = filteredBank();
+  updatePoolInfo();
+  if (!pool.length){
+    renderQ({question:'No questions available for the chosen filters.'});
+    return;
+  }
+  let q = null;
+  if (state.settings.mode === 'missed'){
+    const missed = state.progress.missed || {};
+    const missedPool = pool.filter(x => (missed[x.id] || 0) > 0);
+    if (!missedPool.length){ renderQ({question:'No missed questions in this filter set. Switch mode or broaden filters.'}); return; }
+    const weighted = [];
+    for (const item of missedPool){ const w = Math.min(5, missed[item.id]||1); for (let i=0;i<w;i++) weighted.push(item); }
+    q = weighted[Math.floor(Math.random()*weighted.length)];
+  } else if (state.settings.mode === 'spaced'){
+    const seen = state.progress.seen || {};
+    const withSeen = pool.map(item => ({ item, c:(seen[item.id]||0) }));
+    const min = Math.min(...withSeen.map(x => x.c));
+    const candidates = withSeen.filter(x => x.c === min).map(x => x.item);
+    q = candidates[Math.floor(Math.random()*candidates.length)];
+  } else {
+    q = pool[Math.floor(Math.random()*pool.length)];
+  }
+  state.lastPickedId = q.id;
+  state.lastQ = q;
+  state.selectedIndex = null;
+  state.checked = false;
+  state.progress.seen[q.id] = (state.progress.seen[q.id]||0)+1;
+  saveState();
+  renderQ(q);
+}
+
+function scheduleAutoAdvance(){
+  if (state.autoAdvanceTimer){ clearTimeout(state.autoAdvanceTimer); state.autoAdvanceTimer = null; }
+  state.autoAdvanceTimer = setTimeout(() => {
+    state.autoAdvanceTimer = null;
+    pickQuestion();
+    renderStats();
+  }, AUTO_ADVANCE_MS);
+}
+
+function checkAndMaybeAdvance(){
+  const q = state.lastQ;
+  if (!q || state.selectedIndex == null || state.checked) return;
+  state.checked = true;
+  const correct = (state.selectedIndex === q.answerIndex);
+
+  state.progress.attempts++;
+  if (correct) state.progress.correct++;
+  const mKey = manualKey(q);
+  state.progress.perManual = state.progress.perManual || {};
+  const m = state.progress.perManual[mKey] || { attempts:0, correct:0 };
+  m.attempts++; if (correct) m.correct++;
+  state.progress.perManual[mKey] = m;
+  state.progress.missed = state.progress.missed || {};
+  if (!correct) state.progress.missed[q.id] = (state.progress.missed[q.id]||0)+1;
+  else if (state.progress.missed[q.id]) delete state.progress.missed[q.id];
+  saveState();
+
+  const opts = document.querySelectorAll('.opt');
+  opts[q.answerIndex]?.classList.add('correct');
+  if (!correct) opts[state.selectedIndex]?.classList.add('incorrect');
+
+  const fb = $('feedback');
+  if (!fb) return;
+
+  if (correct){
+    // Correct: show pill and auto-advance as before
+    fb.innerHTML = `<div class="feedback-row"><span class="pill good">Correct ✓</span></div>`;
+    scheduleAutoAdvance();
+  } else {
+    // Wrong: show pill + Explain This button + manual Next button. No auto-advance.
+    fb.innerHTML = `
+      <div class="feedback-row">
+        <span class="pill bad">Incorrect</span>
+        <button class="btn explain-btn" id="explainBtn">✦ Explain This</button>
+        <button class="btn next-inline" id="nextInlineBtn">Next →</button>
+      </div>
+    `;
+    $('explainBtn').addEventListener('click', () => fetchExplanation(q));
+    $('nextInlineBtn').addEventListener('click', () => { pickQuestion(); renderStats(); });
+  }
+}
+
+// ── AI Explanation ────────────────────────────────────────────────────────────
+
+async function fetchExplanation(q){
+  // Disable button and show loading box
+  const btn = $('explainBtn');
+  if (btn){ btn.disabled = true; btn.textContent = 'Loading…'; }
+
+  // Remove any existing box
+  const existing = $('explanationBox');
+  if (existing) existing.remove();
+
+  const fb = $('feedback');
+  if (!fb) return;
+
+  const box = document.createElement('div');
+  box.id = 'explanationBox';
+  box.className = 'loading';
+  box.innerHTML = `
+    <div class="explain-header">
+      <span class="explain-dot pulse"></span>
+      AI Tutor · Generating explanation…
+    </div>
+    <div id="explanationText" class="thinking">Asking Claude why the correct answer is right and yours was wrong…</div>
+  `;
+  fb.after(box);
+
+  // Build prompt
+  const wrongAnswer   = q.options[state.selectedIndex];
+  const correctAnswer = q.options[q.answerIndex];
+  const chapterInfo   = q.chapter      ? `Chapter ${q.chapter}` : '';
+  const chapterTag    = q.chapter_tag  ? ` — ${q.chapter_tag}`  : '';
+
+  const prompt = `You are an EDP (Economic Development Professional) exam tutor helping someone study for the IEDC certification.
+
+The student just answered this question INCORRECTLY.
+
+Manual: "${manualKey(q)}"
+${chapterInfo}${chapterTag}
+
+QUESTION:
+${q.question}
+
+ANSWER CHOICES:
+${q.options.map((o,i) => `${String.fromCharCode(65+i)}. ${o}`).join('\n')}
+
+CORRECT ANSWER: ${String.fromCharCode(65+q.answerIndex)}. ${correctAnswer}
+STUDENT'S WRONG ANSWER: ${String.fromCharCode(65+state.selectedIndex)}. ${wrongAnswer}
+
+Write a clear explanation (3–5 sentences) that:
+1. Explains WHY the correct answer is right, grounded in what the IEDC manual teaches
+2. Explains WHY the student's chosen answer is wrong
+3. Ends with a short memorable takeaway they can use to remember this concept on exam day
+
+Write in plain, direct prose. No bullet points. Be specific.`;
+
+  try {
+    const res = await fetch('/.netlify/functions/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!res.ok){
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData?.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const text = data?.content?.find(b => b.type === 'text')?.text || 'No explanation returned.';
+
+    // Render result
+    box.classList.remove('loading');
+    box.style.borderColor = '#5a9a2a66';
+    box.style.background   = '#111d0b';
+
+    const dot = box.querySelector('.explain-dot');
+    if (dot){ dot.classList.remove('pulse'); dot.style.background = '#45d07c'; }
+
+    const header = box.querySelector('.explain-header');
+    if (header) header.innerHTML = `<span class="explain-dot" style="background:#45d07c"></span> AI Tutor Explanation`;
+
+    const textEl = $('explanationText');
+    if (textEl){ textEl.className = ''; textEl.textContent = text; }
+
+    // Hide explain button now that we have the answer
+    if (btn) btn.style.display = 'none';
+
+  } catch(err){
+    box.classList.remove('loading');
+    box.style.borderColor = '#ff4d4d55';
+
+    const dot = box.querySelector('.explain-dot');
+    if (dot){ dot.classList.remove('pulse'); dot.style.background = '#ff6b6b'; }
+
+    const textEl = $('explanationText');
+    if (textEl){
+      textEl.className = '';
+      textEl.style.color = '#ffaaaa';
+      textEl.textContent = `Could not load explanation: ${err.message}`;
+    }
+
+    if (btn){ btn.disabled = false; btn.textContent = '↺ Retry'; }
+  }
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+
+async function fetchWithTimeout(url, ms){
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), ms);
+  try{ return await fetch(url, { cache:'no-store', signal: controller.signal }); }
+  finally{ clearTimeout(t); }
+}
+async function loadBankFromUrl(url){
+  const res = await fetchWithTimeout(url, BANK_FETCH_TIMEOUT_MS);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  const rawText = await res.text();
+  let parsed;
+  try{ parsed = JSON.parse(rawText); }
+  catch(_){ const cleaned = sanitizeJsonText(rawText); parsed = JSON.parse(cleaned); }
+  return normalizeBankPayload(parsed);
+}
+
+function doResetProgress(){
+  if (!confirm('Reset all progress?')) return;
+  state.progress = { attempts:0, correct:0, perManual:{}, seen:{}, missed:{} };
+  state.lastPickedId = null;
+  saveState();
+  renderStats();
+  updatePoolInfo();
+  alert('Progress reset.');
+}
+
+$('nextBtn').addEventListener('click', () => { pickQuestion(); renderStats(); });
+$('resetBtn').addEventListener('click', doResetProgress);
+$('resetBtn2').addEventListener('click', doResetProgress);
+$('selectAllBtn').addEventListener('click', () => {
+  document.querySelectorAll('#manualsGroup input[type="checkbox"]').forEach(cb => {
+    cb.checked = true; cb.closest('.check-row').classList.add('checked');
+  });
+  syncManualState();
+});
+$('selectNoneBtn').addEventListener('click', () => {
+  document.querySelectorAll('#manualsGroup input[type="checkbox"]').forEach(cb => {
+    cb.checked = false; cb.closest('.check-row').classList.remove('checked');
+  });
+  syncManualState();
+});
+
+(async function init(){
+  buildModeRadios();
+  setNextButtonLabel();
+  renderStats();
+  setStatus('Loading question bank…');
+  try{
+    let arr;
+    try{ arr = await loadBankFromUrl(BANK_URL_PRIMARY); }
+    catch(e1){ arr = await loadBankFromUrl(BANK_URL_FALLBACK); }
+    state.bank = arr;
+    saveState();
+    buildManualCheckboxes();
+    renderStats();
+    updatePoolInfo();
+    setStatus(`Loaded ${arr.length} questions`);
+  } catch(err){
+    const msg = (err.name === 'AbortError')
+      ? 'Bank load timed out. This page may be blocking external fetches.'
+      : `Could not load bank: ${err.message}`;
+    setStatus(msg, 'error');
+    buildManualCheckboxes();
+    updatePoolInfo();
+  }
+})();
+</script>
+</body>
+</html>
