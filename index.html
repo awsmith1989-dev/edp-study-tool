@@ -125,6 +125,23 @@
     #explanationText.thinking{color:var(--muted);font-style:italic}
 
     footer{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
+
+    /* ── Quiz Mode ── */
+    .btn.quiz-btn{background:var(--surface);border:1.5px solid var(--amber);color:var(--amber);font-weight:700}
+    .btn.quiz-btn:hover{background:#1e4a7a}
+    .quiz-progress{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+    .quiz-progress-bar{height:4px;background:var(--border);border-radius:4px;margin-bottom:12px;overflow:hidden}
+    .quiz-progress-fill{height:100%;background:var(--amber);border-radius:4px;transition:width .3s ease}
+    .quiz-results{text-align:center;padding:8px 0}
+    .result-score{font-size:3.8rem;font-weight:800;color:var(--ink);line-height:1}
+    .result-score span{font-size:2rem;font-weight:400;color:var(--muted)}
+    .result-grade{font-size:1rem;font-weight:600;color:var(--amber);margin:6px 0 14px}
+    .result-percentile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin:0 0 16px}
+    .result-percentile-num{font-size:2.4rem;font-weight:800;color:var(--amber);line-height:1}
+    .result-percentile-num sup{font-size:1.1rem;font-weight:700;vertical-align:super}
+    .result-percentile-label{font-size:13px;color:var(--muted);margin-top:4px}
+    .result-total{font-size:12px;color:var(--border);margin-top:4px}
+    .result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
   </style>
 </head>
 <body>
@@ -146,7 +163,8 @@
         </div>
 
         <div class="row" style="margin-top:10px">
-          <button class="btn primary" id="nextBtn">Begin Quiz</button>
+          <button class="btn primary" id="nextBtn">Begin Practice</button>
+          <button class="btn quiz-btn" id="quizModeBtn">10-Question Quiz</button>
         </div>
       </div>
 
@@ -273,7 +291,7 @@ function updateMissedInfo(){
 function setNextButtonLabel(){
   const btn = $('nextBtn');
   if (!btn) return;
-  btn.textContent = state.started ? 'New Question' : 'Begin Quiz';
+  btn.textContent = state.started ? 'New Question' : 'Begin Practice';
 }
 
 function stableIdFrom(q){
@@ -671,6 +689,175 @@ $('selectNoneBtn').addEventListener('click', () => {
   });
   syncManualState();
 });
+
+// ── Quiz Mode ─────────────────────────────────────────────────────────────────
+
+const QUIZ_LENGTH = 10;
+
+function startQuizMode(){
+  const pool = filteredBank();
+  if(pool.length < QUIZ_LENGTH){
+    alert(`Need at least ${QUIZ_LENGTH} questions in the current filter pool. Try selecting more manuals.`);
+    return;
+  }
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  state.quiz = {
+    questions: shuffled.slice(0, QUIZ_LENGTH),
+    index: 0,
+    score: 0,
+    checked: false,
+    selectedIndex: null,
+    autoTimer: null
+  };
+  $('nextBtn').style.display = 'none';
+  $('quizModeBtn').style.display = 'none';
+  renderQuizQ();
+}
+
+function renderQuizQ(){
+  const { questions, index } = state.quiz;
+  const q = questions[index];
+  const pct = Math.round((index / QUIZ_LENGTH) * 100);
+  const opts = q.options.map((t, i) => `
+    <label class="opt" data-index="${i}">
+      <input type="radio" name="opt"/>
+      <div>${t}</div>
+    </label>`).join('');
+
+  $('qwrap').innerHTML = `
+    <div class="quiz-progress">
+      <span>Question ${index + 1} of ${QUIZ_LENGTH}</span>
+      <span>${state.quiz.score} correct</span>
+    </div>
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
+    <h3>${q.question}</h3>
+    <div class="options">${opts}</div>
+    <div id="feedback" class="small"></div>
+  `;
+  state.quiz.checked = false;
+  state.quiz.selectedIndex = null;
+
+  document.querySelectorAll('.opt').forEach(el => {
+    el.addEventListener('click', () => {
+      if(state.quiz.checked) return;
+      state.quiz.selectedIndex = +el.dataset.index;
+      checkQuizAnswer();
+    });
+  });
+}
+
+function checkQuizAnswer(){
+  const { questions, index, selectedIndex } = state.quiz;
+  const q = questions[index];
+  if(selectedIndex == null || state.quiz.checked) return;
+  state.quiz.checked = true;
+
+  const correct = selectedIndex === q.answerIndex;
+  if(correct) state.quiz.score++;
+
+  const opts = document.querySelectorAll('.opt');
+  opts[q.answerIndex]?.classList.add('correct');
+  if(!correct) opts[selectedIndex]?.classList.add('incorrect');
+
+  const fb = $('feedback');
+  if(!fb) return;
+  const isLast = index === QUIZ_LENGTH - 1;
+  const nextLabel = isLast ? 'See Results' : 'Next &rarr;';
+
+  fb.innerHTML = `
+    <div class="feedback-row">
+      <span class="pill ${correct ? 'good' : 'bad'}">${correct ? 'Correct ✓' : 'Incorrect'}</span>
+      <button class="btn next-inline" id="quizNextBtn">${nextLabel}</button>
+    </div>`;
+
+  $('quizNextBtn').addEventListener('click', advanceQuiz);
+
+  if(correct && !isLast){
+    state.quiz.autoTimer = setTimeout(advanceQuiz, AUTO_ADVANCE_MS);
+  }
+}
+
+function advanceQuiz(){
+  if(state.quiz.autoTimer){ clearTimeout(state.quiz.autoTimer); state.quiz.autoTimer = null; }
+  const isLast = state.quiz.index === QUIZ_LENGTH - 1;
+  if(isLast){ showQuizResults(); return; }
+  state.quiz.index++;
+  renderQuizQ();
+}
+
+function ordinalSuffix(n){
+  const s = ['th','st','nd','rd'];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
+}
+
+function gradeLabel(score){
+  const p = (score / QUIZ_LENGTH) * 100;
+  if(p === 100) return 'Perfect score!';
+  if(p >= 90)   return 'Outstanding!';
+  if(p >= 80)   return 'Great job!';
+  if(p >= 70)   return 'Good work!';
+  if(p >= 60)   return 'Keep studying!';
+  return 'Keep at it — you\'ve got this!';
+}
+
+async function showQuizResults(){
+  const { score } = state.quiz;
+  $('qwrap').innerHTML = `
+    <div class="quiz-results">
+      <div class="result-score">${score}<span>/${QUIZ_LENGTH}</span></div>
+      <div class="result-grade">${gradeLabel(score)}</div>
+      <div class="result-percentile" id="percentileBox">
+        <div class="result-percentile-label" style="color:var(--muted)">Calculating your percentile rank…</div>
+      </div>
+      <div class="result-actions">
+        <button class="btn primary" id="retakeBtn">Retake Quiz</button>
+        <button class="btn" id="backPracticeBtn">Back to Practice</button>
+      </div>
+    </div>`;
+
+  $('retakeBtn').addEventListener('click', startQuizMode);
+  $('backPracticeBtn').addEventListener('click', exitQuizMode);
+
+  try {
+    // Submit score first, then fetch percentile (percentile includes this submission)
+    await fetch('/.netlify/functions/submit-score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ score })
+    });
+
+    const res = await fetch('/.netlify/functions/get-percentile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ score })
+    });
+
+    const data = await res.json();
+    const box = $('percentileBox');
+    if(box && data.percentile != null){
+      const suf = ordinalSuffix(data.percentile);
+      box.innerHTML = `
+        <div class="result-percentile-num">${data.percentile}<sup>${suf}</sup></div>
+        <div class="result-percentile-label">percentile among all users</div>
+        <div class="result-total">${data.total.toLocaleString()} quizzes taken</div>`;
+    }
+  } catch(e){
+    const box = $('percentileBox');
+    if(box) box.innerHTML = `<div class="result-percentile-label" style="color:#f08080">Could not load ranking</div>`;
+  }
+}
+
+function exitQuizMode(){
+  state.quiz = null;
+  $('nextBtn').style.display = '';
+  $('quizModeBtn').style.display = '';
+  $('qwrap').innerHTML = `<div class="muted">Click <em>Begin Practice</em> to start.</div>`;
+  state.started = false;
+  setNextButtonLabel();
+}
+
+$('quizModeBtn').addEventListener('click', startQuizMode);
 
 (async function init(){
   buildModeRadios();
