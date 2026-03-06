@@ -6,14 +6,14 @@
   <title>75Strong — EDP Study Tool</title>
   <style>
     :root{
-      --bg:transparent;
-      --card:#1c3f6e;
-      --surface:#153259;
+      --bg:#f4f4f4;
+      --card:#194261;
+      --surface:#123450;
       --navy:#1a5496;
       --blue:#5ba8e8;
-      --amber:#e8a820;
-      --amber-light:#1e1600;
-      --amber-border:#c8941a;
+      --amber:#ffcf24;
+      --amber-light:#1e1800;
+      --amber-border:#c8a800;
       --ink:#f0f4f8;
       --muted:#8fb5d4;
       --border:#2a5280;
@@ -40,8 +40,8 @@
     /* ── Buttons ── */
     .btn{appearance:none;cursor:pointer;font:inherit;border:1px solid var(--border);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:10px;font-size:14px;font-weight:500;transition:background .12s,border-color .12s}
     .btn:hover{background:#1e4a7a;border-color:#3a6898}
-    .btn.primary{background:var(--amber);color:#1a1200;border-color:#c8841a;font-weight:700}
-    .btn.primary:hover{background:#d4941a;color:#1a1200}
+    .btn.primary{background:var(--amber);color:#1a1200;border-color:#c8a800;font-weight:700}
+    .btn.primary:hover{background:#e6b800;color:#1a1200}
     .btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
     label{font-weight:600;color:var(--amber)}
     .muted{color:var(--muted)}
@@ -95,7 +95,7 @@
 
     /* ── Check rows ── */
     .check-group{display:flex;flex-direction:column;gap:5px;margin-top:6px}
-    .check-row{display:flex;align-items:center;gap:8px;background:#1c3f6e;border:1.5px solid var(--border);border-radius:9px;padding:8px 10px;cursor:pointer;color:var(--ink);font-weight:400;font-size:13px;user-select:none;transition:background .12s,border-color .12s}
+    .check-row{display:flex;align-items:center;gap:8px;background:#194261;border:1.5px solid var(--border);border-radius:9px;padding:8px 10px;cursor:pointer;color:var(--ink);font-weight:400;font-size:13px;user-select:none;transition:background .12s,border-color .12s}
     .check-row:hover{background:#1e4a7a;border-color:#5ba8e8}
     .check-row input[type="checkbox"],.check-row input[type="radio"]{accent-color:var(--blue);width:14px;height:14px;flex-shrink:0;cursor:pointer}
     .check-row.checked{background:#0a2318;border-color:#4caf7d}
@@ -109,7 +109,7 @@
     .btn.next-inline:hover{background:#1e4a7a;color:var(--ink);border-color:#5ba8e8}
 
     /* ── Explain This button ── */
-    .btn.explain-btn{display:inline-flex;align-items:center;gap:6px;background:var(--amber-light);border:1.5px solid var(--amber-border);color:#f0c060;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:background .12s,opacity .12s}
+    .btn.explain-btn{display:inline-flex;align-items:center;gap:6px;background:var(--amber-light);border:1.5px solid var(--amber-border);color:#ffcf24;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:background .12s,opacity .12s}
     .btn.explain-btn:hover{background:#2a1e00}
     .btn.explain-btn:disabled{opacity:.45;cursor:not-allowed}
 
@@ -117,11 +117,11 @@
     #explanationBox{margin-top:12px;border:1.5px solid var(--amber-border);background:var(--amber-light);border-radius:12px;padding:14px 16px;animation:slideDown .2s ease}
     #explanationBox.loading{border-color:var(--border);background:var(--surface)}
     @keyframes slideDown{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-    .explain-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#f0c060}
+    .explain-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ffcf24}
     .explain-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0}
     .explain-dot.pulse{animation:pulse 1s ease-in-out infinite}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
-    #explanationText{font-size:14px;line-height:1.72;color:#f0c060;white-space:pre-wrap}
+    #explanationText{font-size:14px;line-height:1.72;color:#ffcf24;white-space:pre-wrap}
     #explanationText.thinking{color:var(--muted);font-style:italic}
 
     footer{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
