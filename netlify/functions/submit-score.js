@@ -4,10 +4,14 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { score } = JSON.parse(event.body);
+    const { score, total, pct, manual_filter } = JSON.parse(event.body);
 
-    if (typeof score !== 'number' || !Number.isInteger(score) || score < 0 || score > 10) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'score must be an integer 0–10' }) };
+    if (
+      typeof score !== 'number' || !Number.isInteger(score) || score < 0 ||
+      typeof total !== 'number' || !Number.isInteger(total) || total < 1 ||
+      score > total
+    ) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid score or total' }) };
     }
 
     const url = process.env.SUPABASE_URL;
@@ -21,7 +25,12 @@ exports.handler = async function(event) {
         'Authorization': `Bearer ${key}`,
         'Prefer': 'return=minimal'
       },
-      body: JSON.stringify({ score })
+      body: JSON.stringify({
+        score,
+        total,
+        pct: pct ?? Math.round((score / total) * 100),
+        manual_filter: manual_filter ?? null
+      })
     });
 
     if (!res.ok) {

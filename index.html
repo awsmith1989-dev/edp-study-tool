@@ -820,17 +820,23 @@ async function showQuizResults(){
   $('backPracticeBtn').addEventListener('click', exitQuizMode);
 
   try {
+    const total = QUIZ_LENGTH;
+    const pct = Math.round((score / total) * 100);
+    const manual_filter = state.settings.manuals?.length
+      ? state.settings.manuals.join(', ')
+      : null;
+
     // Submit score first, then fetch percentile (percentile includes this submission)
     await fetch('/.netlify/functions/submit-score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ score })
+      body: JSON.stringify({ score, total, pct, manual_filter })
     });
 
     const res = await fetch('/.netlify/functions/get-percentile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ score })
+      body: JSON.stringify({ pct })
     });
 
     const data = await res.json();

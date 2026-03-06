@@ -4,7 +4,11 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { score } = JSON.parse(event.body);
+    const { pct } = JSON.parse(event.body);
+
+    if (typeof pct !== 'number') {
+      return { statusCode: 400, body: JSON.stringify({ error: 'pct required' }) };
+    }
 
     const url = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_ANON_KEY;
@@ -16,13 +20,12 @@ exports.handler = async function(event) {
       'Range': '0-0'
     };
 
-    // Run both counts in parallel
+    // Run both counts in parallel: total rows, and rows where pct <= user's pct
     const [totalRes, atOrBelowRes] = await Promise.all([
       fetch(`${url}/rest/v1/quiz_scores?select=id`, { headers }),
-      fetch(`${url}/rest/v1/quiz_scores?select=id&score=lte.${score}`, { headers })
+      fetch(`${url}/rest/v1/quiz_scores?select=id&pct=lte.${pct}`, { headers })
     ]);
 
-    // PostgREST returns the total count in Content-Range: 0-0/TOTAL
     function parseCount(res) {
       const cr = res.headers.get('content-range');
       if (!cr) return 0;
@@ -32,14 +35,12 @@ exports.handler = async function(event) {
 
     const total = parseCount(totalRes);
     const atOrBelow = parseCount(atOrBelowRes);
-
-    // Percentile: what share of scores are <= yours
     const percentile = total > 0 ? Math.round((atOrBelow / total) * 100) : 50;
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ percentile, total, atOrBelow, score })
+      body: JSON.stringify({ percentile, total, atOrBelow, pct })
     };
 
   } catch (err) {
