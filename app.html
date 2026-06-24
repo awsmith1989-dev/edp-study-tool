@@ -410,7 +410,7 @@ function isTrialExpired(){
 function updateTrialBar(){
   const bar = $('trialBar');
   if (!bar) return;
-  if (hasActiveLicense() || isLoggedIn()){
+  if (hasActiveLicense()){
     bar.style.display = 'none';
     return;
   }
@@ -828,7 +828,7 @@ function renderStats(){
 
 function pickQuestion(){
   // Trial gate
-  if(!hasActiveLicense() && !isLoggedIn()){
+  if(!hasActiveLicense()){
     const used = incrementTrial();
     updateTrialBar();
     if(used > TRIAL_LIMIT){
@@ -964,7 +964,7 @@ Write in plain, direct prose. No bullet points. Be specific.`;
 // ── Quiz Mode ─────────────────────────────────────────────────
 const QUIZ_LENGTH=10;
 function startQuizMode(){
-  if(!hasActiveLicense()&&!isLoggedIn()){showPaywall();return;}
+  if(!hasActiveLicense()){showPaywall();return;}
   const pool=filteredBank();
   if(pool.length<QUIZ_LENGTH){alert(`Need at least ${QUIZ_LENGTH} questions in the current filter pool.`);return;}
   const shuffled=[...pool].sort(()=>Math.random()-.5);
