@@ -1,0 +1,25 @@
+{
+  "name": "edp-study-tool",
+  "version": "1.0.0",
+  "description": "changes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awsmith1989-dev/edp-study-tool.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/awsmith1989-dev/edp-study-tool/issues"
+  },
+  "homepage": "https://github.com/awsmith1989-dev/edp-study-tool#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "stripe": "^22.2.3"
+  }
+}
