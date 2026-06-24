@@ -629,6 +629,24 @@ function doLogout(){
   window.location.href = '/';
 }
 
+async function openBillingPortal(){
+  if(!session?.token){ showAuthModal('login'); return; }
+  try {
+    const res = await fetch('/.netlify/functions/create-portal-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.token}`
+      }
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Could not open billing portal');
+    window.location.href = data.url;
+  } catch(err){
+    alert('Could not open billing portal: ' + err.message);
+  }
+}
+
 function updateHeaderAuth(){
   const el = $('headerRight');
   const footerLink = $('footerAuthLink');
@@ -639,6 +657,7 @@ function updateHeaderAuth(){
         <span>${session.user.email}</span>
         ${hasActiveLicense() ? '<span style="color:#6fcf97;font-size:11px">✓ Licensed</span>' : '<span style="color:#f08080;font-size:11px">No license</span>'}
       </div>
+      ${hasActiveLicense() ? '<button class="btn sm ghost" onclick="openBillingPortal()" style="font-size:12px">Billing</button>' : ''}
       <button class="btn sm ghost" onclick="doLogout()">Sign Out</button>
     `;
     if (footerLink) footerLink.style.display = 'none';
