@@ -2,19 +2,24 @@
 // Handles Stripe webhook events — creates license on successful payment
 
 const { createClient } = require('@supabase/supabase-js');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  // Handle base64 encoded body (Netlify sometimes encodes binary)
+  const rawBody = event.isBase64Encoded
+    ? Buffer.from(event.body, 'base64').toString('utf8')
+    : event.body;
+
   const sig = event.headers['stripe-signature'];
 
   let stripeEvent;
   try {
     stripeEvent = stripe.webhooks.constructEvent(
-      event.body,
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
@@ -23,12 +28,16 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: `Webhook Error: ${err.message}` };
   }
 
+  console.log('Webhook received:', stripeEvent.type);
+
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object;
     const email = session.customer_email || session.metadata?.email;
 
+    console.log('Processing payment for:', email);
+
     if (!email) {
-      console.error('No email found in session');
+      console.error('No email found in session:', JSON.stringify(session));
       return { statusCode: 400, body: 'No email in session' };
     }
 
@@ -38,34 +47,57 @@ exports.handler = async function(event) {
     );
 
     try {
-      // Create or get the auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.getUserByEmail(email);
+      // Check if user already exists
+      const { data: existingUsers } = await supabase.auth.admin.listUsers();
+      const existingUser = existingUsers?.users?.find(u => u.email === email);
 
       let userId;
-      if (authError || !authData?.user) {
-        // User doesn't exist yet — create them with a temp password they'll reset
-        const tempPassword = Math.random().toString(36).slice(-12) + 'Aa1!';
+
+      if (existingUser) {
+        userId = existingUser.id;
+        console.log('Found existing user:', userId);
+        await supabase.from('profiles').upsert({ id: userId, email });
+      } else {
+        // Create new user with temp password
+        const tempPassword = Math.random().toString(36).slice(-10) + 'Aa1!';
         const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
           email,
           password: tempPassword,
           email_confirm: true,
         });
-        if (createError) throw createError;
+        if (createError) {
+          console.error('Error creating user:', createError);
+          throw createError;
+        }
         userId = newUser.user.id;
+        console.log('Created new user:', userId);
 
         // Create profile
         await supabase.from('profiles').insert({ id: userId, email });
 
-        // Send password reset email so user can set their own password
-        await supabase.auth.admin.generateLink({
+        // Send password reset so user can set their own password
+        const { error: resetError } = await supabase.auth.admin.generateLink({
           type: 'recovery',
           email,
+          options: {
+            redirectTo: 'https://edpstudy.com/?reset=true',
+          }
         });
+        if (resetError) console.error('Reset email error (non-fatal):', resetError.message);
+      }
 
-      } else {
-        userId = authData.user.id;
-        // Ensure profile exists
-        await supabase.from('profiles').upsert({ id: userId, email });
+      // Check for existing active license to avoid duplicates
+      const now = new Date().toISOString();
+      const { data: existingLicense } = await supabase
+        .from('licenses')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('stripe_session_id', session.id)
+        .single();
+
+      if (existingLicense) {
+        console.log('License already exists for this session, skipping');
+        return { statusCode: 200, body: JSON.stringify({ received: true }) };
       }
 
       // Create 2-year license
@@ -79,12 +111,15 @@ exports.handler = async function(event) {
         expires_at: expiresAt.toISOString(),
       });
 
-      if (licenseError) throw licenseError;
+      if (licenseError) {
+        console.error('License insert error:', licenseError);
+        throw licenseError;
+      }
 
-      console.log(`License created for ${email}, expires ${expiresAt.toISOString()}`);
+      console.log(`✅ License created for ${email}, expires ${expiresAt.toISOString()}`);
 
     } catch (err) {
-      console.error('Error creating license:', err);
+      console.error('Error processing webhook:', err);
       return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
     }
   }
