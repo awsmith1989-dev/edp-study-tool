@@ -3,11 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>75Strong — EDP Study Tool</title>
-  <link rel="icon" type="image/png" href="75stronglogo.png" />
-  <meta property="og:title" content="75Strong — EDP Study Tool" />
-  <meta property="og:description" content="Practice for the IEDC EDP exam with your 75Strong cohort." />
-  <meta property="og:image" content="Social Image.png" />
+  <title>EDP Study Tool</title>
+  <meta property="og:title" content="EDP Study Tool" />
+  <meta property="og:description" content="Practice for the IEDC EDP certification exam." />
   <meta property="og:type" content="website" />
   <style>
     :root{
@@ -30,13 +28,15 @@
     body{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
     .wrap{max-width:980px;margin:0 auto;padding:14px}
 
-    /* ── Header (light) ── */
-    header{display:flex;align-items:center;gap:14px;background:#f5f7fb;padding:14px 16px;border-radius:14px;margin-bottom:14px;border-bottom:4px solid var(--amber);border:1px solid #dce3ed;border-bottom:4px solid var(--amber)}
-    .brand-logo{height:52px;width:auto;flex-shrink:0;display:block}
+    /* ── Header ── */
+    header{display:flex;align-items:center;gap:14px;background:#f5f7fb;padding:14px 16px;border-radius:14px;margin-bottom:14px;border:1px solid #dce3ed;border-bottom:4px solid var(--amber)}
     .brand-text h1{margin:0;font-size:clamp(15px,3vw,21px);font-weight:700;color:var(--navy);letter-spacing:-.2px}
     .brand-text p{margin:2px 0 0;font-size:12px;color:#64748b}
+    .header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+    .user-badge{font-size:12px;color:#64748b;display:flex;align-items:center;gap:6px}
+    .user-badge span{color:var(--navy);font-weight:600}
 
-    /* ── Cards (dark) ── */
+    /* ── Cards ── */
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.25);padding:16px}
     .grid{display:grid;gap:12px}
     @media(min-width:860px){.grid{grid-template-columns:2fr 1fr}}
@@ -45,9 +45,13 @@
     /* ── Buttons ── */
     .btn{appearance:none;cursor:pointer;font:inherit;border:1px solid var(--border);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:10px;font-size:14px;font-weight:500;transition:background .12s,border-color .12s}
     .btn:hover{background:#1e4a7a;border-color:#3a6898}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
     .btn.primary{background:var(--amber);color:#1a1200;border-color:#c8a800;font-weight:700}
     .btn.primary:hover{background:#e6b800;color:#1a1200}
     .btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
+    .btn.ghost{background:transparent;border-color:var(--border);color:var(--muted)}
+    .btn.ghost:hover{color:var(--ink);background:var(--surface)}
+    .btn.danger{background:#2a0d0d;border-color:#d47676;color:#f08080}
     label{font-weight:600;color:var(--amber)}
     .muted{color:var(--muted)}
     .small{font-size:13px}
@@ -80,6 +84,7 @@
     .pill{padding:4px 10px;border-radius:999px;font-weight:700;font-size:13px}
     .pill.good{background:#0a2318;color:#6fcf97;border:1px solid #4caf7d}
     .pill.bad{background:#2a0d0d;color:#f08080;border:1px solid #d47676}
+    .pill.warn{background:#1e1800;color:#ffcf24;border:1px solid #c8a800}
 
     /* ── Progress ── */
     .progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
@@ -109,14 +114,12 @@
     .select-all-row button{font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer}
     .select-all-row button:hover{color:var(--ink);background:#1e4a7a}
 
-    /* ── Next button (wrong answer) ── */
-    .btn.next-inline{background:var(--surface);border:1.5px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:9px;font-size:13px;cursor:pointer}
-    .btn.next-inline:hover{background:#1e4a7a;color:var(--ink);border-color:#5ba8e8}
-
-    /* ── Explain This button ── */
+    /* ── Explain button ── */
     .btn.explain-btn{display:inline-flex;align-items:center;gap:6px;background:var(--amber-light);border:1.5px solid var(--amber-border);color:#ffcf24;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:background .12s,opacity .12s}
     .btn.explain-btn:hover{background:#2a1e00}
     .btn.explain-btn:disabled{opacity:.45;cursor:not-allowed}
+    .btn.next-inline{background:var(--surface);border:1.5px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:9px;font-size:13px;cursor:pointer}
+    .btn.next-inline:hover{background:#1e4a7a;color:var(--ink);border-color:#5ba8e8}
 
     /* ── AI explanation box ── */
     #explanationBox{margin-top:12px;border:1.5px solid var(--amber-border);background:var(--amber-light);border-radius:12px;padding:14px 16px;animation:slideDown .2s ease}
@@ -128,8 +131,6 @@
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
     #explanationText{font-size:14px;line-height:1.72;color:#ffcf24;white-space:pre-wrap}
     #explanationText.thinking{color:var(--muted);font-style:italic}
-
-    footer{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
 
     /* ── Quiz Mode ── */
     .btn.quiz-btn{background:var(--surface);border:1.5px solid var(--amber);color:var(--amber);font-weight:700}
@@ -147,103 +148,278 @@
     .result-percentile-label{font-size:13px;color:var(--muted);margin-top:4px}
     .result-total{font-size:12px;color:var(--border);margin-top:4px}
     .result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+    /* ── Auth Modal ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .15s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal{background:#0f2540;border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+    .modal h2{margin:0 0 6px;font-size:1.3rem;color:var(--ink)}
+    .modal p{margin:0 0 20px;color:var(--muted);font-size:14px}
+    .modal-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);border-radius:10px;padding:4px}
+    .modal-tab{flex:1;padding:8px;border:none;background:transparent;color:var(--muted);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .12s}
+    .modal-tab.active{background:var(--card);color:var(--ink)}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+    .form-group input{width:100%;padding:10px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;color:var(--ink);font-size:14px;outline:none;transition:border-color .12s}
+    .form-group input:focus{border-color:var(--blue)}
+    .form-error{color:#f08080;font-size:13px;margin-top:8px;display:none}
+    .form-error.show{display:block}
+    .modal-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--muted);font-size:13px}
+    .modal-divider::before,.modal-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    /* ── Paywall Banner ── */
+    .paywall-banner{background:linear-gradient(135deg,#0f2540,#1a3a5c);border:1.5px solid var(--amber-border);border-radius:14px;padding:20px;margin-top:12px;text-align:center}
+    .paywall-banner h3{margin:0 0 6px;color:var(--amber);font-size:1.1rem}
+    .paywall-banner p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.6}
+    .paywall-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+    /* ── Trial indicator ── */
+    .trial-bar{background:#1e1800;border:1px solid var(--amber-border);border-radius:10px;padding:8px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
+    .trial-bar strong{color:var(--amber)}
+
+    /* ── License info ── */
+    .license-info{font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+    .license-info strong{color:#6fcf97}
+
+    footer{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
   </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <img src="75stronglogo.png" alt="75Strong" class="brand-logo">
     <div class="brand-text">
       <h1>EDP Certification Study Tool</h1>
-      <p>IEDC Exam Prep · 75Strong Cohort</p>
+      <p>IEDC Exam Prep · Powered by Cherry &amp; Elm</p>
+    </div>
+    <div class="header-right" id="headerRight">
+      <!-- populated by JS -->
     </div>
   </header>
 
-  <div class="grid">
-    <section class="card" id="quizCard">
+  <div id="appShell">
+    <!-- Trial bar shown during trial mode -->
+    <div class="trial-bar" id="trialBar" style="display:none">
+      <div>🎓 <strong>Free Trial</strong> — <span id="trialCount">5</span> questions remaining</div>
+      <button class="btn primary" style="padding:5px 12px;font-size:12px" onclick="showPaywall()">Unlock Full Access</button>
+    </div>
 
-      <div class="quiz-hero" aria-live="polite">
-        <div id="qwrap">
-          <div class="muted">Practice unlimited questions, or take a 10-question quiz to see how you compare to the rest of the cohort.</div>
-        </div>
-
-        <div class="row" style="margin-top:10px">
-          <button class="btn primary" id="nextBtn">Begin Practice</button>
-          <button class="btn quiz-btn" id="quizModeBtn">10-Question Quiz</button>
-        </div>
-      </div>
-
-      <details class="filters" id="filtersPanel">
-        <summary>
-          <span>Filters &amp; Settings</span>
-          <span class="muted small" id="filtersSummary">Pool: —</span>
-        </summary>
-
-        <div class="filters-body">
-          <div class="filter-cols">
-
-            <div class="filter-col">
-              <span class="filter-col-label">Manuals in play</span>
-              <div class="select-all-row">
-                <button id="selectAllBtn">Select all</button>
-                <button id="selectNoneBtn">Clear</button>
-              </div>
-              <div class="manual-scroll" id="manualsGroup"></div>
-              <div class="status" id="statusLine" aria-live="polite">
-                <div><strong>Status:</strong> <span id="statusText">Loading question bank…</span></div>
-                <div class="small" id="poolInfo">Pool: —</div>
-              </div>
-            </div>
-
-            <div class="filter-col">
-              <span class="filter-col-label">Mode</span>
-              <div class="check-group" id="modeGroup">
-                <label class="check-row checked-radio">
-                  <input type="radio" name="mode" value="random" checked /> Random
-                </label>
-                <label class="check-row">
-                  <input type="radio" name="mode" value="spaced" /> Spaced review (least-seen)
-                </label>
-                <label class="check-row">
-                  <input type="radio" name="mode" value="missed" /> Review missed
-                </label>
-              </div>
-
-              <div style="margin-top:16px">
-                <button class="btn" id="resetBtn">Reset Progress</button>
-              </div>
-            </div>
-
+    <div class="grid">
+      <section class="card" id="quizCard">
+        <div class="quiz-hero" aria-live="polite">
+          <div id="qwrap">
+            <div class="muted">Practice unlimited questions, or take a 10-question quiz to see how you compare to everyone.</div>
+          </div>
+          <div class="row" style="margin-top:10px" id="mainBtns">
+            <button class="btn primary" id="nextBtn">Begin Practice</button>
+            <button class="btn quiz-btn" id="quizModeBtn">10-Question Quiz</button>
           </div>
         </div>
-      </details>
 
-    </section>
+        <details class="filters" id="filtersPanel">
+          <summary>
+            <span>Filters &amp; Settings</span>
+            <span class="muted small" id="filtersSummary">Pool: —</span>
+          </summary>
+          <div class="filters-body">
+            <div class="filter-cols">
+              <div class="filter-col">
+                <span class="filter-col-label">Manuals in play</span>
+                <div class="select-all-row">
+                  <button id="selectAllBtn">Select all</button>
+                  <button id="selectNoneBtn">Clear</button>
+                </div>
+                <div class="manual-scroll" id="manualsGroup"></div>
+                <div class="status" id="statusLine" aria-live="polite">
+                  <div><strong>Status:</strong> <span id="statusText">Loading question bank…</span></div>
+                  <div class="small" id="poolInfo">Pool: —</div>
+                </div>
+              </div>
+              <div class="filter-col">
+                <span class="filter-col-label">Mode</span>
+                <div class="check-group" id="modeGroup">
+                  <label class="check-row checked-radio"><input type="radio" name="mode" value="random" checked /> Random</label>
+                  <label class="check-row"><input type="radio" name="mode" value="spaced" /> Spaced review (least-seen)</label>
+                  <label class="check-row"><input type="radio" name="mode" value="missed" /> Review missed</label>
+                </div>
+                <div style="margin-top:16px">
+                  <button class="btn" id="resetBtn">Reset Progress</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
 
-    <aside class="card">
-      <div class="progress-head">
-        <h3 style="margin:0;font-size:15px">Progress</h3>
-        <button class="btn sm" id="resetBtn2" title="Reset all quiz progress">Reset</button>
-      </div>
-
-      <div id="stats"></div>
-      <div class="small muted" style="margin-top:8px">Progress is stored locally in your browser (no account needed).</div>
-      <div class="small muted" style="margin-top:8px" id="missedInfo"></div>
-    </aside>
+      <aside class="card">
+        <div class="progress-head">
+          <h3 style="margin:0;font-size:15px">Progress</h3>
+          <button class="btn sm" id="resetBtn2">Reset</button>
+        </div>
+        <div id="stats"></div>
+        <div class="small muted" style="margin-top:8px">Progress stored locally in your browser.</div>
+        <div class="small muted" style="margin-top:8px" id="missedInfo"></div>
+        <div class="license-info" id="licenseInfo" style="display:none"></div>
+      </aside>
+    </div>
   </div>
 
-  <footer>v2.5 &middot; AI explanations powered by Claude</footer>
+  <footer>v3.0 &middot; AI explanations powered by Claude &middot; <a href="#" onclick="showAuthModal('login');return false" style="color:var(--muted)" id="footerAuthLink">Sign in</a></footer>
+</div>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal" style="display:none">
+  <div class="modal">
+    <div class="modal-tabs" id="authTabs">
+      <button class="modal-tab active" onclick="switchTab('login')">Sign In</button>
+      <button class="modal-tab" onclick="switchTab('register')">Create Account</button>
+      <button class="modal-tab" onclick="switchTab('redeem')">Redeem Code</button>
+    </div>
+
+    <!-- Login tab -->
+    <div id="tabLogin">
+      <h2>Welcome back</h2>
+      <p>Sign in to access your licensed study tool.</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="form-error" id="loginError"></div>
+      <button class="btn primary" style="width:100%;margin-top:4px" id="loginBtn" onclick="doLogin()">Sign In</button>
+      <div class="modal-divider">or</div>
+      <button class="btn ghost" style="width:100%;font-size:13px" onclick="switchTab('register')">Create a new account</button>
+      <div style="text-align:center;margin-top:12px">
+        <a href="#" style="color:var(--muted);font-size:13px" onclick="doForgotPassword();return false">Forgot password?</a>
+      </div>
+    </div>
+
+    <!-- Register tab -->
+    <div id="tabRegister" style="display:none">
+      <h2>Create your account</h2>
+      <p>Already have a license code? Create an account first, then redeem it.</p>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="regPassword" placeholder="At least 8 characters" autocomplete="new-password" />
+      </div>
+      <div class="form-error" id="regError"></div>
+      <button class="btn primary" style="width:100%;margin-top:4px" id="regBtn" onclick="doRegister()">Create Account</button>
+      <div class="modal-divider">or</div>
+      <button class="btn ghost" style="width:100%;font-size:13px" onclick="switchTab('login')">Sign in to existing account</button>
+    </div>
+
+    <!-- Redeem tab -->
+    <div id="tabRedeem" style="display:none">
+      <h2>Redeem a code</h2>
+      <p>Enter the license code provided by your program coordinator.</p>
+      <div class="form-group">
+        <label>License Code</label>
+        <input type="text" id="redeemCode" placeholder="XXXX-XXXX-XXXX" autocomplete="off" style="text-transform:uppercase;letter-spacing:2px" />
+      </div>
+      <div class="form-error" id="redeemError"></div>
+      <button class="btn primary" style="width:100%;margin-top:4px" id="redeemBtn" onclick="doRedeem()">Redeem Code</button>
+    </div>
+
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn ghost btn-sm" onclick="closeModal()" style="font-size:13px">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Paywall Modal -->
+<div class="modal-overlay" id="paywallModal" style="display:none">
+  <div class="modal">
+    <h2 style="color:var(--amber)">Unlock Full Access</h2>
+    <p>Get unlimited practice questions, AI-powered explanations, 10-question scored quizzes, and spaced repetition — for 2 years.</p>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;text-align:center">
+      <div style="font-size:2.4rem;font-weight:800;color:var(--ink)">$199</div>
+      <div style="color:var(--muted);font-size:13px">2-year individual license</div>
+    </div>
+
+    <div class="form-group">
+      <label>Your Email</label>
+      <input type="email" id="purchaseEmail" placeholder="you@example.com" autocomplete="email" />
+    </div>
+    <div class="form-error" id="purchaseError"></div>
+    <button class="btn primary" style="width:100%;margin-bottom:10px" id="purchaseBtn" onclick="doPurchase()">Purchase License — $199</button>
+
+    <div class="modal-divider">have a code?</div>
+    <button class="btn ghost" style="width:100%;font-size:13px" onclick="closePaywall();showAuthModal('redeem')">Redeem a License Code</button>
+
+    <div style="text-align:center;margin-top:14px">
+      <button class="btn ghost btn-sm" onclick="closePaywall()" style="font-size:13px">Continue free trial</button>
+    </div>
+  </div>
 </div>
 
 <script>
+// ── Constants ─────────────────────────────────────────────────
 const STORAGE_KEY = 'iedc-edp-quiz-v1';
+const SESSION_KEY = 'edp-session-v1';
 const BANK_URL_PRIMARY = 'https://cdn.jsdelivr.net/gh/awsmith1989-dev/iedc@main/iedc_edp_questions.cleaned.json';
 const BANK_URL_FALLBACK = 'https://raw.githubusercontent.com/awsmith1989-dev/iedc/refs/heads/main/iedc_edp_questions.cleaned.json';
 const BANK_FETCH_TIMEOUT_MS = 8000;
 const AUTO_ADVANCE_MS = 1200;
+const TRIAL_LIMIT = 5;
 
 function $(id){ return document.getElementById(id); }
 
+// ── Session management ────────────────────────────────────────
+let session = null; // { user, token, license, expiresAt }
+
+function loadSession(){
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (raw) session = JSON.parse(raw);
+  } catch(_){}
+}
+function saveSession(data){
+  session = data;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+}
+function clearSession(){
+  session = null;
+  sessionStorage.removeItem(SESSION_KEY);
+}
+function hasActiveLicense(){
+  if (!session?.license) return false;
+  return new Date(session.license.expires_at) > new Date();
+}
+function isLoggedIn(){ return !!session?.user; }
+
+// ── Trial management ──────────────────────────────────────────
+function getTrialCount(){
+  return parseInt(localStorage.getItem('edp-trial-count') || '0', 10);
+}
+function incrementTrial(){
+  const n = getTrialCount() + 1;
+  localStorage.setItem('edp-trial-count', String(n));
+  return n;
+}
+function isTrialExpired(){
+  return !hasActiveLicense() && getTrialCount() >= TRIAL_LIMIT;
+}
+function updateTrialBar(){
+  const bar = $('trialBar');
+  if (!bar) return;
+  if (hasActiveLicense() || isLoggedIn()){
+    bar.style.display = 'none';
+    return;
+  }
+  const remaining = Math.max(0, TRIAL_LIMIT - getTrialCount());
+  bar.style.display = 'flex';
+  const countEl = $('trialCount');
+  if (countEl) countEl.textContent = remaining;
+}
+
+// ── Quiz state ────────────────────────────────────────────────
 const state = loadState();
 
 function loadState(){
@@ -252,12 +428,9 @@ function loadState(){
     bank: saved.bank || [],
     progress: saved.progress || { attempts:0, correct:0, perManual:{}, seen:{}, missed:{} },
     settings: saved.settings || { manuals:[], mode:'random' },
-    lastQ: null,
-    selectedIndex: null,
-    checked: false,
-    lastPickedId: null,
-    started: false,
-    autoAdvanceTimer: null
+    lastQ: null, selectedIndex: null, checked: false,
+    lastPickedId: null, started: false, autoAdvanceTimer: null,
+    quiz: null,
   };
 }
 function saveState(){
@@ -266,6 +439,247 @@ function saveState(){
   }));
 }
 
+// ── Auth Modal ────────────────────────────────────────────────
+function showAuthModal(tab){
+  $('authModal').style.display = 'flex';
+  switchTab(tab || 'login');
+}
+function closeModal(){
+  $('authModal').style.display = 'none';
+}
+function showPaywall(){
+  $('paywallModal').style.display = 'flex';
+}
+function closePaywall(){
+  $('paywallModal').style.display = 'none';
+}
+
+function switchTab(tab){
+  ['login','register','redeem'].forEach(t => {
+    $('tab' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.modal-tab').forEach((el, i) => {
+    el.classList.toggle('active', ['login','register','redeem'][i] === tab);
+  });
+}
+
+function setFormError(id, msg){
+  const el = $(id);
+  if (el){ el.textContent = msg; el.classList.toggle('show', !!msg); }
+}
+function setButtonLoading(id, loading, label){
+  const btn = $(id);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Please wait…' : label;
+}
+
+async function doLogin(){
+  const email = $('loginEmail').value.trim();
+  const password = $('loginPassword').value;
+  setFormError('loginError', '');
+  if (!email || !password){ setFormError('loginError', 'Email and password required.'); return; }
+  setButtonLoading('loginBtn', true, 'Sign In');
+
+  try {
+    const res = await fetch('/.netlify/functions/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'login', email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+
+    saveSession({
+      user: data.user,
+      token: data.session.access_token,
+      license: data.license,
+    });
+
+    closeModal();
+    updateHeaderAuth();
+    updateTrialBar();
+    updateLicenseInfo();
+
+    if (!data.license) {
+      showPaywall();
+    }
+  } catch(err){
+    setFormError('loginError', err.message);
+  } finally {
+    setButtonLoading('loginBtn', false, 'Sign In');
+  }
+}
+
+async function doRegister(){
+  const email = $('regEmail').value.trim();
+  const password = $('regPassword').value;
+  setFormError('regError', '');
+  if (!email || !password){ setFormError('regError', 'Email and password required.'); return; }
+  if (password.length < 8){ setFormError('regError', 'Password must be at least 8 characters.'); return; }
+  setButtonLoading('regBtn', true, 'Create Account');
+
+  try {
+    const res = await fetch('/.netlify/functions/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'register', email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+
+    // Auto-login after register
+    const loginRes = await fetch('/.netlify/functions/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'login', email, password }),
+    });
+    const loginData = await loginRes.json();
+    if (loginRes.ok && loginData.session) {
+      saveSession({ user: loginData.user, token: loginData.session.access_token, license: loginData.license });
+    }
+
+    closeModal();
+    updateHeaderAuth();
+    updateTrialBar();
+    // Show redeem or paywall
+    if (!loginData.license) switchTab('redeem'), $('authModal').style.display = 'flex';
+
+  } catch(err){
+    setFormError('regError', err.message);
+  } finally {
+    setButtonLoading('regBtn', false, 'Create Account');
+  }
+}
+
+async function doRedeem(){
+  if (!isLoggedIn()){ closeModal(); showAuthModal('login'); return; }
+  const code = $('redeemCode').value.trim().toUpperCase();
+  setFormError('redeemError', '');
+  if (!code){ setFormError('redeemError', 'Please enter a license code.'); return; }
+  setButtonLoading('redeemBtn', true, 'Redeem Code');
+
+  try {
+    const res = await fetch('/.netlify/functions/redeem-code', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.token}`,
+      },
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Redemption failed');
+
+    // Update session with new license
+    saveSession({ ...session, license: data.license });
+    closeModal();
+    updateHeaderAuth();
+    updateTrialBar();
+    updateLicenseInfo();
+    alert('✅ License activated! You now have full access for 2 years.');
+
+  } catch(err){
+    setFormError('redeemError', err.message);
+  } finally {
+    setButtonLoading('redeemBtn', false, 'Redeem Code');
+  }
+}
+
+async function doPurchase(){
+  const email = $('purchaseEmail').value.trim();
+  setFormError('purchaseError', '');
+  if (!email){ setFormError('purchaseError', 'Email required to purchase.'); return; }
+  setButtonLoading('purchaseBtn', true, 'Purchase License — $199');
+
+  try {
+    const res = await fetch('/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not create checkout session');
+    window.location.href = data.url;
+  } catch(err){
+    setFormError('purchaseError', err.message);
+    setButtonLoading('purchaseBtn', false, 'Purchase License — $199');
+  }
+}
+
+async function doForgotPassword(){
+  const email = $('loginEmail').value.trim();
+  if (!email){ setFormError('loginError', 'Enter your email above first.'); return; }
+  try {
+    await fetch('/.netlify/functions/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reset-password', email }),
+    });
+    setFormError('loginError', '');
+    alert(`Password reset email sent to ${email}. Check your inbox.`);
+  } catch(err){
+    setFormError('loginError', err.message);
+  }
+}
+
+function doLogout(){
+  clearSession();
+  updateHeaderAuth();
+  updateTrialBar();
+  updateLicenseInfo();
+}
+
+function updateHeaderAuth(){
+  const el = $('headerRight');
+  const footerLink = $('footerAuthLink');
+  if (!el) return;
+  if (isLoggedIn()){
+    el.innerHTML = `
+      <div class="user-badge">
+        <span>${session.user.email}</span>
+        ${hasActiveLicense() ? '<span style="color:#6fcf97;font-size:11px">✓ Licensed</span>' : '<span style="color:#f08080;font-size:11px">No license</span>'}
+      </div>
+      <button class="btn sm ghost" onclick="doLogout()">Sign Out</button>
+    `;
+    if (footerLink) footerLink.style.display = 'none';
+  } else {
+    el.innerHTML = `
+      <button class="btn sm" onclick="showAuthModal('login')">Sign In</button>
+      <button class="btn primary sm" onclick="showPaywall()">Get Access</button>
+    `;
+    if (footerLink){ footerLink.textContent = 'Sign in'; footerLink.style.display = ''; }
+  }
+}
+
+function updateLicenseInfo(){
+  const el = $('licenseInfo');
+  if (!el) return;
+  if (hasActiveLicense()){
+    const exp = new Date(session.license.expires_at);
+    const fmt = exp.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    el.innerHTML = `<strong>✓ Licensed</strong> · Expires ${fmt}`;
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ── Check URL params for post-purchase ────────────────────────
+function checkUrlParams(){
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('purchase') === 'success'){
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+    showAuthModal('login');
+    alert('🎉 Payment successful! Create an account or sign in to activate your license.');
+  }
+  if (params.get('purchase') === 'cancelled'){
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+}
+
+// ── Core quiz logic ───────────────────────────────────────────
 function setStatus(msg, kind){
   const el = $('statusText'); if (el) el.textContent = msg;
   const box = $('statusLine');
@@ -273,168 +687,128 @@ function setStatus(msg, kind){
 }
 function manualKey(q){ return q?.title || q?.manual || 'Unknown Manual'; }
 function uniqueManuals(){ return [...new Set(state.bank.map(manualKey))].sort(); }
-
 function filteredBank(){
-  const chosenManuals = state.settings.manuals?.length
-    ? new Set(state.settings.manuals)
-    : new Set(uniqueManuals());
-  return state.bank.filter(q => chosenManuals.has(manualKey(q)));
+  const chosen = state.settings.manuals?.length ? new Set(state.settings.manuals) : new Set(uniqueManuals());
+  return state.bank.filter(q => chosen.has(manualKey(q)));
 }
-
 function updatePoolInfo(){
-  const el = $('poolInfo'); if (!el) return;
   const n = filteredBank().length;
-  el.textContent = `Pool: ${n}`;
-  const sum = $('filtersSummary');
-  if (sum) sum.textContent = `Pool: ${n}`;
+  const el = $('poolInfo'); if (el) el.textContent = `Pool: ${n}`;
+  const sum = $('filtersSummary'); if (sum) sum.textContent = `Pool: ${n}`;
 }
 function updateMissedInfo(){
   const el = $('missedInfo'); if (!el) return;
-  const missedIds = Object.keys(state.progress.missed || {}).filter(id => (state.progress.missed[id]||0) > 0);
-  el.textContent = `Missed queue: ${missedIds.length} questions`;
+  const n = Object.keys(state.progress.missed||{}).filter(id=>(state.progress.missed[id]||0)>0).length;
+  el.textContent = n ? `Missed queue: ${n} questions` : '';
 }
 function setNextButtonLabel(){
   const btn = $('nextBtn');
-  if (!btn) return;
-  btn.textContent = state.started ? 'New Question' : 'Begin Practice';
+  if (btn) btn.textContent = state.started ? 'New Question' : 'Begin Practice';
 }
 
 function stableIdFrom(q){
-  const s = [q.title||q.manual||'', q.chapter||'', q.chapter_tag||'', q.difficulty||'', q.type||'', q.question||''].join('|');
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-  return 'q-' + (h >>> 0).toString(16).padStart(8,'0');
+  const s=[q.title||q.manual||'',q.chapter||'',q.chapter_tag||'',q.difficulty||'',q.type||'',q.question||''].join('|');
+  let h=2166136261;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return 'q-'+(h>>>0).toString(16).padStart(8,'0');
 }
 function sanitizeJsonText(input){
-  let text = input.replace(/^\uFEFF/, '');
-  text = text.replace(/\/\*[\s\S]*?\*\//g, '');
-  text = text.replace(/(^|\s)\/\/.*$/gm, '$1');
-  let out = '';
-  let inString = false;
-  let escape = false;
-  for (let i = 0; i < text.length; i++){
-    const c = text[i];
-    if (!inString){
-      if (c === '"'){ inString = true; out += c; continue; }
-      out += c; continue;
-    }
-    if (escape){ out += c; escape = false; continue; }
-    if (c === '\\'){ out += c; escape = true; continue; }
-    if (c === '"'){ inString = false; out += c; continue; }
-    if (c === '\r') continue;
-    if (c === '\n'){ out += '\\n'; continue; }
-    out += c;
+  let text=input.replace(/^\uFEFF/,'').replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|\s)\/\/.*$/gm,'$1');
+  let out='',inString=false,escape=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(!inString){if(c==='"'){inString=true;out+=c;continue;}out+=c;continue;}
+    if(escape){out+=c;escape=false;continue;}
+    if(c==='\\'){out+=c;escape=true;continue;}
+    if(c==='"'){inString=false;out+=c;continue;}
+    if(c==='\r')continue;
+    if(c==='\n'){out+='\\n';continue;}
+    out+=c;
   }
   return out;
 }
 function normalizeBankPayload(parsed){
-  let arr = null;
-  if (Array.isArray(parsed)) arr = parsed;
-  else if (parsed && Array.isArray(parsed.questions)) arr = parsed.questions;
-  else if (parsed && Array.isArray(parsed.bank)) arr = parsed.bank;
-  else if (parsed && Array.isArray(parsed.items)) arr = parsed.items;
-  if (!Array.isArray(arr)) throw new Error('Bank must be an array or an object with questions[].');
-  const fixed = arr.map((q, idx) => {
-    const qq = { ...q };
-    if (!qq.title && qq.manual) qq.title = qq.manual;
-    if (!Array.isArray(qq.options)) throw new Error(`Question at index ${idx} missing options[]`);
-    if (qq.answerIndex == null && typeof qq.answer === 'string'){
-      const ai = qq.options.indexOf(qq.answer);
-      if (ai !== -1) qq.answerIndex = ai;
-    }
-    if (qq.answerIndex == null) throw new Error(`Question at index ${idx} missing answerIndex`);
-    if (!qq.question) throw new Error(`Question at index ${idx} missing question`);
-    if (!qq.id) qq.id = stableIdFrom(qq);
-    qq.question = String(qq.question);
-    if (!qq.type) qq.type = 'standard';
-    if (qq.chapter == null) qq.chapter = '';
+  let arr=null;
+  if(Array.isArray(parsed))arr=parsed;
+  else if(parsed&&Array.isArray(parsed.questions))arr=parsed.questions;
+  else if(parsed&&Array.isArray(parsed.bank))arr=parsed.bank;
+  else if(parsed&&Array.isArray(parsed.items))arr=parsed.items;
+  if(!Array.isArray(arr))throw new Error('Bank must be an array.');
+  const fixed=arr.map((q,idx)=>{
+    const qq={...q};
+    if(!qq.title&&qq.manual)qq.title=qq.manual;
+    if(!Array.isArray(qq.options))throw new Error(`Q${idx} missing options[]`);
+    if(qq.answerIndex==null&&typeof qq.answer==='string'){const ai=qq.options.indexOf(qq.answer);if(ai!==-1)qq.answerIndex=ai;}
+    if(qq.answerIndex==null)throw new Error(`Q${idx} missing answerIndex`);
+    if(!qq.question)throw new Error(`Q${idx} missing question`);
+    if(!qq.id)qq.id=stableIdFrom(qq);
+    qq.question=String(qq.question);
+    if(!qq.type)qq.type='standard';
+    if(qq.chapter==null)qq.chapter='';
     return qq;
   });
-  const seen = new Set();
-  for (let i = 0; i < fixed.length; i++){
-    const id = fixed[i].id;
-    if (seen.has(id)) fixed[i].id = id + '-' + i;
-    seen.add(fixed[i].id);
-  }
+  const seen=new Set();
+  for(let i=0;i<fixed.length;i++){const id=fixed[i].id;if(seen.has(id))fixed[i].id=id+'-'+i;seen.add(fixed[i].id);}
   return fixed;
 }
 
 function buildManualCheckboxes(){
-  const group = $('manualsGroup'); if (!group) return;
-  group.innerHTML = '';
-  const allManuals = uniqueManuals();
-  const chosen = new Set(state.settings.manuals.length ? state.settings.manuals : allManuals);
-  allManuals.forEach(m => {
-    const isChecked = chosen.has(m);
-    const lbl = document.createElement('label');
-    lbl.className = 'check-row' + (isChecked ? ' checked' : '');
-    lbl.innerHTML = `<input type="checkbox" value="${m}" ${isChecked ? 'checked' : ''} /> ${m}`;
-    lbl.addEventListener('change', () => {
-      lbl.classList.toggle('checked', lbl.querySelector('input').checked);
-      syncManualState();
-    });
+  const group=$('manualsGroup');if(!group)return;
+  group.innerHTML='';
+  const all=uniqueManuals();
+  const chosen=new Set(state.settings.manuals.length?state.settings.manuals:all);
+  all.forEach(m=>{
+    const isChecked=chosen.has(m);
+    const lbl=document.createElement('label');
+    lbl.className='check-row'+(isChecked?' checked':'');
+    lbl.innerHTML=`<input type="checkbox" value="${m}" ${isChecked?'checked':''}/>${m}`;
+    lbl.addEventListener('change',()=>{lbl.classList.toggle('checked',lbl.querySelector('input').checked);syncManualState();});
     group.appendChild(lbl);
   });
   updatePoolInfo();
 }
-
 function syncManualState(){
-  const checked = [...document.querySelectorAll('#manualsGroup input[type="checkbox"]:checked')].map(i => i.value);
-  state.settings.manuals = checked;
-  saveState();
-  updatePoolInfo();
+  state.settings.manuals=[...document.querySelectorAll('#manualsGroup input:checked')].map(i=>i.value);
+  saveState();updatePoolInfo();
 }
-
 function buildModeRadios(){
-  const group = $('modeGroup'); if (!group) return;
-  const currentMode = state.settings.mode || 'random';
-  group.querySelectorAll('input[type="radio"]').forEach(r => {
-    r.checked = (r.value === currentMode);
-    r.closest('.check-row').classList.toggle('checked-radio', r.checked);
-  });
-  group.querySelectorAll('input[type="radio"]').forEach(r => {
-    r.addEventListener('change', () => {
-      group.querySelectorAll('.check-row').forEach(row => row.classList.remove('checked-radio'));
+  const group=$('modeGroup');if(!group)return;
+  const cur=state.settings.mode||'random';
+  group.querySelectorAll('input[type="radio"]').forEach(r=>{
+    r.checked=(r.value===cur);
+    r.closest('.check-row').classList.toggle('checked-radio',r.checked);
+    r.addEventListener('change',()=>{
+      group.querySelectorAll('.check-row').forEach(row=>row.classList.remove('checked-radio'));
       r.closest('.check-row').classList.add('checked-radio');
-      state.settings.mode = r.value;
-      saveState();
+      state.settings.mode=r.value;saveState();
     });
   });
 }
 
 function renderQ(q){
-  const wrap = $('qwrap');
-  if (!q || !q.options){
-    wrap.innerHTML = `<div class="muted">${q ? (q.question||'') : ''}</div>`;
-    return;
-  }
-  const opts = q.options.map((t,i) => `
+  const wrap=$('qwrap');
+  if(!q||!q.options){wrap.innerHTML=`<div class="muted">${q?(q.question||''):''}</div>`;return;}
+  const opts=q.options.map((t,i)=>`
     <label class="opt" data-index="${i}">
-      <input type="radio" name="opt" ${state.selectedIndex===i ? 'checked' : ''}/>
+      <input type="radio" name="opt" ${state.selectedIndex===i?'checked':''}/>
       <div>${t}</div>
     </label>`).join('');
-
-  const chapterLabel = (q.chapter !== '' && q.chapter != null)
-    ? `<span class="chip meta-chip">Chapter: <strong>${q.chapter}</strong></span>` : '';
-  const manualLabel = `<span class="chip meta-chip">Manual: <strong>${manualKey(q)}</strong></span>`;
-
-  wrap.innerHTML = `
-    <div class="meta" aria-label="Question metadata">
-      ${manualLabel}${chapterLabel}
-    </div>
+  const chapterLabel=(q.chapter!==''&&q.chapter!=null)?`<span class="chip">Chapter: <strong>${q.chapter}</strong></span>`:'';
+  const manualLabel=`<span class="chip">Manual: <strong>${manualKey(q)}</strong></span>`;
+  wrap.innerHTML=`
+    <div class="meta">${manualLabel}${chapterLabel}</div>
     <h3>${q.question}</h3>
     <div class="options">${opts}</div>
     <div id="feedback" class="small"></div>
   `;
-
-  document.querySelectorAll('.opt').forEach(el => {
-    el.addEventListener('click', () => {
-      if (state.checked) return;
-      if (state.autoAdvanceTimer){ clearTimeout(state.autoAdvanceTimer); state.autoAdvanceTimer = null; }
-      state.selectedIndex = +el.dataset.index;
-      document.querySelectorAll('.opt').forEach(e => e.classList.remove('correct','incorrect'));
-      const radio = el.querySelector('input[type="radio"]');
-      if (radio) radio.checked = true;
+  document.querySelectorAll('.opt').forEach(el=>{
+    el.addEventListener('click',()=>{
+      if(state.checked)return;
+      if(state.autoAdvanceTimer){clearTimeout(state.autoAdvanceTimer);state.autoAdvanceTimer=null;}
+      state.selectedIndex=+el.dataset.index;
+      document.querySelectorAll('.opt').forEach(e=>e.classList.remove('correct','incorrect'));
+      const radio=el.querySelector('input[type="radio"]');
+      if(radio)radio.checked=true;
       checkAndMaybeAdvance();
       renderStats();
     });
@@ -442,138 +816,113 @@ function renderQ(q){
 }
 
 function renderStats(){
-  const s = state.progress;
-  const pct = s.attempts ? Math.round(100*s.correct/s.attempts) : 0;
-  let html = `<div class="stat"><div>Total</div><div class="muted">${s.correct}/${s.attempts} correct</div><div class="pill ${pct>=70?'good':'bad'}">${pct}%</div></div>`;
-  const per = s.perManual || {};
-  Object.entries(per).sort().forEach(([m,v]) => {
-    const p = v.attempts ? Math.round(100*v.correct/v.attempts) : 0;
-    html += `<div class="stat"><div class="small">${m}</div><div class="muted">${v.correct}/${v.attempts}</div><div class="pill ${p>=70?'good':'bad'}">${p}%</div></div>`;
+  const s=state.progress;
+  const pct=s.attempts?Math.round(100*s.correct/s.attempts):0;
+  let html=`<div class="stat"><div>Total</div><div class="muted">${s.correct}/${s.attempts} correct</div><div class="pill ${pct>=70?'good':'bad'}">${pct}%</div></div>`;
+  Object.entries(s.perManual||{}).sort().forEach(([m,v])=>{
+    const p=v.attempts?Math.round(100*v.correct/v.attempts):0;
+    html+=`<div class="stat"><div class="small">${m}</div><div class="muted">${v.correct}/${v.attempts}</div><div class="pill ${p>=70?'good':'bad'}">${p}%</div></div>`;
   });
-  $('stats').innerHTML = html;
+  $('stats').innerHTML=html;
   updateMissedInfo();
 }
 
 function pickQuestion(){
-  state.started = true;
-  setNextButtonLabel();
-  const pool = filteredBank();
-  updatePoolInfo();
-  if (!pool.length){
-    renderQ({question:'No questions available for the chosen filters.'});
-    return;
+  // Trial gate
+  if(!hasActiveLicense() && !isLoggedIn()){
+    const used = incrementTrial();
+    updateTrialBar();
+    if(used > TRIAL_LIMIT){
+      showPaywall();
+      return;
+    }
   }
-  let q = null;
-  if (state.settings.mode === 'missed'){
-    const missed = state.progress.missed || {};
-    const missedPool = pool.filter(x => (missed[x.id] || 0) > 0);
-    if (!missedPool.length){ renderQ({question:'No missed questions in this filter set. Switch mode or broaden filters.'}); return; }
-    const weighted = [];
-    for (const item of missedPool){ const w = Math.min(5, missed[item.id]||1); for (let i=0;i<w;i++) weighted.push(item); }
-    q = weighted[Math.floor(Math.random()*weighted.length)];
-  } else if (state.settings.mode === 'spaced'){
-    const seen = state.progress.seen || {};
-    const withSeen = pool.map(item => ({ item, c:(seen[item.id]||0) }));
-    const min = Math.min(...withSeen.map(x => x.c));
-    const candidates = withSeen.filter(x => x.c === min).map(x => x.item);
-    q = candidates[Math.floor(Math.random()*candidates.length)];
+
+  state.started=true;setNextButtonLabel();
+  const pool=filteredBank();updatePoolInfo();
+  if(!pool.length){renderQ({question:'No questions available for the chosen filters.'});return;}
+  let q=null;
+  if(state.settings.mode==='missed'){
+    const missed=state.progress.missed||{};
+    const mp=pool.filter(x=>(missed[x.id]||0)>0);
+    if(!mp.length){renderQ({question:'No missed questions in this filter set.'});return;}
+    const w=[];for(const item of mp){const wt=Math.min(5,missed[item.id]||1);for(let i=0;i<wt;i++)w.push(item);}
+    q=w[Math.floor(Math.random()*w.length)];
+  } else if(state.settings.mode==='spaced'){
+    const seen=state.progress.seen||{};
+    const ws=pool.map(item=>({item,c:(seen[item.id]||0)}));
+    const min=Math.min(...ws.map(x=>x.c));
+    const cands=ws.filter(x=>x.c===min).map(x=>x.item);
+    q=cands[Math.floor(Math.random()*cands.length)];
   } else {
-    q = pool[Math.floor(Math.random()*pool.length)];
+    q=pool[Math.floor(Math.random()*pool.length)];
   }
-  state.lastPickedId = q.id;
-  state.lastQ = q;
-  state.selectedIndex = null;
-  state.checked = false;
-  state.progress.seen[q.id] = (state.progress.seen[q.id]||0)+1;
-  saveState();
-  renderQ(q);
+  state.lastPickedId=q.id;state.lastQ=q;
+  state.selectedIndex=null;state.checked=false;
+  state.progress.seen[q.id]=(state.progress.seen[q.id]||0)+1;
+  saveState();renderQ(q);
 }
 
 function scheduleAutoAdvance(){
-  if (state.autoAdvanceTimer){ clearTimeout(state.autoAdvanceTimer); state.autoAdvanceTimer = null; }
-  state.autoAdvanceTimer = setTimeout(() => {
-    state.autoAdvanceTimer = null;
-    pickQuestion();
-    renderStats();
-  }, AUTO_ADVANCE_MS);
+  if(state.autoAdvanceTimer){clearTimeout(state.autoAdvanceTimer);state.autoAdvanceTimer=null;}
+  state.autoAdvanceTimer=setTimeout(()=>{state.autoAdvanceTimer=null;pickQuestion();renderStats();},AUTO_ADVANCE_MS);
 }
 
 function checkAndMaybeAdvance(){
-  const q = state.lastQ;
-  if (!q || state.selectedIndex == null || state.checked) return;
-  state.checked = true;
-  const correct = (state.selectedIndex === q.answerIndex);
-
+  const q=state.lastQ;
+  if(!q||state.selectedIndex==null||state.checked)return;
+  state.checked=true;
+  const correct=(state.selectedIndex===q.answerIndex);
   state.progress.attempts++;
-  if (correct) state.progress.correct++;
-  const mKey = manualKey(q);
-  state.progress.perManual = state.progress.perManual || {};
-  const m = state.progress.perManual[mKey] || { attempts:0, correct:0 };
-  m.attempts++; if (correct) m.correct++;
-  state.progress.perManual[mKey] = m;
-  state.progress.missed = state.progress.missed || {};
-  if (!correct) state.progress.missed[q.id] = (state.progress.missed[q.id]||0)+1;
-  else if (state.progress.missed[q.id]) delete state.progress.missed[q.id];
+  if(correct)state.progress.correct++;
+  const mKey=manualKey(q);
+  state.progress.perManual=state.progress.perManual||{};
+  const m=state.progress.perManual[mKey]||{attempts:0,correct:0};
+  m.attempts++;if(correct)m.correct++;
+  state.progress.perManual[mKey]=m;
+  state.progress.missed=state.progress.missed||{};
+  if(!correct)state.progress.missed[q.id]=(state.progress.missed[q.id]||0)+1;
+  else if(state.progress.missed[q.id])delete state.progress.missed[q.id];
   saveState();
-
-  const opts = document.querySelectorAll('.opt');
+  const opts=document.querySelectorAll('.opt');
   opts[q.answerIndex]?.classList.add('correct');
-  if (!correct) opts[state.selectedIndex]?.classList.add('incorrect');
-
-  const fb = $('feedback');
-  if (!fb) return;
-
-  if (correct){
-    // Correct: show pill and auto-advance as before
-    fb.innerHTML = `<div class="feedback-row"><span class="pill good">Correct ✓</span></div>`;
+  if(!correct)opts[state.selectedIndex]?.classList.add('incorrect');
+  const fb=$('feedback');if(!fb)return;
+  if(correct){
+    fb.innerHTML=`<div class="feedback-row"><span class="pill good">Correct ✓</span></div>`;
     scheduleAutoAdvance();
   } else {
-    // Wrong: show pill + Explain This button + manual Next button. No auto-advance.
-    fb.innerHTML = `
+    // AI Explain only for licensed users
+    const explainBtnHtml = hasActiveLicense()
+      ? `<button class="btn explain-btn" id="explainBtn">✦ Explain This</button>`
+      : `<button class="btn explain-btn" onclick="showPaywall()" style="opacity:.7">✦ Explain This <span style="font-size:11px;font-weight:400">(licensed)</span></button>`;
+    fb.innerHTML=`
       <div class="feedback-row">
         <span class="pill bad">Incorrect</span>
-        <button class="btn explain-btn" id="explainBtn">✦ Explain This</button>
+        ${explainBtnHtml}
         <button class="btn next-inline" id="nextInlineBtn">Next →</button>
-      </div>
-    `;
-    $('explainBtn').addEventListener('click', () => fetchExplanation(q));
-    $('nextInlineBtn').addEventListener('click', () => { pickQuestion(); renderStats(); });
+      </div>`;
+    if(hasActiveLicense()) $('explainBtn').addEventListener('click',()=>fetchExplanation(q));
+    $('nextInlineBtn').addEventListener('click',()=>{pickQuestion();renderStats();});
   }
 }
 
-// ── AI Explanation ────────────────────────────────────────────────────────────
-
 async function fetchExplanation(q){
-  // Disable button and show loading box
-  const btn = $('explainBtn');
-  if (btn){ btn.disabled = true; btn.textContent = 'Loading…'; }
-
-  // Remove any existing box
-  const existing = $('explanationBox');
-  if (existing) existing.remove();
-
-  const fb = $('feedback');
-  if (!fb) return;
-
-  const box = document.createElement('div');
-  box.id = 'explanationBox';
-  box.className = 'loading';
-  box.innerHTML = `
-    <div class="explain-header">
-      <span class="explain-dot pulse"></span>
-      AI Tutor · Generating explanation…
-    </div>
-    <div id="explanationText" class="thinking">Asking Claude why the correct answer is right and yours was wrong…</div>
-  `;
+  const btn=$('explainBtn');
+  if(btn){btn.disabled=true;btn.textContent='Loading…';}
+  const existing=$('explanationBox');if(existing)existing.remove();
+  const fb=$('feedback');if(!fb)return;
+  const box=document.createElement('div');
+  box.id='explanationBox';box.className='loading';
+  box.innerHTML=`
+    <div class="explain-header"><span class="explain-dot pulse"></span>AI Tutor · Generating explanation…</div>
+    <div id="explanationText" class="thinking">Asking Claude why the correct answer is right and yours was wrong…</div>`;
   fb.after(box);
-
-  // Build prompt
-  const wrongAnswer   = q.options[state.selectedIndex];
-  const correctAnswer = q.options[q.answerIndex];
-  const chapterInfo   = q.chapter      ? `Chapter ${q.chapter}` : '';
-  const chapterTag    = q.chapter_tag  ? ` — ${q.chapter_tag}`  : '';
-
-  const prompt = `You are an EDP (Economic Development Professional) exam tutor helping someone study for the IEDC certification.
+  const wrongAnswer=q.options[state.selectedIndex];
+  const correctAnswer=q.options[q.answerIndex];
+  const chapterInfo=q.chapter?`Chapter ${q.chapter}`:'';
+  const chapterTag=q.chapter_tag?` — ${q.chapter_tag}`:'';
+  const prompt=`You are an EDP (Economic Development Professional) exam tutor helping someone study for the IEDC certification.
 
 The student just answered this question INCORRECTLY.
 
@@ -584,7 +933,7 @@ QUESTION:
 ${q.question}
 
 ANSWER CHOICES:
-${q.options.map((o,i) => `${String.fromCharCode(65+i)}. ${o}`).join('\n')}
+${q.options.map((o,i)=>`${String.fromCharCode(65+i)}. ${o}`).join('\n')}
 
 CORRECT ANSWER: ${String.fromCharCode(65+q.answerIndex)}. ${correctAnswer}
 STUDENT'S WRONG ANSWER: ${String.fromCharCode(65+state.selectedIndex)}. ${wrongAnswer}
@@ -595,308 +944,172 @@ Write a clear explanation (3–5 sentences) that:
 3. Ends with a short memorable takeaway they can use to remember this concept on exam day
 
 Write in plain, direct prose. No bullet points. Be specific.`;
-
-  try {
-    const res = await fetch('/.netlify/functions/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    if (!res.ok){
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData?.error?.message || `HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
-    const text = data?.content?.find(b => b.type === 'text')?.text || 'No explanation returned.';
-
-    // Render result
-    box.classList.remove('loading');
-    box.style.borderColor = '#4caf7d';
-    box.style.background   = '#0a2318';
-
-    const dot = box.querySelector('.explain-dot');
-    if (dot){ dot.classList.remove('pulse'); dot.style.background = '#4caf7d'; }
-
-    const header = box.querySelector('.explain-header');
-    if (header) header.innerHTML = `<span class="explain-dot" style="background:#4caf7d"></span> AI Tutor Explanation`;
-
-    const textEl = $('explanationText');
-    if (textEl){ textEl.className = ''; textEl.style.color = '#6fcf97'; textEl.textContent = text; }
-
-    // Hide explain button now that we have the answer
-    if (btn) btn.style.display = 'none';
-
-  } catch(err){
-    box.classList.remove('loading');
-    box.style.borderColor = '#d47676';
-    box.style.background = '#2a0d0d';
-
-    const dot = box.querySelector('.explain-dot');
-    if (dot){ dot.classList.remove('pulse'); dot.style.background = '#d47676'; }
-
-    const textEl = $('explanationText');
-    if (textEl){
-      textEl.className = '';
-      textEl.style.color = '#f08080';
-      textEl.textContent = `Could not load explanation: ${err.message}`;
-    }
-
-    if (btn){ btn.disabled = false; btn.textContent = '↺ Retry'; }
+  try{
+    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
+    const data=await res.json();
+    const text=data?.content?.find(b=>b.type==='text')?.text||'No explanation returned.';
+    box.classList.remove('loading');box.style.borderColor='#4caf7d';box.style.background='#0a2318';
+    const dot=box.querySelector('.explain-dot');if(dot){dot.classList.remove('pulse');dot.style.background='#4caf7d';}
+    const header=box.querySelector('.explain-header');if(header)header.innerHTML=`<span class="explain-dot" style="background:#4caf7d"></span> AI Tutor Explanation`;
+    const textEl=$('explanationText');if(textEl){textEl.className='';textEl.style.color='#6fcf97';textEl.textContent=text;}
+    if(btn)btn.style.display='none';
+  }catch(err){
+    box.classList.remove('loading');box.style.borderColor='#d47676';box.style.background='#2a0d0d';
+    const dot=box.querySelector('.explain-dot');if(dot){dot.classList.remove('pulse');dot.style.background='#d47676';}
+    const textEl=$('explanationText');if(textEl){textEl.className='';textEl.style.color='#f08080';textEl.textContent=`Could not load explanation: ${err.message}`;}
+    if(btn){btn.disabled=false;btn.textContent='↺ Retry';}
   }
 }
 
-// ── Utilities ─────────────────────────────────────────────────────────────────
-
-async function fetchWithTimeout(url, ms){
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), ms);
-  try{ return await fetch(url, { cache:'no-store', signal: controller.signal }); }
-  finally{ clearTimeout(t); }
-}
-async function loadBankFromUrl(url){
-  const res = await fetchWithTimeout(url, BANK_FETCH_TIMEOUT_MS);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  const rawText = await res.text();
-  let parsed;
-  try{ parsed = JSON.parse(rawText); }
-  catch(_){ const cleaned = sanitizeJsonText(rawText); parsed = JSON.parse(cleaned); }
-  return normalizeBankPayload(parsed);
-}
-
-function doResetProgress(){
-  if (!confirm('Reset all progress?')) return;
-  state.progress = { attempts:0, correct:0, perManual:{}, seen:{}, missed:{} };
-  state.lastPickedId = null;
-  saveState();
-  renderStats();
-  updatePoolInfo();
-  alert('Progress reset.');
-}
-
-$('nextBtn').addEventListener('click', () => { pickQuestion(); renderStats(); });
-$('resetBtn').addEventListener('click', doResetProgress);
-$('resetBtn2').addEventListener('click', doResetProgress);
-$('selectAllBtn').addEventListener('click', () => {
-  document.querySelectorAll('#manualsGroup input[type="checkbox"]').forEach(cb => {
-    cb.checked = true; cb.closest('.check-row').classList.add('checked');
-  });
-  syncManualState();
-});
-$('selectNoneBtn').addEventListener('click', () => {
-  document.querySelectorAll('#manualsGroup input[type="checkbox"]').forEach(cb => {
-    cb.checked = false; cb.closest('.check-row').classList.remove('checked');
-  });
-  syncManualState();
-});
-
-// ── Quiz Mode ─────────────────────────────────────────────────────────────────
-
-const QUIZ_LENGTH = 10;
-
+// ── Quiz Mode ─────────────────────────────────────────────────
+const QUIZ_LENGTH=10;
 function startQuizMode(){
-  const pool = filteredBank();
-  if(pool.length < QUIZ_LENGTH){
-    alert(`Need at least ${QUIZ_LENGTH} questions in the current filter pool. Try selecting more manuals.`);
-    return;
-  }
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  state.quiz = {
-    questions: shuffled.slice(0, QUIZ_LENGTH),
-    index: 0,
-    score: 0,
-    checked: false,
-    selectedIndex: null,
-    autoTimer: null
-  };
-  $('nextBtn').style.display = 'none';
-  $('quizModeBtn').style.display = 'none';
+  if(!hasActiveLicense()&&!isLoggedIn()){showPaywall();return;}
+  const pool=filteredBank();
+  if(pool.length<QUIZ_LENGTH){alert(`Need at least ${QUIZ_LENGTH} questions in the current filter pool.`);return;}
+  const shuffled=[...pool].sort(()=>Math.random()-.5);
+  state.quiz={questions:shuffled.slice(0,QUIZ_LENGTH),index:0,score:0,checked:false,selectedIndex:null,autoTimer:null};
+  $('nextBtn').style.display='none';$('quizModeBtn').style.display='none';
   renderQuizQ();
 }
-
 function renderQuizQ(){
-  const { questions, index } = state.quiz;
-  const q = questions[index];
-  const pct = Math.round((index / QUIZ_LENGTH) * 100);
-  const opts = q.options.map((t, i) => `
-    <label class="opt" data-index="${i}">
-      <input type="radio" name="opt"/>
-      <div>${t}</div>
-    </label>`).join('');
-
-  const chapterChip = (q.chapter !== '' && q.chapter != null)
-    ? `<span class="chip">Chapter: <strong>${q.chapter}</strong></span>` : '';
-  const manualChip = `<span class="chip">Manual: <strong>${manualKey(q)}</strong></span>`;
-
-  $('qwrap').innerHTML = `
-    <div class="quiz-progress">
-      <span>Question ${index + 1} of ${QUIZ_LENGTH}</span>
-      <span>${state.quiz.score} correct</span>
-    </div>
+  const{questions,index}=state.quiz;
+  const q=questions[index];
+  const pct=Math.round((index/QUIZ_LENGTH)*100);
+  const opts=q.options.map((t,i)=>`<label class="opt" data-index="${i}"><input type="radio" name="opt"/><div>${t}</div></label>`).join('');
+  const chapterChip=(q.chapter!==''&&q.chapter!=null)?`<span class="chip">Chapter: <strong>${q.chapter}</strong></span>`:'';
+  const manualChip=`<span class="chip">Manual: <strong>${manualKey(q)}</strong></span>`;
+  $('qwrap').innerHTML=`
+    <div class="quiz-progress"><span>Question ${index+1} of ${QUIZ_LENGTH}</span><span>${state.quiz.score} correct</span></div>
     <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
     <div class="meta">${manualChip}${chapterChip}</div>
     <h3>${q.question}</h3>
     <div class="options">${opts}</div>
-    <div id="feedback" class="small"></div>
-  `;
-  state.quiz.checked = false;
-  state.quiz.selectedIndex = null;
-
-  document.querySelectorAll('.opt').forEach(el => {
-    el.addEventListener('click', () => {
-      if(state.quiz.checked) return;
-      state.quiz.selectedIndex = +el.dataset.index;
-      checkQuizAnswer();
-    });
+    <div id="feedback" class="small"></div>`;
+  state.quiz.checked=false;state.quiz.selectedIndex=null;
+  document.querySelectorAll('.opt').forEach(el=>{
+    el.addEventListener('click',()=>{if(state.quiz.checked)return;state.quiz.selectedIndex=+el.dataset.index;checkQuizAnswer();});
   });
 }
-
 function checkQuizAnswer(){
-  const { questions, index, selectedIndex } = state.quiz;
-  const q = questions[index];
-  if(selectedIndex == null || state.quiz.checked) return;
-  state.quiz.checked = true;
-
-  const correct = selectedIndex === q.answerIndex;
-  if(correct) state.quiz.score++;
-
-  const opts = document.querySelectorAll('.opt');
+  const{questions,index,selectedIndex}=state.quiz;
+  const q=questions[index];
+  if(selectedIndex==null||state.quiz.checked)return;
+  state.quiz.checked=true;
+  const correct=selectedIndex===q.answerIndex;
+  if(correct)state.quiz.score++;
+  const opts=document.querySelectorAll('.opt');
   opts[q.answerIndex]?.classList.add('correct');
-  if(!correct) opts[selectedIndex]?.classList.add('incorrect');
-
-  const fb = $('feedback');
-  if(!fb) return;
-  const isLast = index === QUIZ_LENGTH - 1;
-  const nextLabel = isLast ? 'See Results' : 'Next &rarr;';
-
-  fb.innerHTML = `
-    <div class="feedback-row">
-      <span class="pill ${correct ? 'good' : 'bad'}">${correct ? 'Correct ✓' : 'Incorrect'}</span>
-      <button class="btn next-inline" id="quizNextBtn">${nextLabel}</button>
-    </div>`;
-
-  $('quizNextBtn').addEventListener('click', advanceQuiz);
-
-  if(correct && !isLast){
-    state.quiz.autoTimer = setTimeout(advanceQuiz, AUTO_ADVANCE_MS);
-  }
+  if(!correct)opts[selectedIndex]?.classList.add('incorrect');
+  const fb=$('feedback');if(!fb)return;
+  const isLast=index===QUIZ_LENGTH-1;
+  fb.innerHTML=`<div class="feedback-row"><span class="pill ${correct?'good':'bad'}">${correct?'Correct ✓':'Incorrect'}</span><button class="btn next-inline" id="quizNextBtn">${isLast?'See Results':'Next →'}</button></div>`;
+  $('quizNextBtn').addEventListener('click',advanceQuiz);
+  if(correct&&!isLast){state.quiz.autoTimer=setTimeout(advanceQuiz,AUTO_ADVANCE_MS);}
 }
-
 function advanceQuiz(){
-  if(state.quiz.autoTimer){ clearTimeout(state.quiz.autoTimer); state.quiz.autoTimer = null; }
-  const isLast = state.quiz.index === QUIZ_LENGTH - 1;
-  if(isLast){ showQuizResults(); return; }
-  state.quiz.index++;
-  renderQuizQ();
+  if(state.quiz.autoTimer){clearTimeout(state.quiz.autoTimer);state.quiz.autoTimer=null;}
+  if(state.quiz.index===QUIZ_LENGTH-1){showQuizResults();return;}
+  state.quiz.index++;renderQuizQ();
 }
-
-function ordinalSuffix(n){
-  const s = ['th','st','nd','rd'];
-  const v = n % 100;
-  return s[(v - 20) % 10] || s[v] || s[0];
-}
-
-function gradeLabel(score){
-  const p = (score / QUIZ_LENGTH) * 100;
-  if(p === 100) return 'Perfect score!';
-  if(p >= 90)   return 'Outstanding!';
-  if(p >= 80)   return 'Great job!';
-  if(p >= 70)   return 'Good work!';
-  if(p >= 60)   return 'Keep studying!';
-  return 'Keep at it — you\'ve got this!';
-}
-
+function ordinalSuffix(n){const s=['th','st','nd','rd'];const v=n%100;return s[(v-20)%10]||s[v]||s[0];}
+function gradeLabel(score){const p=(score/QUIZ_LENGTH)*100;if(p===100)return'Perfect score!';if(p>=90)return'Outstanding!';if(p>=80)return'Great job!';if(p>=70)return'Good work!';if(p>=60)return'Keep studying!';return"Keep at it — you've got this!";}
 async function showQuizResults(){
-  const { score } = state.quiz;
-  $('qwrap').innerHTML = `
+  const{score}=state.quiz;
+  $('qwrap').innerHTML=`
     <div class="quiz-results">
       <div class="result-score">${score}<span>/${QUIZ_LENGTH}</span></div>
       <div class="result-grade">${gradeLabel(score)}</div>
-      <div class="result-percentile" id="percentileBox">
-        <div class="result-percentile-label" style="color:var(--muted)">Calculating your percentile rank…</div>
-      </div>
+      <div class="result-percentile" id="percentileBox"><div class="result-percentile-label" style="color:var(--muted)">Calculating your percentile rank…</div></div>
       <div class="result-actions">
         <button class="btn primary" id="retakeBtn">Retake Quiz</button>
         <button class="btn" id="backPracticeBtn">Back to Practice</button>
       </div>
     </div>`;
-
-  $('retakeBtn').addEventListener('click', startQuizMode);
-  $('backPracticeBtn').addEventListener('click', exitQuizMode);
-
-  try {
-    const total = QUIZ_LENGTH;
-    const pct = Math.round((score / total) * 100);
-    const manual_filter = state.settings.manuals?.length
-      ? state.settings.manuals.join(', ')
-      : null;
-
-    // Submit score first, then fetch percentile (percentile includes this submission)
-    await fetch('/.netlify/functions/submit-score', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ score, total, pct, manual_filter })
-    });
-
-    const res = await fetch('/.netlify/functions/get-percentile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pct })
-    });
-
-    const data = await res.json();
-    const box = $('percentileBox');
-    if(box && data.percentile != null){
-      const suf = ordinalSuffix(data.percentile);
-      box.innerHTML = `
-        <div class="result-percentile-num">${data.percentile}<sup>${suf}</sup></div>
-        <div class="result-percentile-label">percentile among all users</div>
-        <div class="result-total">${data.total.toLocaleString()} quizzes taken</div>`;
+  $('retakeBtn').addEventListener('click',startQuizMode);
+  $('backPracticeBtn').addEventListener('click',exitQuizMode);
+  try{
+    const total=QUIZ_LENGTH;
+    const pct=Math.round((score/total)*100);
+    const manual_filter=state.settings.manuals?.length?state.settings.manuals.join(', '):null;
+    await fetch('/.netlify/functions/submit-score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({score,total,pct,manual_filter})});
+    const res=await fetch('/.netlify/functions/get-percentile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pct})});
+    const data=await res.json();
+    const box=$('percentileBox');
+    if(box&&data.percentile!=null){
+      const suf=ordinalSuffix(data.percentile);
+      box.innerHTML=`<div class="result-percentile-num">${data.percentile}<sup>${suf}</sup></div><div class="result-percentile-label">percentile among all users</div><div class="result-total">${data.total.toLocaleString()} quizzes taken</div>`;
     }
-  } catch(e){
-    const box = $('percentileBox');
-    if(box) box.innerHTML = `<div class="result-percentile-label" style="color:#f08080">Could not load ranking</div>`;
+  }catch(e){
+    const box=$('percentileBox');
+    if(box)box.innerHTML=`<div class="result-percentile-label" style="color:#f08080">Could not load ranking</div>`;
   }
 }
-
 function exitQuizMode(){
-  state.quiz = null;
-  $('nextBtn').style.display = '';
-  $('quizModeBtn').style.display = '';
-  $('qwrap').innerHTML = `<div class="muted">Click <em>Begin Practice</em> to start.</div>`;
-  state.started = false;
-  setNextButtonLabel();
+  state.quiz=null;
+  $('nextBtn').style.display='';$('quizModeBtn').style.display='';
+  $('qwrap').innerHTML=`<div class="muted">Click <em>Begin Practice</em> to start.</div>`;
+  state.started=false;setNextButtonLabel();
 }
 
-$('quizModeBtn').addEventListener('click', startQuizMode);
+// ── Event listeners ───────────────────────────────────────────
+$('nextBtn').addEventListener('click',()=>{pickQuestion();renderStats();});
+$('quizModeBtn').addEventListener('click',startQuizMode);
+$('resetBtn').addEventListener('click',doResetProgress);
+$('resetBtn2').addEventListener('click',doResetProgress);
+$('selectAllBtn').addEventListener('click',()=>{
+  document.querySelectorAll('#manualsGroup input').forEach(cb=>{cb.checked=true;cb.closest('.check-row').classList.add('checked');});
+  syncManualState();
+});
+$('selectNoneBtn').addEventListener('click',()=>{
+  document.querySelectorAll('#manualsGroup input').forEach(cb=>{cb.checked=false;cb.closest('.check-row').classList.remove('checked');});
+  syncManualState();
+});
 
+function doResetProgress(){
+  if(!confirm('Reset all progress?'))return;
+  state.progress={attempts:0,correct:0,perManual:{},seen:{},missed:{}};
+  state.lastPickedId=null;saveState();renderStats();updatePoolInfo();
+}
+
+async function fetchWithTimeout(url,ms){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),ms);
+  try{return await fetch(url,{cache:'no-store',signal:ctrl.signal});}
+  finally{clearTimeout(t);}
+}
+async function loadBankFromUrl(url){
+  const res=await fetchWithTimeout(url,BANK_FETCH_TIMEOUT_MS);
+  if(!res.ok)throw new Error(`${res.status} ${res.statusText}`);
+  const raw=await res.text();
+  let parsed;
+  try{parsed=JSON.parse(raw);}catch(_){parsed=JSON.parse(sanitizeJsonText(raw));}
+  return normalizeBankPayload(parsed);
+}
+
+// ── Init ──────────────────────────────────────────────────────
 (async function init(){
+  loadSession();
+  checkUrlParams();
+  updateHeaderAuth();
+  updateTrialBar();
+  updateLicenseInfo();
   buildModeRadios();
   setNextButtonLabel();
   renderStats();
   setStatus('Loading question bank…');
   try{
     let arr;
-    try{ arr = await loadBankFromUrl(BANK_URL_PRIMARY); }
-    catch(e1){ arr = await loadBankFromUrl(BANK_URL_FALLBACK); }
-    state.bank = arr;
-    saveState();
-    buildManualCheckboxes();
-    renderStats();
-    updatePoolInfo();
+    try{arr=await loadBankFromUrl(BANK_URL_PRIMARY);}
+    catch(e1){arr=await loadBankFromUrl(BANK_URL_FALLBACK);}
+    state.bank=arr;saveState();
+    buildManualCheckboxes();renderStats();updatePoolInfo();
     setStatus(`Loaded ${arr.length} questions`);
-  } catch(err){
-    const msg = (err.name === 'AbortError')
-      ? 'Bank load timed out. This page may be blocking external fetches.'
-      : `Could not load bank: ${err.message}`;
-    setStatus(msg, 'error');
-    buildManualCheckboxes();
-    updatePoolInfo();
+  }catch(err){
+    const msg=(err.name==='AbortError')?'Bank load timed out.':'Could not load bank: '+err.message;
+    setStatus(msg,'error');
+    buildManualCheckboxes();updatePoolInfo();
   }
 })();
 </script>
