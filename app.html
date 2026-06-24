@@ -486,7 +486,7 @@ function switchTab(tab){
   ['login','register','redeem'].forEach(t => {
     $('tab' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = t === tab ? 'block' : 'none';
   });
-  document.querySelectorAll('.modal-tab').forEach((el, i) => {
+  document.querySelectorAll('#authTabs .modal-tab').forEach((el, i) => {
     el.classList.toggle('active', ['login','register','redeem'][i] === tab);
   });
 }
