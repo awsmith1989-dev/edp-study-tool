@@ -711,13 +711,36 @@ function updateLicenseInfo(){
 }
 
 // ── Check URL params for post-purchase ────────────────────────
-function checkUrlParams(){
+async function checkUrlParams(){
   const params = new URLSearchParams(window.location.search);
   if (params.get('purchase') === 'success'){
-    // Clean URL
     window.history.replaceState({}, '', window.location.pathname);
-    showAuthModal('login');
-    alert('🎉 Payment successful! Create an account or sign in to activate your license.');
+    // If already logged in, refresh license from server then show success
+    if (isLoggedIn() && session.token){
+      try {
+        const res = await fetch('/.netlify/functions/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+          body: JSON.stringify({ action: 'check' })
+        });
+        const data = await res.json();
+        if (res.ok && data.license){
+          saveSession({ ...session, license: data.license });
+          updateHeaderAuth();
+          updateLicenseInfo();
+          updateTrialBar();
+        }
+      } catch(_){}
+      // Show clean success banner instead of alert
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:#0a2318;border:1px solid #4caf7d;border-radius:10px;padding:12px 16px;margin-bottom:12px;color:#6fcf97;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
+      banner.innerHTML = '<span>🎉 <strong>Payment successful!</strong> Your 2-year license is now active.</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#6fcf97;cursor:pointer;font-size:18px;line-height:1">&times;</button>';
+      const wrap = document.querySelector('.wrap');
+      if (wrap) wrap.insertBefore(banner, wrap.firstChild);
+    } else {
+      // Not logged in — send back to landing to sign in
+      window.location.href = '/?purchase=success';
+    }
   }
   if (params.get('purchase') === 'cancelled'){
     window.history.replaceState({}, '', window.location.pathname);
