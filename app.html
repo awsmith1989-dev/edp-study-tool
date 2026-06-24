@@ -41,6 +41,33 @@
     .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.25);padding:16px}
     .grid{display:grid;gap:12px}
     @media(min-width:860px){.grid{grid-template-columns:2fr 1fr}}
+
+    /* Mobile */
+    @media(max-width:600px){
+      .wrap{padding:8px}
+      header{flex-wrap:wrap;gap:8px;padding:10px 12px;border-radius:10px}
+      .brand-text h1{font-size:15px}
+      .brand-text p{font-size:11px}
+      .header-right{width:100%;justify-content:flex-end;gap:6px;margin-left:0}
+      .user-badge{font-size:11px}
+      .user-badge span{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .btn.sm{padding:5px 8px;font-size:11px}
+      .card{padding:12px;border-radius:10px}
+      .quiz-hero{padding:10px}
+      .quiz-hero h3{font-size:1rem}
+      .opt{padding:8px 10px;font-size:13px}
+      .btn.primary{padding:9px 12px;font-size:13px}
+      .btn.quiz-btn{padding:9px 12px;font-size:13px}
+      .modal{padding:20px;border-radius:16px;max-height:90vh;overflow-y:auto}
+      .modal h2{font-size:1.1rem}
+      .modal-tab{font-size:12px;padding:6px}
+      .result-score{font-size:3rem}
+      .result-percentile-num{font-size:2rem}
+      details.filters{border-radius:10px}
+      .filter-cols{flex-direction:column;gap:12px}
+      .check-group{gap:4px}
+      .check-row{padding:6px 8px;font-size:12px}
+    }
     .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 
     /* ── Buttons ── */
@@ -277,7 +304,7 @@
     </div>
 
     <!-- Login tab -->
-    <div id="tabLogin">
+    <div id="tabLogin" style="display:none">
       <h2>Welcome back</h2>
       <p>Sign in to access your licensed study tool.</p>
       <div class="form-group">
