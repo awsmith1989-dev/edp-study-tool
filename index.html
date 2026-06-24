@@ -1134,7 +1134,10 @@ function showModal(type){
       if(loggedStep) loggedStep.classList.add('hidden');
     }
   } else if(type === 'redeem') switchView('redeem');
-  else switchView('trial');
+  else {
+    switchView('trial');
+    if(type === 'login') switchModalTab('trial', 'login');
+  }
 }
 function closeModal(){ document.getElementById('modalOverlay').classList.add('hidden'); }
 function handleOverlayClick(e){ if(e.target === document.getElementById('modalOverlay')) closeModal(); }
