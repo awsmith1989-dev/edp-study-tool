@@ -80,7 +80,7 @@ exports.handler = async function(event) {
           type: 'recovery',
           email,
           options: {
-            redirectTo: 'https://edpstudy.com/app.html',
+            redirectTo: 'https://edpstudy.com',
           }
         });
         if (resetError) console.error('Reset email error (non-fatal):', resetError.message);
