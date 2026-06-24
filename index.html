@@ -980,6 +980,26 @@
   </div>
 </footer>
 
+<!-- Password Reset Modal -->
+<div class="modal-overlay hidden" id="resetModal">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">Set your password</div>
+      <div class="modal-sub">Choose a password to activate your account and access your license.</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">New Password</label>
+      <input type="password" class="form-input" id="resetPassword" placeholder="At least 8 characters" autocomplete="new-password" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirm Password</label>
+      <input type="password" class="form-input" id="resetPasswordConfirm" placeholder="Repeat your password" autocomplete="new-password" />
+    </div>
+    <div class="form-error" id="resetError"></div>
+    <button class="btn-modal-primary" id="resetBtn" onclick="doResetPassword()">Set Password &amp; Sign In</button>
+  </div>
+</div>
+
 <!-- Auth / Paywall Modal -->
 <div class="modal-overlay hidden" id="modalOverlay" onclick="handleOverlayClick(event)">
   <div class="modal" onclick="event.stopPropagation()">
@@ -1242,18 +1262,61 @@ function showScreenshot(idx, btn){
   btn.classList.add('active');
 }
 
+// ── Password reset handler ────────────────────────────────────
+let resetAccessToken = null;
+
+async function doResetPassword(){
+  const password = document.getElementById('resetPassword').value;
+  const confirm = document.getElementById('resetPasswordConfirm').value;
+  setErr('resetError', '');
+  if(!password || password.length < 8){ setErr('resetError', 'Password must be at least 8 characters.'); return; }
+  if(password !== confirm){ setErr('resetError', 'Passwords do not match.'); return; }
+  setBtnLoading('resetBtn', true, 'Set Password & Sign In');
+  try {
+    const res = await fetch('/.netlify/functions/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'set-password', token: resetAccessToken, password })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Could not set password');
+    saveSession({ user: data.user, token: resetAccessToken, license: data.license });
+    document.getElementById('resetModal').classList.add('hidden');
+    window.history.replaceState({}, '', '/app.html');
+    window.location.href = '/app.html';
+  } catch(err){
+    setErr('resetError', err.message);
+  } finally {
+    setBtnLoading('resetBtn', false, 'Set Password & Sign In');
+  }
+}
+
 // Check if returning from successful purchase
 (function init(){
   loadSession();
+
+  // Detect password reset token in URL hash
+  const hash = window.location.hash;
+  if(hash && hash.includes('access_token') && hash.includes('type=recovery')){
+    const hashParams = new URLSearchParams(hash.replace('#', ''));
+    resetAccessToken = hashParams.get('access_token');
+    if(resetAccessToken){
+      window.history.replaceState({}, '', window.location.pathname);
+      document.getElementById('resetModal').classList.remove('hidden');
+      return;
+    }
+  }
+
   const params = new URLSearchParams(window.location.search);
   if(params.get('purchase') === 'success'){
     window.history.replaceState({}, '', '/');
     showModal('trial');
     switchModalTab('trial', 'login');
-    alert('🎉 Payment successful! Sign in to activate your license and start studying.');
+    setTimeout(() => {
+      alert('🎉 Payment successful! Check your email for a link to set your password, then sign in here.');
+    }, 300);
   }
   if(isLoggedIn()){
-    // Already logged in — send straight to app
     const actions = document.querySelector('.nav-actions');
     if(actions){
       actions.innerHTML = `

@@ -93,6 +93,37 @@ exports.handler = async function(event) {
         body: JSON.stringify({ success: true, user: data.user }),
       };
 
+    } else if (action === 'set-password') {
+      // User clicked reset link — use their token to set a new password
+      const { token, password } = JSON.parse(event.body || '{}');
+      if (!token || !password) throw new Error('Token and password required');
+
+      // Get user from token
+      const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+      if (userError || !user) throw new Error('Invalid or expired reset link. Please request a new one.');
+
+      // Update password using admin
+      const { error: updateError } = await supabase.auth.admin.updateUserById(user.id, { password });
+      if (updateError) throw updateError;
+
+      // Check for active license
+      const now = new Date().toISOString();
+      const { data: license } = await supabase
+        .from('licenses')
+        .select('id, expires_at, status')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .gte('expires_at', now)
+        .order('expires_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: { id: user.id, email: user.email }, license: license || null }),
+      };
+
     } else if (action === 'reset-password') {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: 'https://edpstudy.com/app.html',
