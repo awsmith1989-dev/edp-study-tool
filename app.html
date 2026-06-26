@@ -1159,6 +1159,26 @@ async function loadBankFromUrl(url){
 // ── Init ──────────────────────────────────────────────────────
 (async function init(){
   loadSession();
+
+  // Always verify license status from server on page load
+  // This catches revocations that happened since last login
+  if(isLoggedIn() && session.token){
+    try{
+      const res = await fetch('/.netlify/functions/auth', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'Authorization': 'Bearer ' + session.token},
+        body: JSON.stringify({ action: 'check' })
+      });
+      if(res.ok){
+        const data = await res.json();
+        // Update session with fresh license data from server
+        saveSession({ ...session, license: data.license || null });
+      }
+    } catch(_){
+      // Non-fatal — continue with cached session if server check fails
+    }
+  }
+
   checkUrlParams();
   updateHeaderAuth();
   updateTrialBar();

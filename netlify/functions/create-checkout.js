@@ -18,6 +18,9 @@ exports.handler = async function(event) {
       payment_method_types: ['card'],
       mode: 'payment',
       customer_email: email,
+      payment_intent_data: {
+        receipt_email: email,
+      },
       line_items: [{
         price: process.env.STRIPE_PRICE_ID,
         quantity: 1,

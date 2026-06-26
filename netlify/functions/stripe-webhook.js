@@ -102,19 +102,6 @@ exports.handler = async function(event) {
       if (licenseError) throw licenseError;
       console.log(`✅ License created for ${email}, expires ${expiresAt.toISOString()}`);
 
-      // Send receipt via Stripe
-      try {
-        if (session.payment_intent) {
-          const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
-          const chargeId = paymentIntent.latest_charge;
-          if (chargeId) {
-            await stripe.charges.sendReceipt(chargeId);
-            console.log(`📧 Receipt sent to ${email}`);
-          }
-        }
-      } catch (receiptErr) {
-        console.error('Receipt send error (non-fatal):', receiptErr.message);
-      }
 
     } catch (err) {
       console.error('Error creating license:', err);
