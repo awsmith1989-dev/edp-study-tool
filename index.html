@@ -763,6 +763,8 @@
     .hidden { display: none !important; }
     .text-center { text-align: center; }
   </style>
+  <!-- HubSpot Tracking -->
+  <script type="text/javascript" id="hs-script-loader" async defer src="//js-na2.hs-scripts.com/246607958.js"></script>
 </head>
 <body>
 
@@ -1181,6 +1183,13 @@ async function doTrialRegister(){
     if(loginRes.ok && loginData.session){
       saveSession({ user: loginData.user, token: loginData.session.access_token, license: loginData.license });
     }
+    // Sync to HubSpot (non-blocking)
+    fetch('/.netlify/functions/hubspot-sync', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ action: 'trial', email, properties: { edp_license_status: 'trial' } })
+    }).catch(() => {});
+
     closeModal();
     window.location.href = '/app.html';
   } catch(err){
@@ -1253,6 +1262,13 @@ async function doPurchase(){
     if(loginRes.ok && loginData.session){
       saveSession({ user: loginData.user, token: loginData.session.access_token, license: loginData.license });
     }
+
+    // Sync to HubSpot (non-blocking)
+    fetch('/.netlify/functions/hubspot-sync', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ action: 'purchase', email, properties: { edp_license_status: 'purchased' } })
+    }).catch(() => {});
 
     // Step 3: Go to Stripe checkout
     setBtnLoading('purchaseBtn', true, 'Redirecting to payment...');
