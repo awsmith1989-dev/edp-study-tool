@@ -18,6 +18,14 @@ exports.handler = async function(event) {
   };
 
   try {
+    // Map status values to HubSpot capitalized options
+    const statusMap = { 'licensed': 'Licensed', 'trial': 'Trial', 'purchased': 'Licensed', 'expired': 'Expired', 'revoked': 'Revoked' };
+    const mappedProperties = {};
+    if (properties) {
+      Object.entries(properties).forEach(([k, v]) => {
+        mappedProperties[k] = k === 'edp_license_status' ? (statusMap[v] || v) : v;
+      });
+    }
 
     // ── Step 1: Upsert contact ────────────────────────────────
     const contactPayload = {
@@ -25,7 +33,7 @@ exports.handler = async function(event) {
         email,
         hs_lead_status: action === 'purchase' ? 'IN_PROGRESS' : 'NEW',
         lifecyclestage: action === 'purchase' ? 'customer' : 'lead',
-        ...properties,
+        ...mappedProperties,
       }
     };
 
