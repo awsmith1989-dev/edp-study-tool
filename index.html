@@ -1016,6 +1016,16 @@
         <button class="modal-tab" onclick="switchModalTab('trial','login')">Sign In</button>
       </div>
       <div id="trialRegister">
+        <div style="display:flex;gap:10px">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-input" id="trialFirstName" placeholder="Jane" autocomplete="given-name" />
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-input" id="trialLastName" placeholder="Smith" autocomplete="family-name" />
+          </div>
+        </div>
         <div class="form-group">
           <label class="form-label">Email</label>
           <input type="email" class="form-input" id="trialEmail" placeholder="you@example.com" autocomplete="email" />
@@ -1058,6 +1068,16 @@
         <div class="price-period">2-year individual license</div>
       </div>
       <div id="purchaseRegisterStep">
+        <div style="display:flex;gap:10px">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-input" id="purchaseFirstName" placeholder="Jane" autocomplete="given-name" />
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-input" id="purchaseLastName" placeholder="Smith" autocomplete="family-name" />
+          </div>
+        </div>
         <div class="form-group">
           <label class="form-label">Email</label>
           <input type="email" class="form-input" id="purchaseEmail" placeholder="you@example.com" autocomplete="email" />
@@ -1161,16 +1181,19 @@ function setErr(id, msg){ const el = document.getElementById(id); if(el){ el.tex
 function setBtnLoading(id, loading, label){ const b = document.getElementById(id); if(!b) return; b.disabled = loading; b.textContent = loading ? 'Please wait…' : label; }
 
 async function doTrialRegister(){
+  const firstName = document.getElementById('trialFirstName').value.trim();
+  const lastName = document.getElementById('trialLastName').value.trim();
   const email = document.getElementById('trialEmail').value.trim();
   const password = document.getElementById('trialPassword').value;
   setErr('trialRegError', '');
+  if(!firstName || !lastName){ setErr('trialRegError', 'First and last name required.'); return; }
   if(!email || !password){ setErr('trialRegError', 'Email and password required.'); return; }
   if(password.length < 8){ setErr('trialRegError', 'Password must be at least 8 characters.'); return; }
   setBtnLoading('trialRegBtn', true, 'Create Account & Start Trial');
   try {
     const res = await fetch('/.netlify/functions/auth', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ action: 'register', email, password })
+      body: JSON.stringify({ action: 'register', email, password, firstName, lastName })
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Registration failed');
@@ -1187,7 +1210,7 @@ async function doTrialRegister(){
     fetch('/.netlify/functions/hubspot-sync', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ action: 'trial', email, properties: { edp_license_status: 'trial' } })
+      body: JSON.stringify({ action: 'trial', email, properties: { edp_license_status: 'trial', firstname: firstName, lastname: lastName } })
     }).catch(() => {});
 
     closeModal();
@@ -1238,9 +1261,12 @@ async function doPurchase(){
     doCheckout();
     return;
   }
+  const firstName = document.getElementById('purchaseFirstName').value.trim();
+  const lastName = document.getElementById('purchaseLastName').value.trim();
   const email = document.getElementById('purchaseEmail').value.trim();
   const password = document.getElementById('purchasePassword').value;
   setErr('purchaseError', '');
+  if(!firstName || !lastName){ setErr('purchaseError', 'First and last name required.'); return; }
   if(!email || !password){ setErr('purchaseError', 'Email and password required.'); return; }
   if(password.length < 8){ setErr('purchaseError', 'Password must be at least 8 characters.'); return; }
   setBtnLoading('purchaseBtn', true, 'Creating account...');
@@ -1267,7 +1293,7 @@ async function doPurchase(){
     fetch('/.netlify/functions/hubspot-sync', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ action: 'purchase', email, properties: { edp_license_status: 'purchased' } })
+      body: JSON.stringify({ action: 'purchase', email, properties: { edp_license_status: 'purchased', firstname: firstName, lastname: lastName } })
     }).catch(() => {});
 
     // Step 3: Go to Stripe checkout

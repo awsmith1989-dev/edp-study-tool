@@ -75,8 +75,15 @@ exports.handler = async function(event) {
       };
 
     } else if (action === 'register') {
-      // Register new account (for users who purchased and need to set password)
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      // Register new account
+      const { firstName, lastName } = JSON.parse(event.body || '{}');
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { first_name: firstName || '', last_name: lastName || '' }
+        }
+      });
       if (error) throw error;
 
       // Create profile
