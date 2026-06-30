@@ -111,18 +111,31 @@ exports.handler = async function(event) {
       .slice(0, 20);
 
     // ── Page visits & conversion ────────────────────────────────
+    // Conversion rate only counts signups since visit tracking began —
+    // otherwise old signups (before tracking existed) skew the rate above 100%
+    const { data: earliestVisit } = await supabase
+      .from('page_visits')
+      .select('created_at')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single();
+
+    const trackingStart = earliestVisit?.created_at || new Date().toISOString();
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // Use whichever is more recent: 30 days ago, or when tracking started
+    const windowStart = new Date(trackingStart) > thirtyDaysAgo ? trackingStart : thirtyDaysAgo.toISOString();
 
     const { data: allVisits, count: totalVisits } = await supabase
       .from('page_visits')
       .select('session_id, created_at', { count: 'exact' })
-      .gte('created_at', thirtyDaysAgo.toISOString());
+      .gte('created_at', windowStart);
 
     const uniqueSessions = new Set((allVisits || []).map(v => v.session_id)).size;
 
-    const usersLast30 = users.filter(u => new Date(u.created_at) >= thirtyDaysAgo).length;
-    const conversionRate = uniqueSessions ? Math.round((usersLast30 / uniqueSessions) * 1000) / 10 : 0;
+    const usersInWindow = users.filter(u => new Date(u.created_at) >= new Date(windowStart)).length;
+    const conversionRate = uniqueSessions ? Math.round((usersInWindow / uniqueSessions) * 1000) / 10 : null;
 
     // Daily visits for last 14 days (for simple trend display)
     const dailyVisits = {};
@@ -160,9 +173,10 @@ exports.handler = async function(event) {
         traffic: {
           totalVisits30d: totalVisits || 0,
           uniqueSessions30d: uniqueSessions,
-          newSignups30d: usersLast30,
+          newSignups30d: usersInWindow,
           conversionRate,
           dailyVisits,
+          trackingStart,
         },
       }),
     };

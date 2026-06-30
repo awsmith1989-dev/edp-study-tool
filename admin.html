@@ -156,7 +156,11 @@ function render(data){
   const content = document.getElementById('content');
 
   // Top stat cards
+  const trackStart = new Date(data.traffic.trackingStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   let html = `
+    <div style="background:#fffbeb;border:1px solid #f6e05e;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:12px;color:#92600a">
+      📊 Visit tracking began ${trackStart}. Conversion rate and visit counts will become more meaningful as more data accumulates.
+    </div>
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">Visits (30d)</div>
@@ -165,8 +169,8 @@ function render(data){
       </div>
       <div class="stat-card">
         <div class="stat-label">Conversion Rate</div>
-        <div class="stat-value">${data.traffic.conversionRate}%</div>
-        <div class="stat-sub">${data.traffic.newSignups30d} signups / ${data.traffic.uniqueSessions30d} visitors</div>
+        <div class="stat-value">${data.traffic.conversionRate === null ? '—' : data.traffic.conversionRate + '%'}</div>
+        <div class="stat-sub">${data.traffic.newSignups30d} signups / ${data.traffic.uniqueSessions30d} visitors since tracking began</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Total Users</div>
