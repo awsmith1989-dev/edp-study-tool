@@ -159,6 +159,16 @@ function render(data){
   let html = `
     <div class="stat-grid">
       <div class="stat-card">
+        <div class="stat-label">Visits (30d)</div>
+        <div class="stat-value">${data.traffic.totalVisits30d}</div>
+        <div class="stat-sub">${data.traffic.uniqueSessions30d} unique sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Conversion Rate</div>
+        <div class="stat-value">${data.traffic.conversionRate}%</div>
+        <div class="stat-sub">${data.traffic.newSignups30d} signups / ${data.traffic.uniqueSessions30d} visitors</div>
+      </div>
+      <div class="stat-card">
         <div class="stat-label">Total Users</div>
         <div class="stat-value">${data.users.total}</div>
         <div class="stat-sub">${data.users.licensed} licensed · ${data.users.trial} trial</div>
@@ -185,6 +195,25 @@ function render(data){
       </div>
     </div>
   `;
+
+  // Daily visits trend (last 14 days)
+  const days = Object.keys(data.traffic.dailyVisits).sort().slice(-14);
+  if(days.length){
+    const maxVisits = Math.max(...days.map(d => data.traffic.dailyVisits[d]), 1);
+    html += `<div class="section"><h2>Daily Visits (Last 14 Days)</h2>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:10px">`;
+    days.forEach(day => {
+      const v = data.traffic.dailyVisits[day];
+      const h = Math.max(4, Math.round((v / maxVisits) * 90));
+      const label = new Date(day).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+      html += `<div style="flex:1;text-align:center">
+        <div style="background:var(--blue);height:${h}px;border-radius:3px 3px 0 0;margin:0 auto;width:70%" title="${v} visits"></div>
+        <div style="font-size:9px;color:var(--muted);margin-top:4px">${label}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
 
   // Code redemption by batch
   html += `<div class="section"><h2>Code Redemption by Batch</h2><table>

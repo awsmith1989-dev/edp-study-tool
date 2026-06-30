@@ -110,6 +110,27 @@ exports.handler = async function(event) {
       .sort((a, b) => b.questionsAnswered - a.questionsAnswered)
       .slice(0, 20);
 
+    // ── Page visits & conversion ────────────────────────────────
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const { data: allVisits, count: totalVisits } = await supabase
+      .from('page_visits')
+      .select('session_id, created_at', { count: 'exact' })
+      .gte('created_at', thirtyDaysAgo.toISOString());
+
+    const uniqueSessions = new Set((allVisits || []).map(v => v.session_id)).size;
+
+    const usersLast30 = users.filter(u => new Date(u.created_at) >= thirtyDaysAgo).length;
+    const conversionRate = uniqueSessions ? Math.round((usersLast30 / uniqueSessions) * 1000) / 10 : 0;
+
+    // Daily visits for last 14 days (for simple trend display)
+    const dailyVisits = {};
+    (allVisits || []).forEach(v => {
+      const day = new Date(v.created_at).toISOString().split('T')[0];
+      dailyVisits[day] = (dailyVisits[day] || 0) + 1;
+    });
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -135,6 +156,13 @@ exports.handler = async function(event) {
           totalAnswered: totalAnswered || 0,
           overallAccuracy,
           topUsers,
+        },
+        traffic: {
+          totalVisits30d: totalVisits || 0,
+          uniqueSessions30d: uniqueSessions,
+          newSignups30d: usersLast30,
+          conversionRate,
+          dailyVisits,
         },
       }),
     };

@@ -1406,6 +1406,20 @@ async function doResetPassword(){
 (function init(){
   loadSession();
 
+  // Log page visit (non-blocking, anonymous)
+  try {
+    let sid = sessionStorage.getItem('edp-visit-sid');
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem('edp-visit-sid', sid);
+    }
+    fetch('/.netlify/functions/log-visit', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ page: '/', sessionId: sid })
+    }).catch(() => {});
+  } catch(_){}
+
   // Detect password reset token in URL hash
   const hash = window.location.hash;
   if(hash && hash.includes('access_token') && hash.includes('type=recovery')){
