@@ -955,6 +955,16 @@ function checkAndMaybeAdvance(){
   if(!correct)state.progress.missed[q.id]=(state.progress.missed[q.id]||0)+1;
   else if(state.progress.missed[q.id])delete state.progress.missed[q.id];
   saveState();
+
+  // Log activity to server for admin analytics (non-blocking, licensed users only)
+  if(isLoggedIn() && session.token){
+    fetch('/.netlify/functions/log-activity', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'Authorization': 'Bearer ' + session.token},
+      body: JSON.stringify({ questionId: q.id, manual: mKey, correct })
+    }).catch(() => {});
+  }
+
   const opts=document.querySelectorAll('.opt');
   opts[q.answerIndex]?.classList.add('correct');
   if(!correct)opts[state.selectedIndex]?.classList.add('incorrect');

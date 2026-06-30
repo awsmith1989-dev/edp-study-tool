@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin · EDP Study Tool</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0f2744;
+      --blue: #1a5496;
+      --amber: #f0b429;
+      --ink: #0f2744;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --surface: #f8fafc;
+      --white: #ffffff;
+      --good: #15803d;
+      --good-bg: #f0fdf4;
+      --bad: #b91c1c;
+      --bad-bg: #fef2f2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink); background: var(--surface); font-size: 14px; }
+
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #0f2744, #1a5496);
+    }
+    .login-box {
+      background: white;
+      border-radius: 16px;
+      padding: 36px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    .login-box h1 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--navy); margin-bottom: 6px; }
+    .login-box p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .login-box input {
+      width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+      border-radius: 10px; font-size: 14px; margin-bottom: 14px; font-family: inherit;
+    }
+    .login-box button {
+      width: 100%; padding: 12px; background: var(--blue); color: white;
+      border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .login-error { color: var(--bad); font-size: 13px; margin-top: 10px; display: none; }
+    .login-error.show { display: block; }
+
+    .dashboard { display: none; max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+    .dashboard.show { display: block; }
+
+    .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .dash-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); }
+    .dash-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .refresh-btn {
+      padding: 8px 16px; background: white; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--blue);
+    }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; }
+    .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .section { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 14px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 10px; color: var(--muted); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; border-bottom: 1.5px solid var(--border); }
+    td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--ink); }
+    tr:last-child td { border-bottom: none; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .pill.good { background: var(--good-bg); color: var(--good); }
+    .pill.bad { background: var(--bad-bg); color: var(--bad); }
+
+    .progress-bar-bg { background: var(--border); border-radius: 6px; height: 6px; width: 100%; overflow: hidden; }
+    .progress-bar-fill { background: var(--blue); height: 100%; border-radius: 6px; }
+
+    .loading { text-align: center; padding: 40px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1>Admin Dashboard</h1>
+    <p>EDP Study Tool · Cherry &amp; Elm LLC</p>
+    <input type="password" id="adminPassword" placeholder="Admin password" />
+    <button onclick="doAdminLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">EDP Study Tool — Admin</div>
+      <div class="dash-sub">Usage, licenses, and engagement overview</div>
+    </div>
+    <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+  </div>
+
+  <div id="content" class="loading">Loading dashboard...</div>
+</div>
+
+<script>
+let ADMIN_PASSWORD = '';
+
+function doAdminLogin(){
+  const pw = document.getElementById('adminPassword').value;
+  if(!pw){ return; }
+  ADMIN_PASSWORD = pw;
+  loadData();
+}
+
+async function loadData(){
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="loading">Loading dashboard...</div>';
+
+  try {
+    const res = await fetch('/.netlify/functions/admin-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: ADMIN_PASSWORD })
+    });
+
+    if (res.status === 401){
+      document.getElementById('loginError').textContent = 'Incorrect password.';
+      document.getElementById('loginError').classList.add('show');
+      return;
+    }
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to load data');
+
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').classList.add('show');
+
+    render(data);
+
+  } catch(err) {
+    content.innerHTML = `<div class="loading" style="color:#b91c1c">Error: ${err.message}</div>`;
+  }
+}
+
+function render(data){
+  const content = document.getElementById('content');
+
+  // Top stat cards
+  let html = `
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value">${data.users.total}</div>
+        <div class="stat-sub">${data.users.licensed} licensed · ${data.users.trial} trial</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Licenses</div>
+        <div class="stat-value">${data.licenses.active}</div>
+        <div class="stat-sub">${data.licenses.revoked} revoked · ${data.licenses.total} total ever</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Codes Redeemed</div>
+        <div class="stat-value">${data.codes.totalRedeemed}<span style="font-size:16px;color:var(--muted)">/${data.codes.totalCodes}</span></div>
+        <div class="stat-sub">${data.codes.totalCodes - data.codes.totalRedeemed} remaining</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Quizzes Taken</div>
+        <div class="stat-value">${data.quizzes.total}</div>
+        <div class="stat-sub">Avg score: ${data.quizzes.avgPct}%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Questions Answered</div>
+        <div class="stat-value">${data.studyActivity.totalAnswered}</div>
+        <div class="stat-sub">${data.studyActivity.overallAccuracy}% overall accuracy</div>
+      </div>
+    </div>
+  `;
+
+  // Code redemption by batch
+  html += `<div class="section"><h2>Code Redemption by Batch</h2><table>
+    <tr><th>Batch</th><th>Redeemed</th><th>Total</th><th>Progress</th></tr>`;
+  Object.entries(data.codes.byBatch).forEach(([batch, stats]) => {
+    const pct = stats.total ? Math.round((stats.redeemed / stats.total) * 100) : 0;
+    html += `<tr>
+      <td>${batch}</td>
+      <td>${stats.redeemed}</td>
+      <td>${stats.total}</td>
+      <td style="width:160px">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">${pct}%</div>
+      </td>
+    </tr>`;
+  });
+  html += `</table></div>`;
+
+  // Most active users
+  html += `<div class="section"><h2>Most Active Users</h2><table>
+    <tr><th>Email</th><th>Questions Answered</th><th>Accuracy</th></tr>`;
+  data.studyActivity.topUsers.forEach(u => {
+    const accClass = u.accuracy >= 70 ? 'good' : 'bad';
+    html += `<tr>
+      <td>${u.email}</td>
+      <td>${u.questionsAnswered}</td>
+      <td><span class="pill ${accClass}">${u.accuracy}%</span></td>
+    </tr>`;
+  });
+  if (!data.studyActivity.topUsers.length) html += `<tr><td colspan="3" style="color:var(--muted)">No activity data yet</td></tr>`;
+  html += `</table></div>`;
+
+  // Recent signups
+  html += `<div class="section"><h2>Recent Signups</h2><table>
+    <tr><th>Name</th><th>Email</th><th>Date</th></tr>`;
+  data.recentSignups.forEach(u => {
+    const name = (u.first_name || u.last_name) ? `${u.first_name} ${u.last_name}`.trim() : '—';
+    const date = new Date(u.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    html += `<tr><td>${name}</td><td>${u.email}</td><td>${date}</td></tr>`;
+  });
+  html += `</table></div>`;
+
+  // Recent quiz scores
+  html += `<div class="section"><h2>Recent Quiz Scores</h2><table>
+    <tr><th>Score</th><th>Percentage</th><th>Date</th></tr>`;
+  data.quizzes.recent.forEach(q => {
+    const date = new Date(q.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const pctClass = q.pct >= 70 ? 'good' : 'bad';
+    html += `<tr><td>${q.score}/${q.total}</td><td><span class="pill ${pctClass}">${q.pct}%</span></td><td>${date}</td></tr>`;
+  });
+  if (!data.quizzes.recent.length) html += `<tr><td colspan="3" style="color:var(--muted)">No quizzes taken yet</td></tr>`;
+  html += `</table></div>`;
+
+  content.innerHTML = html;
+}
+
+// Allow Enter key to submit login
+document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') doAdminLogin();
+});
+</script>
+</body>
+</html>
