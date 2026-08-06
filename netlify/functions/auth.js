@@ -133,7 +133,7 @@ exports.handler = async function(event) {
 
     } else if (action === 'reset-password') {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://edpstudy.com',
+        redirectTo: 'https://studyedp.com',
       });
       if (error) throw error;
       return {

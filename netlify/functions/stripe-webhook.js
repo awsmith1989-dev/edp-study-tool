@@ -72,7 +72,7 @@ exports.handler = async function(event) {
         const { error: resetError } = await supabase.auth.admin.generateLink({
           type: 'recovery',
           email,
-          options: { redirectTo: 'https://edpstudy.com' }
+          options: { redirectTo: 'https://studyedp.com' }
         });
         if (resetError) console.error('Reset email error (non-fatal):', resetError.message);
       }

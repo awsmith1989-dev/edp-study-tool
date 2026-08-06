@@ -25,8 +25,8 @@ exports.handler = async function(event) {
         price: process.env.STRIPE_PRICE_ID,
         quantity: 1,
       }],
-      success_url: 'https://edpstudy.com/app.html?purchase=success',
-      cancel_url: 'https://edpstudy.com/?purchase=cancelled',
+      success_url: 'https://studyedp.com/app.html?purchase=success',
+      cancel_url: 'https://studyedp.com/?purchase=cancelled',
       metadata: { email },
     });
 

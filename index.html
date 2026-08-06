@@ -12,21 +12,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
     :root {
-      --navy: #0f2744;
-      --navy2: #1a3a5c;
-      --blue: #1a5496;
-      --blue-light: #e8f0fb;
-      --amber: #f0b429;
-      --amber-dark: #b7791f;
-      --amber-light: #fffbeb;
-      --ink: #0f2744;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --surface: #f8fafc;
+      --navy: #1C3A2A;
+      --navy2: #245239;
+      --blue: #2E6B48;
+      --blue-light: #E6F2EA;
+      --amber: #D4A017;
+      --amber-dark: #B8890F;
+      --amber-light: #FBF3DC;
+      --ink: #1C3A2A;
+      --muted: #5F7A6A;
+      --border: #DCEADF;
+      --surface: #F5FAF6;
       --white: #ffffff;
-      --good: #15803d;
-      --good-bg: #f0fdf4;
-      --good-border: #86efac;
+      --good: #27AE60;
+      --good-bg: #E8F5EA;
+      --good-border: #8CDDAA;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -102,11 +102,11 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-nav-primary:hover { background: #e0a820; }
+    .btn-nav-primary:hover { background: #B8890F; }
 
     /* ── Hero ── */
     .hero {
-      background: linear-gradient(160deg, #0f2744 0%, #1a3a5c 50%, #1a5496 100%);
+      background: linear-gradient(160deg, #1C3A2A 0%, #245239 50%, #2E6B48 100%);
       padding: 80px 24px 0;
       overflow: hidden;
     }
@@ -126,8 +126,8 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(240,180,41,.15);
-      border: 1px solid rgba(240,180,41,.3);
+      background: rgba(212,160,23,.15);
+      border: 1px solid rgba(212,160,23,.3);
       color: var(--amber);
       font-size: 12px;
       font-weight: 700;
@@ -151,7 +151,7 @@
     }
     .hero-sub {
       font-size: 17px;
-      color: #94b4d4;
+      color: #9CBFA8;
       line-height: 1.7;
       margin-bottom: 32px;
       max-width: 480px;
@@ -178,7 +178,7 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-hero-primary:hover { background: #e0a820; transform: translateY(-1px); }
+    .btn-hero-primary:hover { background: #B8890F; transform: translateY(-1px); }
     .btn-hero-ghost {
       display: inline-flex;
       align-items: center;
@@ -207,12 +207,12 @@
       align-items: center;
       gap: 6px;
       font-size: 13px;
-      color: #94b4d4;
+      color: #9CBFA8;
     }
     .trust-check {
       width: 16px;
       height: 16px;
-      background: rgba(240,180,41,.2);
+      background: rgba(212,160,23,.2);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -234,7 +234,7 @@
     }
     .screen-card {
       position: absolute;
-      background: #1a3a5c;
+      background: #245239;
       border: 1px solid rgba(255,255,255,.1);
       border-radius: 14px;
       overflow: hidden;
@@ -266,7 +266,7 @@
       bottom: 80px;
       left: -10px;
       background: #0a2318;
-      border: 1px solid #4caf7d;
+      border: 1px solid #4A9E6F;
       border-radius: 10px;
       padding: 10px 14px;
       display: flex;
@@ -280,7 +280,7 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #4caf7d;
+      background: #4A9E6F;
       flex-shrink: 0;
     }
     .screen-pill-text { font-size: 12px; color: #6fcf97; font-weight: 600; }
@@ -288,8 +288,8 @@
       position: absolute;
       top: 160px;
       right: -10px;
-      background: #1e1800;
-      border: 1px solid #c8a800;
+      background: #1F1A08;
+      border: 1px solid #B8890F;
       border-radius: 10px;
       padding: 10px 14px;
       display: flex;
@@ -300,7 +300,7 @@
       z-index: 10;
     }
     .screen-badge-icon { font-size: 18px; }
-    .screen-badge-text { font-size: 12px; color: #ffcf24; font-weight: 600; }
+    .screen-badge-text { font-size: 12px; color: #D4A017; font-weight: 600; }
     @keyframes floatMain {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
@@ -409,7 +409,7 @@
     /* ── Screenshots showcase ── */
     .screenshots-bg { background: var(--navy); }
     .screenshots-bg .section-title { color: #ffffff; }
-    .screenshots-bg .section-sub { color: #94b4d4; }
+    .screenshots-bg .section-sub { color: #9CBFA8; }
     .screenshots-bg .section-eyebrow { color: var(--amber); }
     .screenshots-tabs {
       display: flex;
@@ -422,7 +422,7 @@
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,.15);
       background: transparent;
-      color: #94b4d4;
+      color: #9CBFA8;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
@@ -440,7 +440,7 @@
       overflow: hidden;
       border: 1px solid rgba(255,255,255,.1);
       box-shadow: 0 30px 80px rgba(0,0,0,.5);
-      background: #0f2744;
+      background: #1C3A2A;
       max-width: 880px;
       margin: 0 auto;
     }
@@ -464,7 +464,7 @@
       background: var(--amber);
       flex-shrink: 0;
     }
-    .ss-caption-text { font-size: 13px; color: #94b4d4; }
+    .ss-caption-text { font-size: 13px; color: #9CBFA8; }
 
     /* ── Pricing ── */
     .pricing-grid {
@@ -551,7 +551,7 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-pricing-primary:hover { background: #1a4580; }
+    .btn-pricing-primary:hover { background: #245239; }
     .btn-pricing-ghost {
       display: block;
       width: 100%;
@@ -572,7 +572,7 @@
 
     /* ── CTA band ── */
     .cta-band {
-      background: linear-gradient(135deg, #0f2744, #1a5496);
+      background: linear-gradient(135deg, #1C3A2A, #2E6B48);
       padding: 80px 24px;
       text-align: center;
     }
@@ -583,7 +583,7 @@
       font-weight: 400;
       margin-bottom: 14px;
     }
-    .cta-band p { font-size: 17px; color: #94b4d4; margin-bottom: 32px; }
+    .cta-band p { font-size: 17px; color: #9CBFA8; margin-bottom: 32px; }
     .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
     /* ── Footer ── */
@@ -593,8 +593,8 @@
       text-align: center;
     }
     .footer-inner { max-width: 1080px; margin: 0 auto; }
-    .footer-logo { font-size: 14px; font-weight: 700; color: #94b4d4; margin-bottom: 8px; }
-    .footer-sub { font-size: 12px; color: #4a6a8a; }
+    .footer-logo { font-size: 14px; font-weight: 700; color: #9CBFA8; margin-bottom: 8px; }
+    .footer-sub { font-size: 12px; color: #9CBFA8; }
 
     /* ── Auth Modal ── */
     .modal-overlay {
@@ -687,7 +687,7 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-modal-primary:hover { background: #1a4580; }
+    .btn-modal-primary:hover { background: #245239; }
     .btn-modal-primary:disabled { opacity: .5; cursor: not-allowed; }
     .btn-modal-amber {
       width: 100%;
@@ -703,7 +703,7 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-modal-amber:hover { background: #e0a820; }
+    .btn-modal-amber:hover { background: #B8890F; }
     .btn-modal-amber:disabled { opacity: .5; cursor: not-allowed; }
     .btn-modal-ghost {
       width: 100%;
@@ -977,7 +977,7 @@
 <footer>
   <div class="footer-inner">
     <div class="footer-logo">EDP Study Tool</div>
-    <div class="footer-sub">© 2026 Cherry &amp; Elm LLC · Helena, Arkansas · <a href="mailto:info@cherryandelm.com" style="color:#4a6a8a">info@cherryandelm.com</a> · <a href="/privacy.html" style="color:#4a6a8a">Privacy</a> · <a href="/terms.html" style="color:#4a6a8a">Terms</a></div>
+    <div class="footer-sub">© 2026 Cherry &amp; Elm LLC · Helena, Arkansas · <a href="mailto:info@cherryandelm.com" style="color:#9CBFA8">info@cherryandelm.com</a> · <a href="/privacy.html" style="color:#9CBFA8">Privacy</a> · <a href="/terms.html" style="color:#9CBFA8">Terms</a></div>
   </div>
 </footer>
 

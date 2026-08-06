@@ -10,19 +10,19 @@
   <meta property="og:type" content="website" />
   <style>
     :root{
-      --bg:#f4f4f4;
-      --card:#194261;
-      --surface:#123450;
-      --navy:#1a5496;
-      --blue:#5ba8e8;
-      --amber:#ffcf24;
-      --amber-light:#1e1800;
-      --amber-border:#c8a800;
-      --ink:#f0f4f8;
-      --muted:#8fb5d4;
-      --border:#2a5280;
-      --good:#2a9d5c;
-      --bad:#d94f4f;
+      --bg:#F0F7F0;
+      --card:#1C3A2A;
+      --surface:#163224;
+      --navy:#1C3A2A;
+      --blue:#4A9E6F;
+      --amber:#D4A017;
+      --amber-light:#1F1A08;
+      --amber-border:#B8890F;
+      --ink:#F0F7F0;
+      --muted:#9CBFA8;
+      --border:#2E6B48;
+      --good:#27AE60;
+      --bad:#C0392B;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
@@ -30,11 +30,11 @@
     .wrap{max-width:980px;margin:0 auto;padding:14px}
 
     /* ── Header ── */
-    header{display:flex;align-items:center;gap:14px;background:#f5f7fb;padding:14px 16px;border-radius:14px;margin-bottom:14px;border:1px solid #dce3ed;border-bottom:4px solid var(--amber)}
+    header{display:flex;align-items:center;gap:14px;background:#F7FBF8;padding:14px 16px;border-radius:14px;margin-bottom:14px;border:1px solid #DCEADF;border-bottom:4px solid var(--amber)}
     .brand-text h1{margin:0;font-size:clamp(15px,3vw,21px);font-weight:700;color:var(--navy);letter-spacing:-.2px}
-    .brand-text p{margin:2px 0 0;font-size:12px;color:#64748b}
+    .brand-text p{margin:2px 0 0;font-size:12px;color:#5F7A6A}
     .header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-    .user-badge{font-size:12px;color:#64748b;display:flex;align-items:center;gap:6px}
+    .user-badge{font-size:12px;color:#5F7A6A;display:flex;align-items:center;gap:6px}
     .user-badge span{color:var(--navy);font-weight:600}
 
     /* ── Cards ── */
@@ -72,10 +72,10 @@
 
     /* ── Buttons ── */
     .btn{appearance:none;cursor:pointer;font:inherit;border:1px solid var(--border);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:10px;font-size:14px;font-weight:500;transition:background .12s,border-color .12s}
-    .btn:hover{background:#1e4a7a;border-color:#3a6898}
+    .btn:hover{background:#245239;border-color:#2E6B48}
     .btn:disabled{opacity:.5;cursor:not-allowed}
-    .btn.primary{background:var(--amber);color:#1a1200;border-color:#c8a800;font-weight:700}
-    .btn.primary:hover{background:#e6b800;color:#1a1200}
+    .btn.primary{background:var(--amber);color:#1F1A08;border-color:#B8890F;font-weight:700}
+    .btn.primary:hover{background:#B8890F;color:#1F1A08}
     .btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
     .btn.ghost{background:transparent;border-color:var(--border);color:var(--muted)}
     .btn.ghost:hover{color:var(--ink);background:var(--surface)}
@@ -92,7 +92,7 @@
     .meta{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
 
     /* ── Status ── */
-    .status{border:1px solid var(--border);background:#0f2540;border-radius:10px;padding:8px 12px;margin:8px 0 0;color:var(--muted);display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px}
+    .status{border:1px solid var(--border);background:#0F241A;border-radius:10px;padding:8px 12px;margin:8px 0 0;color:var(--muted);display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:13px}
     .status strong{color:var(--amber)}
 
     /* ── Quiz hero ── */
@@ -102,17 +102,17 @@
     /* ── Options ── */
     .options{display:grid;gap:8px;margin:10px 0}
     .opt{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1.5px solid var(--border);padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--ink);transition:background .12s,border-color .12s}
-    .opt:hover{background:#1e4a7a;border-color:#5ba8e8}
+    .opt:hover{background:#245239;border-color:#4A9E6F}
     .opt input{margin-top:3px;accent-color:var(--blue);flex-shrink:0}
-    .opt.correct{border-color:#4caf7d;background:#0a2318}
+    .opt.correct{border-color:#4A9E6F;background:#0a2318}
     .opt.incorrect{border-color:#d47676;background:#2a0d0d}
 
     /* ── Feedback ── */
     .feedback-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
     .pill{padding:4px 10px;border-radius:999px;font-weight:700;font-size:13px}
-    .pill.good{background:#0a2318;color:#6fcf97;border:1px solid #4caf7d}
+    .pill.good{background:#0a2318;color:#6fcf97;border:1px solid #4A9E6F}
     .pill.bad{background:#2a0d0d;color:#f08080;border:1px solid #d47676}
-    .pill.warn{background:#1e1800;color:#ffcf24;border:1px solid #c8a800}
+    .pill.warn{background:#1F1A08;color:#D4A017;border:1px solid #B8890F}
 
     /* ── Progress ── */
     .progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
@@ -133,36 +133,36 @@
 
     /* ── Check rows ── */
     .check-group{display:flex;flex-direction:column;gap:5px;margin-top:6px}
-    .check-row{display:flex;align-items:center;gap:8px;background:#194261;border:1.5px solid var(--border);border-radius:9px;padding:8px 10px;cursor:pointer;color:var(--ink);font-weight:400;font-size:13px;user-select:none;transition:background .12s,border-color .12s}
-    .check-row:hover{background:#1e4a7a;border-color:#5ba8e8}
+    .check-row{display:flex;align-items:center;gap:8px;background:#1C3A2A;border:1.5px solid var(--border);border-radius:9px;padding:8px 10px;cursor:pointer;color:var(--ink);font-weight:400;font-size:13px;user-select:none;transition:background .12s,border-color .12s}
+    .check-row:hover{background:#245239;border-color:#4A9E6F}
     .check-row input[type="checkbox"],.check-row input[type="radio"]{accent-color:var(--blue);width:14px;height:14px;flex-shrink:0;cursor:pointer}
-    .check-row.checked{background:#0a2318;border-color:#4caf7d}
-    .check-row.checked-radio{background:#0e1e3a;border-color:#5ba8e8}
+    .check-row.checked{background:#0a2318;border-color:#4A9E6F}
+    .check-row.checked-radio{background:#0F241A;border-color:#4A9E6F}
     .select-all-row{display:flex;gap:6px;margin-bottom:6px}
     .select-all-row button{font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer}
-    .select-all-row button:hover{color:var(--ink);background:#1e4a7a}
+    .select-all-row button:hover{color:var(--ink);background:#245239}
 
     /* ── Explain button ── */
-    .btn.explain-btn{display:inline-flex;align-items:center;gap:6px;background:var(--amber-light);border:1.5px solid var(--amber-border);color:#ffcf24;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:background .12s,opacity .12s}
-    .btn.explain-btn:hover{background:#2a1e00}
+    .btn.explain-btn{display:inline-flex;align-items:center;gap:6px;background:var(--amber-light);border:1.5px solid var(--amber-border);color:#D4A017;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:background .12s,opacity .12s}
+    .btn.explain-btn:hover{background:#2A2008}
     .btn.explain-btn:disabled{opacity:.45;cursor:not-allowed}
     .btn.next-inline{background:var(--surface);border:1.5px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:9px;font-size:13px;cursor:pointer}
-    .btn.next-inline:hover{background:#1e4a7a;color:var(--ink);border-color:#5ba8e8}
+    .btn.next-inline:hover{background:#245239;color:var(--ink);border-color:#4A9E6F}
 
     /* ── AI explanation box ── */
     #explanationBox{margin-top:12px;border:1.5px solid var(--amber-border);background:var(--amber-light);border-radius:12px;padding:14px 16px;animation:slideDown .2s ease}
     #explanationBox.loading{border-color:var(--border);background:var(--surface)}
     @keyframes slideDown{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-    .explain-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#ffcf24}
+    .explain-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#D4A017}
     .explain-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0}
     .explain-dot.pulse{animation:pulse 1s ease-in-out infinite}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
-    #explanationText{font-size:14px;line-height:1.72;color:#ffcf24;white-space:pre-wrap}
+    #explanationText{font-size:14px;line-height:1.72;color:#D4A017;white-space:pre-wrap}
     #explanationText.thinking{color:var(--muted);font-style:italic}
 
     /* ── Quiz Mode ── */
     .btn.quiz-btn{background:var(--surface);border:1.5px solid var(--amber);color:var(--amber);font-weight:700}
-    .btn.quiz-btn:hover{background:#1e4a7a}
+    .btn.quiz-btn:hover{background:#245239}
     .quiz-progress{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
     .quiz-progress-bar{height:4px;background:var(--border);border-radius:4px;margin-bottom:12px;overflow:hidden}
     .quiz-progress-fill{height:100%;background:var(--amber);border-radius:4px;transition:width .3s ease}
@@ -180,7 +180,7 @@
     /* ── Auth Modal ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .15s ease}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    .modal{background:#0f2540;border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+    .modal{background:#0F241A;border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
     .modal h2{margin:0 0 6px;font-size:1.3rem;color:var(--ink)}
     .modal p{margin:0 0 20px;color:var(--muted);font-size:14px}
     .modal-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);border-radius:10px;padding:4px}
@@ -196,13 +196,13 @@
     .modal-divider::before,.modal-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 
     /* ── Paywall Banner ── */
-    .paywall-banner{background:linear-gradient(135deg,#0f2540,#1a3a5c);border:1.5px solid var(--amber-border);border-radius:14px;padding:20px;margin-top:12px;text-align:center}
+    .paywall-banner{background:linear-gradient(135deg,#0F241A,#1F4531);border:1.5px solid var(--amber-border);border-radius:14px;padding:20px;margin-top:12px;text-align:center}
     .paywall-banner h3{margin:0 0 6px;color:var(--amber);font-size:1.1rem}
     .paywall-banner p{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.6}
     .paywall-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 
     /* ── Trial indicator ── */
-    .trial-bar{background:#1e1800;border:1px solid var(--amber-border);border-radius:10px;padding:8px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
+    .trial-bar{background:#1F1A08;border:1px solid var(--amber-border);border-radius:10px;padding:8px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
     .trial-bar strong{color:var(--amber)}
 
     /* ── License info ── */
@@ -736,7 +736,7 @@ async function checkUrlParams(){
       } catch(_){}
       // Show clean success banner instead of alert
       const banner = document.createElement('div');
-      banner.style.cssText = 'background:#0a2318;border:1px solid #4caf7d;border-radius:10px;padding:12px 16px;margin-bottom:12px;color:#6fcf97;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
+      banner.style.cssText = 'background:#0a2318;border:1px solid #4A9E6F;border-radius:10px;padding:12px 16px;margin-bottom:12px;color:#6fcf97;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
       banner.innerHTML = '<span>🎉 <strong>Payment successful!</strong> Your 2-year license is now active.</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#6fcf97;cursor:pointer;font-size:18px;line-height:1">&times;</button>';
       const wrap = document.querySelector('.wrap');
       if (wrap) wrap.insertBefore(banner, wrap.firstChild);
@@ -754,7 +754,7 @@ async function checkUrlParams(){
 function setStatus(msg, kind){
   const el = $('statusText'); if (el) el.textContent = msg;
   const box = $('statusLine');
-  if (box) box.style.borderColor = (kind === 'error') ? '#fca5a5' : '#d1dae6';
+  if (box) box.style.borderColor = (kind === 'error') ? '#fca5a5' : '#9CBFA8';
 }
 function manualKey(q){ return q?.title || q?.manual || 'Unknown Manual'; }
 function uniqueManuals(){ return [...new Set(state.bank.map(manualKey))].sort(); }
@@ -1030,9 +1030,9 @@ Write in plain, direct prose. No bullet points. Be specific.`;
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
     const data=await res.json();
     const text=data?.content?.find(b=>b.type==='text')?.text||'No explanation returned.';
-    box.classList.remove('loading');box.style.borderColor='#4caf7d';box.style.background='#0a2318';
-    const dot=box.querySelector('.explain-dot');if(dot){dot.classList.remove('pulse');dot.style.background='#4caf7d';}
-    const header=box.querySelector('.explain-header');if(header)header.innerHTML=`<span class="explain-dot" style="background:#4caf7d"></span> AI Tutor Explanation`;
+    box.classList.remove('loading');box.style.borderColor='#4A9E6F';box.style.background='#0a2318';
+    const dot=box.querySelector('.explain-dot');if(dot){dot.classList.remove('pulse');dot.style.background='#4A9E6F';}
+    const header=box.querySelector('.explain-header');if(header)header.innerHTML=`<span class="explain-dot" style="background:#4A9E6F"></span> AI Tutor Explanation`;
     const textEl=$('explanationText');if(textEl){textEl.className='';textEl.style.color='#6fcf97';textEl.textContent=text;}
     // Add AI caveat
     const caveat=document.createElement('div');caveat.style.cssText='margin-top:10px;font-size:11px;color:#4a7a5a;opacity:.8;border-top:1px solid rgba(74,175,101,.2);padding-top:8px;';
