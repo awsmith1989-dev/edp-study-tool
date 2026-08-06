@@ -1,9 +1,11 @@
 // netlify/functions/redeem-code.js
-// Redeems a bulk auth code and creates a license for the user
+// Redeems a cohort access code and creates a license.
+// If the code isn't a cohort code but IS a valid Stripe promotion code,
+// tells the user where it actually belongs instead of failing blankly.
 
 const { createClient } = require('@supabase/supabase-js');
 
-exports.handler = async function(event) {
+exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
@@ -18,47 +20,65 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Code required' }) };
   }
 
+  const clean = code.trim().toUpperCase();
+
   const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_KEY
   );
 
   try {
-    // Verify the user token
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) throw new Error('Invalid token');
 
-    // Find the code
-    const { data: authCode, error: codeError } = await supabase
+    const { data: authCode } = await supabase
       .from('auth_codes')
       .select('*')
-      .eq('code', code.trim().toUpperCase())
+      .eq('code', clean)
       .single();
 
-    if (codeError || !authCode) {
+    // ── Not a cohort code — is it a Stripe promotion code? ──────
+    if (!authCode) {
+      let isPromo = false;
+      try {
+        const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+        // Stripe promotion codes are case-insensitive on redemption but
+        // stored as entered; check both the raw and uppercased forms.
+        for (const candidate of [code.trim(), clean]) {
+          const found = await stripe.promotionCodes.list({ code: candidate, active: true, limit: 1 });
+          if (found.data.length) { isPromo = true; break; }
+        }
+      } catch (e) {
+        console.error('Stripe promo lookup failed (non-fatal):', e.message);
+      }
+
+      if (isPromo) {
+        return {
+          statusCode: 409,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            error: "That's a discount code, not a cohort access code. Discount codes are applied at checkout — continue to payment and enter it there.",
+            isPromotionCode: true,
+          }),
+        };
+      }
+
       return {
         statusCode: 404,
-        body: JSON.stringify({ error: 'Code not found. Please check and try again.' }),
+        body: JSON.stringify({ error: 'Code not found. Check the code and try again, or contact your program coordinator.' }),
       };
     }
 
     if (authCode.redeemed) {
-      return {
-        statusCode: 409,
-        body: JSON.stringify({ error: 'This code has already been redeemed.' }),
-      };
+      return { statusCode: 409, body: JSON.stringify({ error: 'This code has already been redeemed.' }) };
     }
 
     const now = new Date();
     if (new Date(authCode.expires_at) < now) {
-      return {
-        statusCode: 410,
-        body: JSON.stringify({ error: 'This code has expired.' }),
-      };
+      return { statusCode: 410, body: JSON.stringify({ error: 'This code has expired.' }) };
     }
 
-    // Check user doesn't already have an active license
     const { data: existingLicense } = await supabase
       .from('licenses')
       .select('id')
@@ -68,28 +88,19 @@ exports.handler = async function(event) {
       .single();
 
     if (existingLicense) {
-      return {
-        statusCode: 409,
-        body: JSON.stringify({ error: 'You already have an active license.' }),
-      };
+      return { statusCode: 409, body: JSON.stringify({ error: 'You already have an active license.' }) };
     }
 
-    // Mark code as redeemed
     await supabase
       .from('auth_codes')
-      .update({
-        redeemed: true,
-        redeemed_by: user.id,
-        redeemed_at: now.toISOString(),
-      })
+      .update({ redeemed: true, redeemed_by: user.id, redeemed_at: now.toISOString() })
       .eq('id', authCode.id);
 
-    // Create license using the code's expiry date
     const { data: license, error: licenseError } = await supabase
       .from('licenses')
       .insert({
         user_id: user.id,
-        auth_code: code.trim().toUpperCase(),
+        auth_code: clean,
         status: 'active',
         expires_at: authCode.expires_at,
       })
@@ -106,9 +117,6 @@ exports.handler = async function(event) {
 
   } catch (err) {
     console.error('redeem-code error:', err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message }),
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };

@@ -1,7 +1,8 @@
 // netlify/functions/create-checkout.js
-// Creates a Stripe Checkout session for license purchase
+// Creates a Stripe Checkout session for license purchase.
+// Promotion codes are entered on Stripe's hosted checkout page.
 
-exports.handler = async function(event) {
+exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
@@ -18,6 +19,12 @@ exports.handler = async function(event) {
       payment_method_types: ['card'],
       mode: 'payment',
       customer_email: email,
+
+      // Shows an "Add promotion code" field on the Stripe checkout page.
+      // Stripe validates the code, applies the discount, and displays the
+      // adjusted total before payment.
+      allow_promotion_codes: true,
+
       payment_intent_data: {
         receipt_email: email,
       },
