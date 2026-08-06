@@ -449,8 +449,8 @@
 // ── Constants ─────────────────────────────────────────────────
 const STORAGE_KEY = 'iedc-edp-quiz-v1';
 const SESSION_KEY = 'edp-session-v1';
-const BANK_URL_PRIMARY = 'https://cdn.jsdelivr.net/gh/awsmith1989-dev/iedc@main/iedc_edp_questions.cleaned.json';
-const BANK_URL_FALLBACK = 'https://raw.githubusercontent.com/awsmith1989-dev/iedc/refs/heads/main/iedc_edp_questions.cleaned.json';
+const BANK_URL_PRIMARY  = 'https://raw.githubusercontent.com/awsmith1989-dev/iedc/refs/heads/main/iedc_edp_questions.cleaned.json';
+const BANK_URL_FALLBACK = 'https://cdn.jsdelivr.net/gh/awsmith1989-dev/iedc@main/iedc_edp_questions.cleaned.json';
 const BANK_FETCH_TIMEOUT_MS = 8000;
 const AUTO_ADVANCE_MS = 1200;
 const TRIAL_LIMIT = 5;
@@ -755,6 +755,7 @@ function updateHeaderAuth(){
   if (!el) return;
   if (isLoggedIn()){
     el.innerHTML = `
+      <a href="/overview.html" class="btn sm ghost" style="font-size:12px;text-decoration:none">Exam Overview</a>
       <div class="user-badge">
         <span>${session.user.email}</span>
         ${hasActiveLicense() ? '<span style="color:#047857;font-size:11px">✓ Licensed</span>' : '<span style="color:#B91C1C;font-size:11px">No license</span>'}
@@ -766,6 +767,7 @@ function updateHeaderAuth(){
     if (footerLink) footerLink.style.display = 'none';
   } else {
     el.innerHTML = `
+      <a href="/overview.html" class="btn sm ghost" style="font-size:12px;text-decoration:none">Exam Overview</a>
       <button class="btn sm" onclick="showAuthModal('login')">Sign In</button>
       <button class="btn primary sm" onclick="showPaywall()">Get Access</button>
     `;
