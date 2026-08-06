@@ -688,6 +688,7 @@ function updateHeaderAuth(){
         ${hasActiveLicense() ? '<span style="color:#6fcf97;font-size:11px">✓ Licensed</span>' : '<span style="color:#f08080;font-size:11px">No license</span>'}
       </div>
       ${hasActiveLicense() ? '<button class="btn sm ghost" onclick="openBillingPortal()" style="font-size:12px">Billing</button>' : ''}
+      ${hasActiveLicense() ? '<a href="/plan.html" class="btn sm ghost" style="font-size:12px;text-decoration:none">Project Plan</a>' : ''}
       <button class="btn sm ghost" onclick="doLogout()">Sign Out</button>
     `;
     if (footerLink) footerLink.style.display = 'none';
