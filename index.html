@@ -265,6 +265,24 @@
       line-height: 1.7;
     }
 
+    /* ── Two parts ── */
+    .twopart{background:var(--card);padding:64px 24px;border-bottom:1px solid var(--border)}
+    .twopart-inner{max-width:1080px;margin:0 auto}
+    .twopart-head{text-align:center;max-width:620px;margin:0 auto 40px}
+    .twopart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:760px){.twopart-grid{grid-template-columns:1fr}}
+    .part{border:1px solid var(--border);border-radius:14px;padding:28px;background:var(--surface)}
+    .part-num{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;
+      letter-spacing:.9px;text-transform:uppercase;color:var(--teal-text);margin-bottom:12px}
+    .part-num i{width:22px;height:22px;border-radius:6px;background:var(--teal-tint);
+      color:var(--teal-text);font-style:normal;font-size:12px;font-weight:800;
+      display:flex;align-items:center;justify-content:center}
+    .part h3{font-size:19px;font-weight:700;color:var(--teal-deep);margin-bottom:8px}
+    .part>p{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:16px}
+    .part-facts{display:flex;gap:18px;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--border)}
+    .part-fact .n{font-size:19px;font-weight:800;color:var(--teal-deep);line-height:1.1}
+    .part-fact .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+
     /* ── How it works ── */
     .how-bg { background: var(--surface); }
     .steps {
@@ -300,32 +318,25 @@
     }
     .step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
 
-    /* ── Features ── */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 32px;
-      margin-top: 56px;
-    }
-    .feature-item { display: flex; gap: 16px; }
-    .feature-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: var(--teal-tint);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      font-size: 20px;
-    }
-    .feature-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--teal-deep);
-      margin-bottom: 6px;
-    }
-    .feature-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Project plan builder ── */
+    .ppb{background:var(--surface);padding:72px 24px}
+    .ppb-inner{max-width:1080px;margin:0 auto}
+    .ppb-top{max-width:640px;margin-bottom:36px}
+    .ppb-shot{border-radius:14px;overflow:hidden;border:1px solid var(--border);
+      box-shadow:0 8px 28px rgba(15,23,42,.09);background:#fff;margin-bottom:28px}
+    .ppb-shot-wrap{height:440px;display:flex;align-items:center;justify-content:center;background:var(--surface2)}
+    .ppb-shot img{max-width:100%;max-height:100%;width:auto;height:auto;display:block;object-fit:contain;transition:opacity .3s ease}
+    .ppb-dots{display:flex;justify-content:center;gap:6px;padding:12px 0;background:var(--surface2)}
+    .ppb-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background .2s ease}
+    .ppb-dot.active{background:var(--teal)}
+    .ppb-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:26px}
+    .ppb-col h4{font-size:15px;font-weight:700;color:var(--teal-deep);margin-bottom:7px}
+    .ppb-col p{font-size:14px;color:var(--muted);line-height:1.65}
+    .ppb-quote{background:#fff;border:1px solid var(--border);border-left:4px solid var(--teal);
+      border-radius:0 12px 12px 0;padding:20px 24px;margin:28px 0 0}
+    .ppb-quote p{font-size:14.5px;color:var(--ink);line-height:1.7;font-style:italic;margin:0}
+    .ppb-quote .src{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:10px}
 
     /* ── Screenshots showcase ── */
     .screenshots-bg { background: var(--teal-tint); }
@@ -365,9 +376,21 @@
       max-width: 880px;
       margin: 0 auto;
     }
+    .ss-image-wrap {
+      height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface2);
+      overflow: hidden;
+    }
     .ss-display img {
-      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
       display: block;
+      object-fit: contain;
       transition: opacity .2s ease;
     }
     .ss-caption {
@@ -375,7 +398,7 @@
       background: var(--surface2);
       border-top: 1px solid var(--border);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
     }
     .ss-caption-dot {
@@ -384,8 +407,10 @@
       border-radius: 50%;
       background: var(--teal);
       flex-shrink: 0;
+      margin-top: 5px;
     }
-    .ss-caption-text { font-size: 13px; color: var(--muted); }
+    .ss-caption-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+    .ss-caption-text { font-size: 13px; color: var(--muted); line-height: 1.55; }
 
     /* ── Pricing ── */
     .pricing-grid {
@@ -710,7 +735,9 @@
     <div class="hero-content">
       <div class="hero-eyebrow">✦ IEDC EDP Certification Prep</div>
       <h1 class="hero-title">Study smarter.<br>Pass <em>faster.</em></h1>
-      <p class="hero-sub">The only adaptive study tool built specifically for the IEDC Entrepreneurship Development Professional exam — with AI-powered explanations that teach you why, not just what.</p>
+      <p class="hero-sub">The only tool built for both parts of the IEDC EDP exam — 182 practice
+      questions with AI explanations for the written section, and a guided project plan builder
+      with expert-calibrated feedback for the oral.</p>
       <div class="hero-actions">
         <button class="btn-hero-primary" onclick="showModal('trial')">
           Start Free Trial
@@ -721,11 +748,79 @@
       <div class="hero-trust">
         <div class="trust-item"><div class="trust-check"></div>5 free questions, no card required</div>
         <div class="trust-item"><div class="trust-check"></div>2-year license</div>
-        <div class="trust-item"><div class="trust-check"></div>Over 150 practice questions</div>
+        <div class="trust-item"><div class="trust-check"></div>182 questions across 9 domains</div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Two parts -->
+<section class="twopart">
+  <div class="twopart-inner">
+    <div class="twopart-head">
+      <div class="section-eyebrow" style="text-align:center">Built for the whole exam</div>
+      <h2 class="section-title">The EDP has two parts.<br>Most study tools only help with one.</h2>
+      <p class="section-sub" style="margin:12px auto 0">You have to pass the written exam before you're
+      allowed to sit for the oral — and the oral is where candidates are most often caught unprepared.</p>
+    </div>
+
+    <div class="twopart-grid">
+      <div class="part">
+        <div class="part-num"><i>1</i> Written exam</div>
+        <h3>100 multiple choice questions</h3>
+        <p>Two hours and fifteen minutes, drawn directly from the IEDC manuals. Twenty questions from
+        each of your five topics — four required manuals plus the elective you selected on your
+        application.</p>
+        <div class="part-facts">
+          <div class="part-fact"><div class="n">182</div><div class="l">practice questions</div></div>
+          <div class="part-fact"><div class="n">9</div><div class="l">study domains</div></div>
+          <div class="part-fact"><div class="n">5</div><div class="l">manuals covered</div></div>
+        </div>
+      </div>
+
+      <div class="part">
+        <div class="part-num"><i>2</i> Oral exam</div>
+        <h3>Project plan &amp; panel interview</h3>
+        <p>You submit a project plan in advance, then defend it before three EDP-certified graders for
+        45 minutes. They assess the plan, then ask about everything around it — the entrepreneurs you
+        didn't name, and the problems you haven't solved yet.</p>
+        <div class="part-facts">
+          <div class="part-fact"><div class="n">3</div><div class="l">expert panelists</div></div>
+          <div class="part-fact"><div class="n">5</div><div class="l">plan sections</div></div>
+          <div class="part-fact"><div class="n">45m</div><div class="l">interview</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screenshots showcase -->
+<section class="screenshots-bg">
+  <div class="section-inner">
+    <div class="section-eyebrow">See it in action</div>
+    <h2 class="section-title">Every feature, visible<br>before you commit</h2>
+    <p class="section-sub">Take a look at the actual tool — no mockups, no marketing screenshots. This is exactly what you'll use to study.</p>
+    <div class="screenshots-tabs">
+      <button class="ss-tab active" onclick="showScreenshot(0, this)">Practice</button>
+      <button class="ss-tab" onclick="showScreenshot(1, this)">Wrong Answer</button>
+      <button class="ss-tab" onclick="showScreenshot(2, this)">AI Explanation</button>
+      <button class="ss-tab" onclick="showScreenshot(3, this)">Domain Tracking</button>
+      <button class="ss-tab" onclick="showScreenshot(4, this)">Quiz Results</button>
+    </div>
+    <div class="ss-display">
+      <div class="ss-image-wrap">
+        <img id="ssImage" src="Question_Options_and_Progress.png" alt="Practice mode showing a question with answer options and progress tracking" />
+      </div>
+      <div class="ss-caption">
+        <div class="ss-caption-dot"></div>
+        <div>
+          <div class="ss-caption-title" id="ssCaptionTitle" style="display:none"></div>
+          <div class="ss-caption-text" id="ssCaption">Practice questions with a session progress bar that fills as you work</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- How it works -->
 <section class="how-bg">
@@ -745,85 +840,62 @@
       </div>
       <div class="step-card">
         <div class="step-num">3</div>
-        <div class="step-title">Quiz and rank up</div>
-        <div class="step-desc">Take timed 10-question quizzes and see your real-time percentile rank against everyone who's used the tool. Know exactly where you stand.</div>
+        <div class="step-title">Prepare for the oral</div>
+        <div class="step-desc">Build your project plan in the guided builder and get section-by-section
+        feedback before you submit it. Know what the panel will push on before you're sitting in front
+        of them.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Features -->
-<section>
-  <div class="section-inner">
-    <div class="section-eyebrow">Features</div>
-    <h2 class="section-title">Everything you need<br>to pass the EDP</h2>
-    <p class="section-sub">Built by an economic developer who used this exact tool to pass — then refined it into something the whole profession can use.</p>
-    <div class="features-grid">
-      <div class="feature-item">
-        <div class="feature-icon">🧠</div>
-        <div>
-          <div class="feature-title">AI-powered explanations</div>
-          <div class="feature-desc">Get a wrong answer? Claude explains exactly why the correct answer is right, why yours was wrong, and gives you a memorable takeaway for exam day.</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-icon">📊</div>
-        <div>
-          <div class="feature-title">Adaptive practice</div>
-          <div class="feature-desc">Three study modes: random, spaced review (least-seen first), and review missed. The tool focuses your time where it matters most.</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-icon">🏆</div>
-        <div>
-          <div class="feature-title">Percentile ranking</div>
-          <div class="feature-desc">After each 10-question quiz, see your real-time percentile score against all users. Know exactly where you stand before you sit for the exam.</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-icon">📚</div>
-        <div>
-          <div class="feature-title">Over 150 practice questions</div>
-          <div class="feature-desc">Questions drawn from all major IEDC manuals — BRE, ELED I &amp; II, Entrepreneurial and Small Business Development, and Economic Development Credit Analysis and Finance. Filter by manual and chapter.</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-icon">📈</div>
-        <div>
-          <div class="feature-title">Progress tracking</div>
-          <div class="feature-desc">Track your accuracy by manual and identify which areas need the most work. Your progress is saved so every session builds on the last.</div>
-        </div>
-      </div>
-      <div class="feature-item">
-        <div class="feature-icon">🔑</div>
-        <div>
-          <div class="feature-title">Bulk licensing for cohorts</div>
-          <div class="feature-desc">Program coordinators can purchase bulk licenses at a discounted rate and distribute access codes to participants. Perfect for statewide cohort programs.</div>
-        </div>
-      </div>
+<!-- Project plan builder -->
+<section class="ppb">
+  <div class="ppb-inner">
+    <div class="ppb-top">
+      <div class="section-eyebrow">Project plan builder</div>
+      <h2 class="section-title">Write your project plan.<br>Get told what a grader would say.</h2>
+      <p class="section-sub">Work through all five sections of IEDC's ELED Project Plan template with
+      AI feedback on each one — calibrated against the plan IEDC circulates as its own exemplar.
+      Drafts save automatically. Export a clean PDF when it's ready to submit.</p>
     </div>
-  </div>
-</section>
 
-<!-- Screenshots showcase -->
-<section class="screenshots-bg">
-  <div class="section-inner">
-    <div class="section-eyebrow">See it in action</div>
-    <h2 class="section-title">Every feature, visible<br>before you commit</h2>
-    <p class="section-sub">Take a look at the actual tool — no mockups, no marketing screenshots. This is exactly what you'll use to study.</p>
-    <div class="screenshots-tabs">
-      <button class="ss-tab active" onclick="showScreenshot(0, this)">Practice Mode</button>
-      <button class="ss-tab" onclick="showScreenshot(1, this)">Wrong Answer</button>
-      <button class="ss-tab" onclick="showScreenshot(2, this)">AI Explanation</button>
-      <button class="ss-tab" onclick="showScreenshot(3, this)">Quiz Results</button>
-      <button class="ss-tab" onclick="showScreenshot(4, this)">Filters</button>
-    </div>
-    <div class="ss-display">
-      <img id="ssImage" src="Question_Options_and_Progress.png" alt="Practice mode showing a question with answer options and progress tracking" />
-      <div class="ss-caption">
-        <div class="ss-caption-dot"></div>
-        <div class="ss-caption-text" id="ssCaption">Adaptive practice questions with per-manual progress tracking</div>
+    <div class="ppb-shot">
+      <div class="ppb-shot-wrap">
+        <img id="ppbImage" src="Project_Plan_Builder.png" alt="The ELED Project Plan template as a guided builder" />
       </div>
+      <div class="ppb-dots" id="ppbDots">
+        <div class="ppb-dot active" onclick="showPpbSlide(0, true)"></div>
+        <div class="ppb-dot" onclick="showPpbSlide(1, true)"></div>
+        <div class="ppb-dot" onclick="showPpbSlide(2, true)"></div>
+      </div>
+    </div>
+
+    <div class="ppb-cols">
+      <div class="ppb-col">
+        <h4>Section by section</h4>
+        <p>Review each of the five sections as you write it, or run a full-plan review that weights
+        coherence — whether your action steps recur in funding and timeline, and whether your metrics
+        actually measure your objective.</p>
+      </div>
+      <div class="ppb-col">
+        <h4>Graded against what works</h4>
+        <p>Feedback checks the things strong plans do: bounded objectives, named partners and data
+        sources, honest acknowledgment of gaps, and policy advocacy that most candidates omit entirely.</p>
+      </div>
+      <div class="ppb-col">
+        <h4>Submission ready</h4>
+        <p>Autosaves to your account so you can iterate over weeks. Export as a formatted PDF that
+        matches the IEDC template when you're ready to attach it to your application.</p>
+      </div>
+    </div>
+
+    <div class="ppb-quote">
+      <p>"The highest-leverage improvement is to the objective statement itself. 'Increase the number of
+      businesses in Phillips County' is a lagging outcome that takes years to manifest and is nearly
+      impossible to attribute to a single plan. Rewrite the objective around what you will actually do
+      in twelve months."
+      <span class="src">Actual feedback from the plan builder</span></p>
     </div>
   </div>
 </section>
@@ -841,11 +913,11 @@
         <div class="pricing-period">No credit card required</div>
         <ul class="pricing-features">
           <li>5 practice questions</li>
-          <li>All manual categories</li>
+          <li>All 9 study domains</li>
           <li class="no">AI explanations</li>
-          <li class="no">10-question quizzes</li>
-          <li class="no">Percentile ranking</li>
-          <li class="no">Progress tracking</li>
+          <li class="no">Domain accuracy tracking</li>
+          <li class="no">10-question scored quizzes</li>
+          <li class="no">Project plan builder</li>
         </ul>
         <button class="btn-pricing-ghost" onclick="showModal('trial')">Start Free Trial</button>
       </div>
@@ -855,12 +927,12 @@
         <div class="pricing-price">$199</div>
         <div class="pricing-period">2-year individual license</div>
         <ul class="pricing-features">
-          <li>Unlimited practice questions</li>
-          <li>All manual categories + filters</li>
+          <li>All 182 questions, unlimited practice</li>
           <li>AI explanations on every wrong answer</li>
-          <li>10-question scored quizzes</li>
-          <li>Real-time percentile ranking</li>
-          <li>Full progress tracking</li>
+          <li>Domain filtering and accuracy tracking</li>
+          <li>10-question quizzes with percentile ranking</li>
+          <li>Project plan builder with AI review</li>
+          <li>PDF export for your application</li>
         </ul>
         <button class="btn-pricing-primary" onclick="showModal('purchase')">Buy License — $199</button>
       </div>
@@ -875,7 +947,7 @@
 <div class="cta-band">
   <div class="section-inner">
     <h2>Ready to start studying?</h2>
-    <p>Join economic developers across the country preparing for the IEDC EDP certification.</p>
+    <p>Join economic developers preparing for both parts of the IEDC EDP certification.</p>
     <div class="cta-actions">
       <button class="btn-hero-primary" onclick="showModal('trial')">
         Start Free — 5 Questions
@@ -1265,26 +1337,70 @@ async function doRedeem(){
 
 // Screenshot switcher
 const screenshots = [
-  { src: 'Question_Options_and_Progress.png', caption: 'Adaptive practice questions with per-manual progress tracking', alt: 'Practice mode' },
-  { src: 'Wrong_Answer.png', caption: 'Wrong answers reveal the correct option instantly — with an Explain This button', alt: 'Wrong answer feedback' },
-  { src: 'AI_Tutor_Explanation.png', caption: 'AI Tutor explains exactly why your answer was wrong and gives a memorable exam takeaway', alt: 'AI tutor explanation' },
-  { src: 'Quiz_Results_Screenshot.png', caption: '10-question quiz results with real-time percentile ranking against all users', alt: 'Quiz results with percentile' },
-  { src: 'Quiz_and_Filters_Options.png', caption: 'Filter by manual and chapter — study exactly what you need to work on', alt: 'Filters and settings' },
+  { src:'Question_Options_and_Progress.png',
+    caption:'Practice questions with a session progress bar that fills as you work',
+    alt:'Practice mode' },
+  { src:'Wrong_Answer.png',
+    caption:'Wrong answers reveal the correct option instantly — with an Explain This button',
+    alt:'Wrong answer feedback' },
+  { src:'AI_Tutor_Explanation.png',
+    title:'AI-powered explanations',
+    caption:'Get a wrong answer? Claude explains exactly why the correct answer is right, why yours was wrong, and gives you a memorable takeaway for exam day.',
+    alt:'AI tutor explanation' },
+  { src:'Domains.png',
+    title:"See exactly where you're weak",
+    caption:'Accuracy tracked by domain and displayed weakest-first, so the thing you should study next is always at the top of the list. No guessing about where to spend your time.',
+    alt:'Per-domain mastery tracking' },
+  { src:'Quiz_Results_Screenshot.png',
+    title:'Percentile ranking',
+    caption:'After each 10-question quiz, see your real-time percentile score against all users. Know exactly where you stand before you sit for the exam.',
+    alt:'Quiz results with percentile' },
 ];
 
 function showScreenshot(idx, btn){
   const img = document.getElementById('ssImage');
   const caption = document.getElementById('ssCaption');
+  const title = document.getElementById('ssCaptionTitle');
+  const s = screenshots[idx];
   img.style.opacity = '0';
   setTimeout(() => {
-    img.src = screenshots[idx].src;
-    img.alt = screenshots[idx].alt;
-    caption.textContent = screenshots[idx].caption;
+    img.src = s.src;
+    img.alt = s.alt;
+    caption.textContent = s.caption;
+    if (s.title) { title.textContent = s.title; title.style.display = 'block'; }
+    else { title.style.display = 'none'; }
     img.style.opacity = '1';
   }, 150);
   document.querySelectorAll('.ss-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
 }
+
+// ── Project plan builder rotating gallery ──────────────────────
+const ppbGallery = [
+  { src:'Project_Plan_Builder.png', alt:'The ELED Project Plan template as a guided builder' },
+  { src:'Section_Review.png', alt:'AI feedback on a project plan objective section, identifying what works and the highest-leverage improvements' },
+  { src:'Full_Plan_Review.png', alt:'Full-plan review weighing coherence across all five sections, ready to export to PDF' },
+];
+let ppbIndex = 0;
+let ppbTimer = null;
+function showPpbSlide(idx, isManual){
+  const img = document.getElementById('ppbImage');
+  if (!img) return;
+  ppbIndex = idx;
+  img.style.opacity = '0';
+  setTimeout(() => {
+    img.src = ppbGallery[ppbIndex].src;
+    img.alt = ppbGallery[ppbIndex].alt;
+    img.style.opacity = '1';
+  }, 200);
+  document.querySelectorAll('#ppbDots .ppb-dot').forEach((d, i) => d.classList.toggle('active', i === ppbIndex));
+  if (isManual) resetPpbTimer();
+}
+function resetPpbTimer(){
+  if (ppbTimer) clearInterval(ppbTimer);
+  ppbTimer = setInterval(() => showPpbSlide((ppbIndex + 1) % ppbGallery.length), 4500);
+}
+resetPpbTimer();
 
 // ── Password reset handler ────────────────────────────────────
 let resetAccessToken = null;
