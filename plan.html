@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Project Plan Builder · EDP Study Tool</title>
+<style>
+  :root{
+    --bg:#F0F7F0;
+    --card:#1C3A2A;
+    --surface:#163224;
+    --surface2:#1F4531;
+    --green:#2E6B48;
+    --green-light:#4A9E6F;
+    --gold:#D4A017;
+    --gold-dark:#B8890F;
+    --gold-bg:#1F1A08;
+    --ink:#F0F7F0;
+    --muted:#9CBFA8;
+    --border:#2E6B48;
+    --good:#27AE60;
+    --bad:#C0392B;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+  .wrap{max-width:900px;margin:0 auto;padding:14px}
+
+  header{display:flex;align-items:center;gap:14px;background:#fff;padding:14px 16px;border-radius:14px;margin-bottom:14px;border:1px solid #d8e6dc;border-bottom:4px solid var(--gold);flex-wrap:wrap}
+  .brand h1{margin:0;font-size:clamp(15px,3vw,20px);font-weight:700;color:var(--card);letter-spacing:-.2px}
+  .brand p{margin:2px 0 0;font-size:12px;color:#5d7a68}
+  .header-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .user-badge{font-size:12px;color:#5d7a68}
+  .user-badge span{color:var(--card);font-weight:600}
+
+  .btn{appearance:none;cursor:pointer;font:inherit;border:1.5px solid var(--border);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:10px;font-size:14px;font-weight:500;transition:background .12s,border-color .12s}
+  .btn:hover{background:var(--surface2);border-color:var(--green-light)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.primary{background:var(--gold);color:#1A1200;border-color:var(--gold-dark);font-weight:700}
+  .btn.primary:hover{background:#c29513;color:#1A1200}
+  .btn.sm{padding:6px 10px;font-size:12px;border-radius:8px}
+  .btn.ghost{background:transparent;border-color:#c3d8ca;color:#3d5a48}
+  .btn.ghost:hover{background:#e2eee6;border-color:var(--green)}
+  .btn.danger{background:transparent;border-color:#d8a5a0;color:#9e3b32;padding:4px 9px;font-size:12px;border-radius:7px}
+  .btn.danger:hover{background:#fbeceb}
+
+  .savebar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid #d8e6dc;border-radius:10px;padding:9px 14px;margin-bottom:14px;font-size:13px;color:#5d7a68;flex-wrap:wrap}
+  .savebar strong{color:var(--card)}
+  #saveStatus{font-weight:600}
+  #saveStatus.saving{color:var(--gold-dark)}
+  #saveStatus.saved{color:var(--good)}
+  #saveStatus.error{color:var(--bad)}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 4px 20px rgba(28,58,42,.18)}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap}
+  .sec-num{width:28px;height:28px;border-radius:8px;background:var(--gold);color:#1A1200;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .sec-title{font-size:18px;font-weight:700;color:var(--ink);margin:0}
+  .sec-desc{font-size:13px;color:var(--muted);margin:6px 0 16px;line-height:1.55}
+
+  label.fld{display:block;font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;margin:0 0 6px}
+  .fldwrap{margin-bottom:16px}
+  input[type=text],textarea{width:100%;padding:10px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;color:var(--ink);font:inherit;font-size:14px;outline:none;transition:border-color .12s;resize:vertical}
+  input[type=text]:focus,textarea:focus{border-color:var(--green-light)}
+  input[type=text]::placeholder,textarea::placeholder{color:#6b8f78}
+  textarea{min-height:90px;line-height:1.6}
+  textarea.tall{min-height:200px}
+
+  table.rows{width:100%;border-collapse:collapse;margin-bottom:10px}
+  table.rows th{text-align:left;font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.6px;padding:0 6px 7px;white-space:nowrap}
+  table.rows td{padding:0 6px 8px;vertical-align:top}
+  table.rows td input[type=text],table.rows td textarea{font-size:13px;padding:8px 10px}
+  table.rows textarea{min-height:56px}
+  td.act{width:44px;text-align:right;padding-top:6px}
+  select{width:100%;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:9px;color:var(--ink);font:inherit;font-size:13px;outline:none}
+  select:focus{border-color:var(--green-light)}
+
+  .fb-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .btn.review{display:inline-flex;align-items:center;gap:6px;background:var(--gold-bg);border:1.5px solid var(--gold-dark);color:var(--gold);font-weight:700;font-size:13px;padding:7px 13px;border-radius:9px}
+  .btn.review:hover{background:#2A2410}
+
+  .fb{margin-top:12px;border:1.5px solid var(--gold-dark);background:var(--gold-bg);border-radius:12px;padding:14px 16px;animation:sd .2s ease}
+  .fb.loading{border-color:var(--border);background:var(--surface)}
+  .fb.done{border-color:var(--green-light);background:#0F2A1C}
+  @keyframes sd{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+  .fb-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold)}
+  .fb.done .fb-head{color:var(--green-light)}
+  .fb-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0}
+  .fb.done .fb-dot{background:var(--green-light)}
+  .fb-dot.pulse{animation:pl 1s ease-in-out infinite}
+  @keyframes pl{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+  .fb-text{font-size:14px;line-height:1.72;color:#E3D9B8;white-space:pre-wrap}
+  .fb.done .fb-text{color:#BFE3CC}
+  .fb-text.thinking{color:var(--muted);font-style:italic}
+  .fb-note{margin-top:10px;font-size:11px;color:#6b8f78;border-top:1px solid rgba(74,158,111,.2);padding-top:8px}
+
+  .gate{max-width:520px;margin:80px auto;background:#fff;border:1px solid #d8e6dc;border-radius:16px;padding:32px;text-align:center}
+  .gate h2{margin:0 0 8px;color:var(--card);font-size:20px}
+  .gate p{margin:0 0 20px;color:#5d7a68;font-size:14px;line-height:1.6}
+
+  footer{margin-top:16px;text-align:center;color:#5d7a68;font-size:12px}
+  footer a{color:#5d7a68}
+
+  .hidden{display:none !important}
+
+  @media print{
+    body{background:#fff;color:#000;font-size:11pt}
+    .wrap{max-width:100%;padding:0}
+    header,.savebar,.no-print,.btn,.fb,footer{display:none !important}
+    .card{background:#fff !important;border:none;box-shadow:none;padding:0;margin:0 0 18pt;page-break-inside:avoid}
+    .sec-num{background:#000;color:#fff}
+    .sec-title,.fb-text{color:#000}
+    .sec-desc{display:none}
+    label.fld{color:#333;font-size:8pt}
+    input[type=text],textarea,select{background:#fff !important;color:#000 !important;border:1px solid #999 !important;padding:4pt 6pt}
+    textarea{min-height:auto;height:auto;overflow:visible}
+    table.rows th{color:#333}
+    .print-title{display:block !important;font-size:18pt;font-weight:700;margin-bottom:4pt;color:#000}
+    .print-sub{display:block !important;font-size:10pt;color:#444;margin-bottom:16pt}
+    td.act{display:none}
+    table.rows th:last-child{display:none}
+  }
+  .print-title,.print-sub{display:none}
+</style>
+</head>
+<body>
+
+<div id="gateScreen" class="hidden">
+  <div class="gate">
+    <h2 id="gateTitle">License required</h2>
+    <p id="gateMsg">The Project Plan Builder is available to licensed users. Head back to the study tool to unlock full access.</p>
+    <a href="/app.html" class="btn primary" style="text-decoration:none;display:inline-block">Back to Study Tool</a>
+  </div>
+</div>
+
+<div class="wrap hidden" id="mainWrap">
+
+  <header class="no-print">
+    <div class="brand">
+      <h1>Project Plan Builder</h1>
+      <p>ELED Project Plan · EDP Application &amp; Oral Exam</p>
+    </div>
+    <div class="header-right">
+      <div class="user-badge"><span id="userEmail"></span></div>
+      <a href="/app.html" class="btn sm ghost" style="text-decoration:none">Study Tool</a>
+    </div>
+  </header>
+
+  <div class="print-title">Entrepreneurship-Led Economic Development Project Plan</div>
+  <div class="print-sub" id="printName"></div>
+
+  <div class="savebar no-print">
+    <div>Candidate: <strong id="nameEcho">—</strong></div>
+    <div><span id="saveStatus">Loading…</span></div>
+  </div>
+
+  <!-- Candidate name -->
+  <div class="card no-print">
+    <div class="fldwrap" style="margin-bottom:0">
+      <label class="fld" for="candidateName">Candidate name</label>
+      <input type="text" id="candidateName" placeholder="Your full name" />
+    </div>
+  </div>
+
+  <!-- 1. Objective -->
+  <div class="card">
+    <div class="sec-head"><div class="sec-num">1</div><h2 class="sec-title">Objective</h2></div>
+    <p class="sec-desc">Describe the defining objective of your plan. The strongest objectives extend something that already exists or close a specific named gap — not "build an ecosystem."</p>
+
+    <div class="fldwrap">
+      <label class="fld" for="objStatement">The objective of the project plan is</label>
+      <textarea id="objStatement" placeholder="e.g. Grow and expand [existing platform or program] by connecting entrepreneurs to resources."></textarea>
+    </div>
+    <div class="fldwrap">
+      <label class="fld" for="objTypes">What types of entrepreneurs will be served</label>
+      <textarea id="objTypes" placeholder="e.g. Aspiring, startup, and growth entrepreneurs."></textarea>
+    </div>
+    <div class="fldwrap">
+      <label class="fld" for="objBarriers">What will you do to reduce barriers to collaboration</label>
+      <textarea id="objBarriers" placeholder="Name real tactics — shared goals, technology, measurement, advocacy, adaptability."></textarea>
+    </div>
+    <div class="fldwrap">
+      <label class="fld" for="objTen">Ten things that will move you closer to your goal</label>
+      <textarea id="objTen" class="tall" placeholder="1. …&#10;2. …&#10;3. …"></textarea>
+    </div>
+
+    <div class="fb-row no-print">
+      <button class="btn review" data-review="objective">✦ Review this section</button>
+    </div>
+    <div id="fb-objective"></div>
+  </div>
+
+  <!-- 2. Action Steps -->
+  <div class="card">
+    <div class="sec-head"><div class="sec-num">2</div><h2 class="sec-title">Action Steps</h2></div>
+    <p class="sec-desc">Select the highest-impact steps from your list of ten. Name partners specifically — "WV Legislature" beats "stakeholders."</p>
+
+    <table class="rows">
+      <thead><tr><th style="width:26%">Step</th><th style="width:28%">Potential partner(s)</th><th>Resources / information needed</th><th></th></tr></thead>
+      <tbody id="stepsBody"></tbody>
+    </table>
+    <button class="btn sm ghost no-print" onclick="addRow('steps')">+ Add step</button>
+
+    <div class="fb-row no-print">
+      <button class="btn review" data-review="action_steps">✦ Review this section</button>
+    </div>
+    <div id="fb-action_steps"></div>
+  </div>
+
+  <!-- 3. Funding -->
+  <div class="card">
+    <div class="sec-head"><div class="sec-num">3</div><h2 class="sec-title">Funding</h2></div>
+    <p class="sec-desc">Map funding to each action step. Being honest that several steps share one current source is stronger than inventing a diversified plan that doesn't exist.</p>
+
+    <table class="rows">
+      <thead><tr><th style="width:38%">Action step</th><th>Funding source</th><th></th></tr></thead>
+      <tbody id="fundingBody"></tbody>
+    </table>
+    <button class="btn sm ghost no-print" onclick="addRow('funding')">+ Add funding row</button>
+
+    <div class="fb-row no-print">
+      <button class="btn review" data-review="funding">✦ Review this section</button>
+    </div>
+    <div id="fb-funding"></div>
+  </div>
+
+  <!-- 4. Metrics -->
+  <div class="card">
+    <div class="sec-head"><div class="sec-num">4</div><h2 class="sec-title">Metrics</h2></div>
+    <p class="sec-desc">Every metric needs a named data source you can actually access. Favor process metrics you can track now over long-horizon outputs like job creation.</p>
+
+    <table class="rows">
+      <thead><tr><th style="width:52%">Metric</th><th>Data source</th><th></th></tr></thead>
+      <tbody id="metricsBody"></tbody>
+    </table>
+    <button class="btn sm ghost no-print" onclick="addRow('metrics')">+ Add metric</button>
+
+    <div class="fb-row no-print">
+      <button class="btn review" data-review="metrics">✦ Review this section</button>
+    </div>
+    <div id="fb-metrics"></div>
+  </div>
+
+  <!-- 5. Timeline -->
+  <div class="card">
+    <div class="sec-head"><div class="sec-num">5</div><h2 class="sec-title">Timeline</h2></div>
+    <p class="sec-desc">Front-load relationship building and early wins. Milestones should be outcomes, not restated activities.</p>
+
+    <table class="rows">
+      <thead><tr><th style="width:30%">Action item</th><th style="width:22%">Milestone</th><th>Completion / outcome</th><th></th></tr></thead>
+      <tbody id="timelineBody"></tbody>
+    </table>
+    <button class="btn sm ghost no-print" onclick="addRow('timeline')">+ Add timeline row</button>
+
+    <div class="fb-row no-print">
+      <button class="btn review" data-review="timeline">✦ Review this section</button>
+    </div>
+    <div id="fb-timeline"></div>
+  </div>
+
+  <!-- Full review -->
+  <div class="card no-print">
+    <div class="sec-head"><h2 class="sec-title" style="font-size:16px">Full plan review</h2></div>
+    <p class="sec-desc">Reviews all five sections together, weighting coherence: do your action steps recur in funding and timeline? Do your metrics measure your objective?</p>
+    <div class="fb-row">
+      <button class="btn review" data-review="full">✦ Review full plan</button>
+      <button class="btn primary" onclick="window.print()">Export as PDF</button>
+    </div>
+    <div id="fb-full"></div>
+  </div>
+
+  <footer class="no-print">
+    Drafts save automatically to your account &middot; <a href="/app.html">Study Tool</a>
+  </footer>
+</div>
+
+<script>
+const SESSION_KEY = 'edp-session-v1';
+let session = null;
+let plan = null;
+let saveTimer = null;
+
+function $(id){ return document.getElementById(id); }
+
+function loadSession(){
+  try { const r = sessionStorage.getItem(SESSION_KEY); if(r) session = JSON.parse(r); } catch(_){}
+}
+function isLoggedIn(){ return !!session?.user && !!session?.token; }
+
+const MILESTONES = ['One month','Three month','Six month','12 month'];
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ── Row rendering ─────────────────────────────────────────────
+const ROW_DEFS = {
+  steps: { body:'stepsBody', key:'action_steps', blank:{step:'',partners:'',resources:''},
+    cells: r => `
+      <td><input type="text" data-f="step" value="${esc(r.step)}" placeholder="e.g. Resource Database" /></td>
+      <td><input type="text" data-f="partners" value="${esc(r.partners)}" placeholder="Name real organizations" /></td>
+      <td><textarea data-f="resources" placeholder="What you need to make this happen">${esc(r.resources)}</textarea></td>` },
+  funding: { body:'fundingBody', key:'funding', blank:{action_step:'',source:''},
+    cells: r => `
+      <td><input type="text" data-f="action_step" value="${esc(r.action_step)}" placeholder="Matching action step" /></td>
+      <td><input type="text" data-f="source" value="${esc(r.source)}" placeholder="e.g. Currently funded by …" /></td>` },
+  metrics: { body:'metricsBody', key:'metrics', blank:{metric:'',data_source:''},
+    cells: r => `
+      <td><input type="text" data-f="metric" value="${esc(r.metric)}" placeholder="e.g. Total number of referrals" /></td>
+      <td><input type="text" data-f="data_source" value="${esc(r.data_source)}" placeholder="e.g. SourceLink" /></td>` },
+  timeline: { body:'timelineBody', key:'timeline', blank:{action_item:'',milestone:'One month',completion:''},
+    cells: r => `
+      <td><input type="text" data-f="action_item" value="${esc(r.action_item)}" placeholder="Matching action step" /></td>
+      <td><select data-f="milestone">${MILESTONES.map(m => `<option value="${m}"${r.milestone===m?' selected':''}>${m}</option>`).join('')}</select></td>
+      <td><input type="text" data-f="completion" value="${esc(r.completion)}" placeholder="Outcome, not activity" /></td>` },
+};
+
+function renderRows(kind){
+  const def = ROW_DEFS[kind];
+  const rows = plan[def.key] || [];
+  const tbody = $(def.body);
+  tbody.innerHTML = rows.map((r, i) => `
+    <tr data-i="${i}">
+      ${def.cells(r)}
+      <td class="act no-print"><button class="btn danger" onclick="removeRow('${kind}',${i})" title="Remove">✕</button></td>
+    </tr>`).join('');
+
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const i = +tr.dataset.i;
+    tr.querySelectorAll('[data-f]').forEach(el => {
+      el.addEventListener('input', () => {
+        plan[def.key][i][el.dataset.f] = el.value;
+        queueSave();
+      });
+      el.addEventListener('change', () => {
+        plan[def.key][i][el.dataset.f] = el.value;
+        queueSave();
+      });
+    });
+  });
+}
+
+function addRow(kind){
+  const def = ROW_DEFS[kind];
+  plan[def.key] = plan[def.key] || [];
+  plan[def.key].push({ ...def.blank });
+  renderRows(kind);
+  queueSave();
+}
+
+function removeRow(kind, i){
+  const def = ROW_DEFS[kind];
+  plan[def.key].splice(i, 1);
+  renderRows(kind);
+  queueSave();
+}
+
+// ── Bind top-level fields ─────────────────────────────────────
+const FIELD_MAP = {
+  candidateName: ['candidate_name'],
+  objStatement:  ['objective','statement'],
+  objTypes:      ['objective','entrepreneur_types'],
+  objBarriers:   ['objective','collaboration_barriers'],
+  objTen:        ['objective','ten_things'],
+};
+
+function bindFields(){
+  Object.entries(FIELD_MAP).forEach(([id, path]) => {
+    const el = $(id);
+    if (!el) return;
+    el.value = path.length === 1 ? (plan[path[0]] || '') : ((plan[path[0]] || {})[path[1]] || '');
+    el.addEventListener('input', () => {
+      if (path.length === 1) plan[path[0]] = el.value;
+      else { plan[path[0]] = plan[path[0]] || {}; plan[path[0]][path[1]] = el.value; }
+      if (id === 'candidateName') updateName();
+      queueSave();
+    });
+  });
+  updateName();
+}
+
+function updateName(){
+  const n = plan.candidate_name || '—';
+  $('nameEcho').textContent = n;
+  $('printName').textContent = 'Candidate: ' + (plan.candidate_name || '');
+}
+
+// ── Save ──────────────────────────────────────────────────────
+function setStatus(text, cls){
+  const el = $('saveStatus');
+  el.textContent = text;
+  el.className = cls || '';
+}
+
+function queueSave(){
+  setStatus('Unsaved changes', 'saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(savePlan, 1200);
+}
+
+async function savePlan(){
+  setStatus('Saving…', 'saving');
+  try {
+    const res = await fetch('/.netlify/functions/plan-crud', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + session.token },
+      body: JSON.stringify({ action: 'save', plan })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Save failed');
+    const t = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+    setStatus('Saved ' + t, 'saved');
+  } catch(err){
+    setStatus('Save failed — ' + err.message, 'error');
+  }
+}
+
+// ── Review ────────────────────────────────────────────────────
+async function runReview(section, btn){
+  const target = $('fb-' + section);
+  if (!target) return;
+
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = 'Reviewing…';
+
+  target.innerHTML = `
+    <div class="fb loading">
+      <div class="fb-head"><span class="fb-dot pulse"></span>Reviewing against IEDC exemplar standards…</div>
+      <div class="fb-text thinking">Reading your plan and comparing it to what strong submissions do.</div>
+    </div>`;
+
+  try {
+    if (saveTimer){ clearTimeout(saveTimer); await savePlan(); }
+
+    const res = await fetch('/.netlify/functions/review-plan', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + session.token },
+      body: JSON.stringify({ section, plan })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    target.innerHTML = `
+      <div class="fb done">
+        <div class="fb-head"><span class="fb-dot"></span>${section === 'full' ? 'Full plan review' : 'Section review'}</div>
+        <div class="fb-text">${esc(data.feedback)}</div>
+        <div class="fb-note">AI-generated feedback · Calibrated to the IEDC exemplar plan · Use your own judgment — this is guidance, not an official assessment.</div>
+      </div>`;
+  } catch(err){
+    target.innerHTML = `
+      <div class="fb" style="border-color:#C0392B;background:#2A0F0D">
+        <div class="fb-head" style="color:#E88">Could not complete review</div>
+        <div class="fb-text" style="color:#E8A5A0">${esc(err.message)}</div>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+(async function init(){
+  loadSession();
+
+  if (!isLoggedIn()){
+    $('gateScreen').classList.remove('hidden');
+    $('gateTitle').textContent = 'Sign in required';
+    $('gateMsg').textContent = 'Sign in to your account to use the Project Plan Builder.';
+    return;
+  }
+
+  try {
+    const res = await fetch('/.netlify/functions/plan-crud', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + session.token },
+      body: JSON.stringify({ action: 'load' })
+    });
+
+    if (res.status === 403){
+      $('gateScreen').classList.remove('hidden');
+      return;
+    }
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not load your plan');
+
+    plan = data.plan;
+    plan.objective = plan.objective || {};
+    plan.action_steps = plan.action_steps || [];
+    plan.funding = plan.funding || [];
+    plan.metrics = plan.metrics || [];
+    plan.timeline = plan.timeline || [];
+
+    // Seed a starting row in each table for new plans
+    if (data.isNew){
+      plan.action_steps = [{step:'',partners:'',resources:''}];
+      plan.funding = [{action_step:'',source:''}];
+      plan.metrics = [{metric:'',data_source:''}];
+      plan.timeline = MILESTONES.map(m => ({action_item:'',milestone:m,completion:''}));
+    }
+
+    $('mainWrap').classList.remove('hidden');
+    $('userEmail').textContent = session.user.email;
+
+    bindFields();
+    ['steps','funding','metrics','timeline'].forEach(renderRows);
+
+    document.querySelectorAll('[data-review]').forEach(btn => {
+      btn.addEventListener('click', () => runReview(btn.dataset.review, btn));
+    });
+
+    setStatus(data.isNew ? 'New plan' : 'Saved', 'saved');
+
+  } catch(err){
+    $('gateScreen').classList.remove('hidden');
+    $('gateTitle').textContent = 'Something went wrong';
+    $('gateMsg').textContent = err.message;
+  }
+})();
+</script>
+</body>
+</html>
