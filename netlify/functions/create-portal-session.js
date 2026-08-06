@@ -40,7 +40,7 @@ exports.handler = async function(event) {
     // Create portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: 'https://studyedp.com/app.html',
+      return_url: 'https://www.studyedp.com/app.html',
     });
 
     return {
