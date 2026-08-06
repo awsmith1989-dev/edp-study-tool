@@ -746,7 +746,7 @@
         <button class="btn-hero-ghost" onclick="showModal('purchase')">Buy License — $199</button>
       </div>
       <div class="hero-trust">
-        <div class="trust-item"><div class="trust-check"></div>5 free questions, no card required</div>
+        <div class="trust-item"><div class="trust-check"></div>20 free questions with AI explanations, no card required</div>
         <div class="trust-item"><div class="trust-check"></div>2-year license</div>
         <div class="trust-item"><div class="trust-check"></div>182 questions across 9 domains</div>
       </div>
@@ -831,7 +831,7 @@
       <div class="step-card">
         <div class="step-num">1</div>
         <div class="step-title">Create your account</div>
-        <div class="step-desc">Sign up free and get 5 practice questions immediately — no credit card, no commitment. See exactly how the tool works before you buy.</div>
+        <div class="step-desc">Sign up free and get 20 practice questions with AI explanations immediately — no credit card, no commitment. See exactly how the tool works before you buy.</div>
       </div>
       <div class="step-card">
         <div class="step-num">2</div>
@@ -912,12 +912,12 @@
         <div class="pricing-price">$0</div>
         <div class="pricing-period">No credit card required</div>
         <ul class="pricing-features">
-          <li>5 practice questions</li>
+          <li>20 practice questions</li>
           <li>All 9 study domains</li>
-          <li class="no">AI explanations</li>
+          <li>AI explanations on trial questions</li>
           <li class="no">Domain accuracy tracking</li>
           <li class="no">10-question scored quizzes</li>
-          <li class="no">Project plan builder</li>
+          <li>Project plan builder (Objective review)</li>
         </ul>
         <button class="btn-pricing-ghost" onclick="showModal('trial')">Start Free Trial</button>
       </div>
@@ -950,7 +950,7 @@
     <p>Join economic developers preparing for both parts of the IEDC EDP certification.</p>
     <div class="cta-actions">
       <button class="btn-hero-primary" onclick="showModal('trial')">
-        Start Free — 5 Questions
+        Start Free — 20 Questions
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
       <button class="btn-hero-ghost" onclick="showModal('purchase')">Buy License — $199</button>
@@ -994,7 +994,7 @@
     <div id="viewTrial">
       <div class="modal-header">
         <div class="modal-title">Start your free trial</div>
-        <div class="modal-sub">Create an account to get 5 free practice questions — no credit card needed.</div>
+        <div class="modal-sub">Create an account to get 20 free practice questions with AI explanations — no credit card needed.</div>
       </div>
       <div class="modal-tabs">
         <button class="modal-tab active" onclick="switchModalTab('trial','register')">Create Account</button>
@@ -1189,7 +1189,7 @@ async function doTrialRegister(){
     });
     const loginData = await loginRes.json();
     if(loginRes.ok && loginData.session){
-      saveSession({ user: loginData.user, token: loginData.session.access_token, license: loginData.license });
+      saveSession({ user: loginData.user, token: loginData.session.access_token, refreshToken: loginData.session.refresh_token, license: loginData.license });
     }
     // Sync to HubSpot (non-blocking)
     fetch('/.netlify/functions/hubspot-sync', {
@@ -1220,7 +1220,7 @@ async function doLogin(){
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Login failed');
-    saveSession({ user: data.user, token: data.session.access_token, license: data.license });
+    saveSession({ user: data.user, token: data.session.access_token, refreshToken: data.session.refresh_token, license: data.license });
     closeModal();
     window.location.href = '/app.html';
   } catch(err){
@@ -1271,7 +1271,7 @@ async function doPurchase(){
     });
     const loginData = await loginRes.json();
     if(loginRes.ok && loginData.session){
-      saveSession({ user: loginData.user, token: loginData.session.access_token, license: loginData.license });
+      saveSession({ user: loginData.user, token: loginData.session.access_token, refreshToken: loginData.session.refresh_token, license: loginData.license });
     }
 
     // Sync to HubSpot (non-blocking)
@@ -1404,6 +1404,7 @@ resetPpbTimer();
 
 // ── Password reset handler ────────────────────────────────────
 let resetAccessToken = null;
+let resetRefreshToken = null;
 
 async function doResetPassword(){
   const password = document.getElementById('resetPassword').value;
@@ -1420,7 +1421,7 @@ async function doResetPassword(){
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Could not set password');
-    saveSession({ user: data.user, token: resetAccessToken, license: data.license });
+    saveSession({ user: data.user, token: resetAccessToken, refreshToken: resetRefreshToken, license: data.license });
     document.getElementById('resetModal').classList.add('hidden');
     window.history.replaceState({}, '', '/app.html');
     window.location.href = '/app.html';
@@ -1454,6 +1455,7 @@ async function doResetPassword(){
   if(hash && hash.includes('access_token') && hash.includes('type=recovery')){
     const hashParams = new URLSearchParams(hash.replace('#', ''));
     resetAccessToken = hashParams.get('access_token');
+    resetRefreshToken = hashParams.get('refresh_token');
     if(resetAccessToken){
       window.history.replaceState({}, '', window.location.pathname);
       document.getElementById('resetModal').classList.remove('hidden');

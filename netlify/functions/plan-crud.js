@@ -1,5 +1,7 @@
 // netlify/functions/plan-crud.js
-// Save and load project plan drafts. Licensed users only.
+// Save and load project plan drafts. Any authenticated user, trial or
+// licensed — review-plan.js and the frontend gate what a trial user can
+// do with the draft, not this endpoint.
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -31,24 +33,6 @@ exports.handler = async function (event) {
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) throw new Error('Invalid token');
-
-    // Licensed users only
-    const now = new Date().toISOString();
-    const { data: license } = await supabase
-      .from('licenses')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .gte('expires_at', now)
-      .limit(1)
-      .single();
-
-    if (!license) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({ error: 'An active license is required to use the Project Plan Builder.' }),
-      };
-    }
 
     const { action, plan } = JSON.parse(event.body || '{}');
 

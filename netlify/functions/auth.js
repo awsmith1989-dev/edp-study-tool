@@ -45,6 +45,38 @@ exports.handler = async function(event) {
         }),
       };
 
+    } else if (action === 'refresh') {
+      // Exchange a refresh token for a new access token. Supabase rotates
+      // the refresh token on every use, so the client must store the new
+      // one from the response, not reuse the old one.
+      const { refresh_token } = JSON.parse(event.body || '{}');
+      if (!refresh_token) throw new Error('No refresh token provided');
+
+      const { data, error } = await supabase.auth.refreshSession({ refresh_token });
+      if (error || !data.session) throw error || new Error('Refresh failed');
+
+      const userId = data.user.id;
+      const now = new Date().toISOString();
+      const { data: license } = await supabase
+        .from('licenses')
+        .select('id, expires_at, status')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .gte('expires_at', now)
+        .order('expires_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: { id: userId, email: data.user.email },
+          session: data.session,
+          license: license || null,
+        }),
+      };
+
     } else if (action === 'check') {
       // Check license by user id (passed as JWT)
       const authHeader = event.headers['authorization'];

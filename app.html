@@ -273,7 +273,7 @@
   <div id="appShell">
     <!-- Trial bar shown during trial mode -->
     <div class="trial-bar" id="trialBar" style="display:none">
-      <div>🎓 <strong>Free Trial</strong> — <span id="trialCount">5</span> questions remaining</div>
+      <div>🎓 <strong>Free Trial</strong> — <span id="trialCount">20</span> questions remaining</div>
       <button class="btn primary" style="padding:5px 12px;font-size:12px" onclick="showPaywall()">Unlock Full Access</button>
     </div>
 
@@ -471,7 +471,6 @@ const BANK_URL_PRIMARY  = 'https://raw.githubusercontent.com/awsmith1989-dev/ied
 const BANK_URL_FALLBACK = 'https://cdn.jsdelivr.net/gh/awsmith1989-dev/iedc@main/iedc_edp_questions.cleaned.json';
 const BANK_FETCH_TIMEOUT_MS = 8000;
 const AUTO_ADVANCE_MS = 1200;
-const TRIAL_LIMIT = 5;
 const SESSION_LENGTH = 20;
 const DOMAINS = [
   'Capital & Financing',
@@ -488,7 +487,7 @@ const DOMAINS = [
 function $(id){ return document.getElementById(id); }
 
 // ── Session management ────────────────────────────────────────
-let session = null; // { user, token, license, expiresAt }
+let session = null; // { user, token, refreshToken, license, expiresAt }
 
 function loadSession(){
   try {
@@ -510,29 +509,73 @@ function hasActiveLicense(){
 }
 function isLoggedIn(){ return !!session?.user; }
 
-// ── Trial management ──────────────────────────────────────────
-function getTrialCount(){
-  return parseInt(localStorage.getItem('edp-trial-count') || '0', 10);
+// Exchanges the stored refresh token for a new access token. Supabase
+// rotates the refresh token on every use, so the new one must be saved too.
+async function refreshAuthToken(){
+  if (!session?.refreshToken) return false;
+  try {
+    const res = await fetch('/.netlify/functions/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'refresh', refresh_token: session.refreshToken }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (!data.session) return false;
+    saveSession({
+      user: data.user,
+      token: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      license: data.license,
+    });
+    return true;
+  } catch(_){
+    return false;
+  }
 }
-function incrementTrial(){
-  const n = getTrialCount() + 1;
-  localStorage.setItem('edp-trial-count', String(n));
-  return n;
+
+// ── Trial management (server-tracked) ──────────────────────────
+let trialStatus = null; // { licensed, trial:{questionsUsed,questionsLimit,questionsRemaining,exhausted} }
+
+async function fetchTrialStatus(isRetry){
+  const res = await fetch('/.netlify/functions/trial-status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+  });
+  if (res.status === 401 && !isRetry){
+    const refreshed = await refreshAuthToken();
+    if (refreshed) return fetchTrialStatus(true);
+    clearSession();
+    updateHeaderAuth();
+    return null;
+  }
+  if (!res.ok) return null;
+  return res.json();
 }
-function isTrialExpired(){
-  return !hasActiveLicense() && getTrialCount() >= TRIAL_LIMIT;
+
+async function loadTrialStatus(){
+  if (!isLoggedIn() || !session.token){ trialStatus = null; updateTrialBar(); return; }
+  let data;
+  try { data = await fetchTrialStatus(); } catch(_){ data = null; }
+  if (!data){ updateTrialBar(); return; }
+  if (data.trial) data.trial.exhausted = data.trial.questionsRemaining <= 0;
+  trialStatus = data;
+  if (data.licensed && data.license && !hasActiveLicense()){
+    saveSession({ ...session, license: data.license });
+  }
+  updateTrialBar();
 }
+
 function updateTrialBar(){
   const bar = $('trialBar');
   if (!bar) return;
-  if (hasActiveLicense()){
+  if (hasActiveLicense() || !trialStatus || trialStatus.licensed || !trialStatus.trial){
     bar.style.display = 'none';
     return;
   }
-  const remaining = Math.max(0, TRIAL_LIMIT - getTrialCount());
   bar.style.display = 'flex';
   const countEl = $('trialCount');
-  if (countEl) countEl.textContent = remaining;
+  if (countEl) countEl.textContent = trialStatus.trial.questionsRemaining;
 }
 
 // ── Quiz state ────────────────────────────────────────────────
@@ -614,12 +657,13 @@ async function doLogin(){
     saveSession({
       user: data.user,
       token: data.session.access_token,
+      refreshToken: data.session.refresh_token,
       license: data.license,
     });
 
     closeModal();
     updateHeaderAuth();
-    updateTrialBar();
+    await loadTrialStatus();
     updateLicenseInfo();
 
     if (!data.license) {
@@ -657,12 +701,12 @@ async function doRegister(){
     });
     const loginData = await loginRes.json();
     if (loginRes.ok && loginData.session) {
-      saveSession({ user: loginData.user, token: loginData.session.access_token, license: loginData.license });
+      saveSession({ user: loginData.user, token: loginData.session.access_token, refreshToken: loginData.session.refresh_token, license: loginData.license });
     }
 
     closeModal();
     updateHeaderAuth();
-    updateTrialBar();
+    await loadTrialStatus();
     // Show redeem or paywall
     if (!loginData.license) switchTab('redeem'), $('authModal').style.display = 'flex';
 
@@ -696,7 +740,7 @@ async function doRedeem(){
     saveSession({ ...session, license: data.license });
     closeModal();
     updateHeaderAuth();
-    updateTrialBar();
+    await loadTrialStatus();
     updateLicenseInfo();
     alert('✅ License activated! You now have full access for 2 years.');
 
@@ -1049,11 +1093,13 @@ function resetSessionProgress(){
 }
 
 function pickQuestion(){
-  // Trial gate
+  // Trial gate — usage is tracked server-side now, not in localStorage
   if(!hasActiveLicense()){
-    const used = incrementTrial();
-    updateTrialBar();
-    if(used > TRIAL_LIMIT){
+    if(!isLoggedIn()){
+      showAuthModal('login');
+      return;
+    }
+    if(trialStatus?.trial?.exhausted){
       showPaywall();
       return;
     }
@@ -1115,13 +1161,10 @@ function checkAndMaybeAdvance(){
   else if(state.progress.missed[q.id])delete state.progress.missed[q.id];
   saveState();
 
-  // Log activity to server for admin analytics (non-blocking, licensed users only)
+  // Log activity to server (non-blocking). For trial users this also
+  // increments and returns the server-side trial counter.
   if(isLoggedIn() && session.token){
-    fetch('/.netlify/functions/log-activity', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json', 'Authorization': 'Bearer ' + session.token},
-      body: JSON.stringify({ questionId: q.id, manual: mKey, correct })
-    }).catch(() => {});
+    logActivity({ questionId: q.id, manual: mKey, domain: dKey, correct });
   }
 
   const opts=document.querySelectorAll('.opt');
@@ -1132,22 +1175,47 @@ function checkAndMaybeAdvance(){
     fb.innerHTML=`<div class="feedback-row"><span class="pill good">Correct ✓</span></div>`;
     scheduleAutoAdvance();
   } else {
-    // AI Explain only for licensed users
-    const explainBtnHtml = hasActiveLicense()
-      ? `<button class="btn explain-btn" id="explainBtn">✦ Explain This</button>`
-      : `<button class="btn explain-btn" onclick="showPaywall()" style="opacity:.7">✦ Explain This <span style="font-size:11px;font-weight:400">(licensed)</span></button>`;
+    // Explain This is available to trial users too — gated server-side
+    // by claude.js against the same 20-question allowance.
     fb.innerHTML=`
       <div class="feedback-row">
         <span class="pill bad">Incorrect</span>
-        ${explainBtnHtml}
+        <button class="btn explain-btn" id="explainBtn">✦ Explain This</button>
         <button class="btn next-inline" id="nextInlineBtn">Next →</button>
       </div>`;
-    if(hasActiveLicense()) $('explainBtn').addEventListener('click',()=>fetchExplanation(q));
+    $('explainBtn').addEventListener('click',()=>fetchExplanation(q));
     $('nextInlineBtn').addEventListener('click',()=>{pickQuestion();renderStats();});
   }
 }
 
-async function fetchExplanation(q){
+async function logActivity(payload, isRetry){
+  try{
+    const res = await fetch('/.netlify/functions/log-activity', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'Authorization': 'Bearer ' + session.token},
+      body: JSON.stringify(payload)
+    });
+    if(res.status === 401 && !isRetry){
+      const refreshed = await refreshAuthToken();
+      if(refreshed) return logActivity(payload, true);
+      return;
+    }
+    if(!res.ok)return;
+    const data = await res.json();
+    if(data.skipped)return;
+    if(data.trial){
+      data.trial.exhausted = data.trial.exhausted ?? (data.trial.questionsRemaining <= 0);
+      trialStatus = { licensed: false, trial: data.trial };
+      updateTrialBar();
+      if(data.trial.exhausted) showPaywall();
+    } else if(data.licensed){
+      trialStatus = { licensed: true };
+      updateTrialBar();
+    }
+  }catch(_){}
+}
+
+async function fetchExplanation(q,isRetry){
   const btn=$('explainBtn');
   if(btn){btn.disabled=true;btn.textContent='Loading…';}
   const existing=$('explanationBox');if(existing)existing.remove();
@@ -1185,8 +1253,18 @@ Write a clear explanation (3–5 sentences) that:
 
 Write in plain, direct prose. No bullet points. Be specific.`;
   try{
-    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
+    const headers={'Content-Type':'application/json'};
+    if(session?.token)headers['Authorization']='Bearer '+session.token;
+    const res=await fetch('/.netlify/functions/claude',{method:'POST',headers,body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    if(res.status===401 && !isRetry && session?.refreshToken){
+      const refreshed=await refreshAuthToken();
+      if(refreshed)return fetchExplanation(q,true);
+    }
+    if(!res.ok){
+      const e=await res.json().catch(()=>({}));
+      if(res.status===403)showPaywall();
+      throw new Error(e?.error?.message||`HTTP ${res.status}`);
+    }
     const data=await res.json();
     const text=data?.content?.find(b=>b.type==='text')?.text||'No explanation returned.';
     box.classList.remove('loading');box.style.borderColor='#A7F3D0';box.style.background='#ECFDF5';
@@ -1366,7 +1444,7 @@ async function loadBankFromUrl(url){
 
   checkUrlParams();
   updateHeaderAuth();
-  updateTrialBar();
+  await loadTrialStatus();
   updateLicenseInfo();
   buildModeRadios();
   setNextButtonLabel();

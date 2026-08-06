@@ -98,6 +98,7 @@
   .fb-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
   .btn.review{display:inline-flex;align-items:center;gap:6px;background:var(--teal-tint);border:1.5px solid var(--teal-border);color:var(--teal-text);font-weight:700;font-size:13px;padding:7px 13px;border-radius:9px}
   .btn.review:hover{background:var(--teal-border)}
+  .trial-note{font-size:11px;color:var(--muted);font-style:italic}
 
   .fb{margin-top:12px;border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:14px 16px;animation:sd .2s ease}
   .fb.loading{border-color:var(--border);background:var(--surface)}
@@ -289,7 +290,7 @@
     <p class="sec-desc">Reviews all five sections together, weighting coherence: do your action steps recur in funding and timeline? Do your metrics measure your objective?</p>
     <div class="fb-row">
       <button class="btn review" data-review="full">✦ Review full plan</button>
-      <button class="btn primary" onclick="window.print()">Export as PDF</button>
+      <button class="btn primary" id="exportPdfBtn" onclick="window.print()">Export as PDF</button>
     </div>
     <div id="fb-full"></div>
   </div>
@@ -310,7 +311,58 @@ function $(id){ return document.getElementById(id); }
 function loadSession(){
   try { const r = sessionStorage.getItem(SESSION_KEY); if(r) session = JSON.parse(r); } catch(_){}
 }
+function saveSession(data){
+  session = data;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+}
 function isLoggedIn(){ return !!session?.user && !!session?.token; }
+
+// Exchanges the stored refresh token for a new access token. Supabase
+// rotates the refresh token on every use, so the new one must be saved too.
+async function refreshAuthToken(){
+  if (!session?.refreshToken) return false;
+  try {
+    const res = await fetch('/.netlify/functions/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'refresh', refresh_token: session.refreshToken }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (!data.session) return false;
+    saveSession({
+      user: data.user,
+      token: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      license: data.license,
+    });
+    return true;
+  } catch(_){
+    return false;
+  }
+}
+
+// ── Trial status (server-tracked) ───────────────────────────────
+let trialStatus = null; // { licensed, trial:{questionsUsed,questionsLimit,questionsRemaining,reviewsUsed,reviewsLimit,reviewsRemaining,allowedSection} }
+function hasActiveLicense(){ return trialStatus?.licensed === true; }
+
+async function fetchTrialStatus(isRetry){
+  const res = await fetch('/.netlify/functions/trial-status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+  });
+  if (res.status === 401 && !isRetry){
+    const refreshed = await refreshAuthToken();
+    if (refreshed) return fetchTrialStatus(true);
+    return null;
+  }
+  if (!res.ok) return null;
+  return res.json();
+}
+async function loadTrialStatus(){
+  try { const data = await fetchTrialStatus(); if (data) trialStatus = data; }
+  catch(_){}
+}
 
 const MILESTONES = ['One month','Three month','Six month','12 month'];
 
@@ -439,7 +491,7 @@ async function savePlan(){
 }
 
 // ── Review ────────────────────────────────────────────────────
-async function runReview(section, btn){
+async function runReview(section, btn, isRetry){
   const target = $('fb-' + section);
   if (!target) return;
 
@@ -461,7 +513,27 @@ async function runReview(section, btn){
       headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + session.token },
       body: JSON.stringify({ section, plan })
     });
+
+    if (res.status === 401 && !isRetry){
+      const refreshed = await refreshAuthToken();
+      if (refreshed) return runReview(section, btn, true);
+    }
+
     const data = await res.json();
+
+    // Trial exhausted or wrong section — upgrade prompt, not an error
+    if (res.status === 403 && (data.exhausted || data.trialSection)){
+      target.innerHTML = `
+        <div class="fb" style="border-color:var(--teal-border);background:var(--teal-tint)">
+          <div class="fb-head" style="color:var(--teal-text)">Unlock full access to continue</div>
+          <div class="fb-text">${esc(data.error)}</div>
+          <div class="fb-row" style="margin-top:10px">
+            <button class="btn primary" onclick="window.location.href='/app.html'">Unlock Full Access</button>
+          </div>
+        </div>`;
+      return;
+    }
+
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
     target.innerHTML = `
@@ -483,6 +555,24 @@ async function runReview(section, btn){
 }
 
 // ── Init ──────────────────────────────────────────────────────
+function applyTrialGating(){
+  if (hasActiveLicense()) return;
+  const addNote = el => {
+    const note = document.createElement('span');
+    note.className = 'trial-note';
+    note.textContent = 'Full access required.';
+    el.insertAdjacentElement('afterend', note);
+  };
+  ['action_steps','funding','metrics','timeline'].forEach(section => {
+    const btn = document.querySelector(`[data-review="${section}"]`);
+    if (btn){ btn.disabled = true; addNote(btn); }
+  });
+  const fullBtn = document.querySelector('[data-review="full"]');
+  if (fullBtn) fullBtn.disabled = true;
+  const exportBtn = $('exportPdfBtn');
+  if (exportBtn){ exportBtn.disabled = true; addNote(exportBtn); }
+}
+
 (async function init(){
   loadSession();
 
@@ -493,17 +583,14 @@ async function runReview(section, btn){
     return;
   }
 
+  await loadTrialStatus();
+
   try {
     const res = await fetch('/.netlify/functions/plan-crud', {
       method: 'POST',
       headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + session.token },
       body: JSON.stringify({ action: 'load' })
     });
-
-    if (res.status === 403){
-      $('gateScreen').classList.remove('hidden');
-      return;
-    }
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not load your plan');
@@ -532,6 +619,8 @@ async function runReview(section, btn){
     document.querySelectorAll('[data-review]').forEach(btn => {
       btn.addEventListener('click', () => runReview(btn.dataset.review, btn));
     });
+
+    applyTrialGating();
 
     setStatus(data.isNew ? 'New plan' : 'Saved', 'saved');
 

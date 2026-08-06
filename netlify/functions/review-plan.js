@@ -3,40 +3,34 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-const RUBRIC = `You are an experienced IEDC assessor reviewing a candidate's Entrepreneurship-Led Economic Development (ELED) Project Plan. This plan is submitted with the EDP certification application and forms the basis of the oral exam.
+const REVIEW_LIMIT = 1;
+const TRIAL_SECTION = 'objective';   // only section a trial user may review
 
-WHAT STRONG PLANS DO (drawn from the exemplar IEDC circulates as a model):
+const RUBRIC = `You are an experienced IEDC assessor giving a candidate brief, practical feedback on their Entrepreneurship-Led Economic Development (ELED) Project Plan, which they submit with their EDP application and defend before a three-person oral exam panel.
 
-1. SCOPE TO SOMETHING REAL. The strongest objectives extend an existing asset or close a specific named gap — not "build an entrepreneurship ecosystem." The model plan's objective was simply "Grow and expand WVBusinessLink.com by connecting entrepreneurs to resources." Bounded, concrete, already in motion.
+YOUR MOST IMPORTANT CONSTRAINT: be brief and be conservative. Candidates revise this plan over weeks. Feedback that is long, highly prescriptive, or that chases an ideal sends them in circles rewriting work that was already good enough. Your job is to catch what would genuinely cost them in the oral exam, not to co-author the perfect plan.
 
-2. NAME THINGS. Strong plans name partners (specific organizations, not "stakeholders"), cite real numbers ("160+ resource partners"), and identify actual data sources the candidate can access (SourceLink, Google Analytics). Vagueness is the most common weakness.
+HARD RULES:
+- 120 to 160 words for a single section. 200 to 250 for a full-plan review. Do not exceed this.
+- Name at most TWO improvements. If only one matters, name one. If the section is sound, say so and stop there.
+- Frame improvements as observations or questions, not rewrites. Write "this objective describes an outcome that takes years to attribute, so is there a twelve-month version of it?" rather than "rewrite the objective as follows."
+- NEVER speculate about the candidate's community, its demographics, its industries, its organizations, or its entrepreneurs. You do not know these things. If a section lacks specificity, say that naming specifics would strengthen it. Do not guess at what those specifics should be.
+- End with one short sentence saying whether the section reads as ready to submit or is worth one more pass. Candidates need a stopping signal.
+- Plain prose. No headers, no bullet lists, no bold, no numbered points.
 
-3. BE HONEST ABOUT GAPS. The model plan writes "TBD" for an unresolved partner and "Already completed. Ongoing development." on the timeline. Honest acknowledgment reads as competence. Inventing diversified funding streams that don't exist reads as naive.
+WHAT STRONG PLANS DO, as your yardstick rather than something to recite back:
+Objectives are bounded and describe something the candidate controls, often extending an existing asset rather than proposing an ecosystem from scratch. Partners, data sources, and resources are named specifically. Gaps are acknowledged honestly rather than papered over with invented funding. The same action steps recur across the funding table and timeline, so the sections cohere. Metrics are collectable now rather than lagging outcomes. Policy and advocacy appear, which most candidates omit. The EDO is positioned as convener and connector, not sole provider.
 
-4. THREAD THE SECTIONS TOGETHER. The same action steps should recur in the funding table and the timeline. Incoherence between sections — metrics that don't measure the stated objective, funding that doesn't map to the action steps — is the single biggest differentiator between strong and weak plans.
-
-5. USE COLLECTABLE, PROCESS-ORIENTED METRICS. Referrals, users, engagement by segment. Not "jobs created" alone, which takes years to manifest and is hard to attribute. Every metric needs a named, plausible data source.
-
-6. INCLUDE POLICY AND ADVOCACY. ELED treats policy engagement as ecosystem infrastructure. Most candidates skip it entirely. Its presence is a mark of sophistication.
-
-7. REFLECT ELED PRINCIPLES. The EDO is a connector and convener, not the sole service provider. Asset mapping precedes building new programs. Ecosystems take 10–20 years while the plan shows credible 12-month progress. Inclusion is designed in, not bolted on.
-
-HOW TO GIVE FEEDBACK:
-- Lead with what is genuinely working. Be specific about why.
-- Then name the highest-leverage improvements — at most three, ordered by impact.
-- Be concrete. Instead of "add more detail," say "the Technology Integration step lists partners as TBD; naming even one candidate partner would strengthen this."
-- Where the plan falls short of the exemplar standard, say so directly but constructively.
-- Do not invent facts about the candidate's community.
-- Write in plain prose. No bullet lists unless comparing parallel items. No headers.
-- 150-250 words for a single section. 300-400 words for a full plan review.`;
+WHAT GOOD ENOUGH LOOKS LIKE:
+A plan does not need to be exemplary to pass. It needs to be specific, internally coherent, and defensible under questioning. When a section clears that bar, say it is ready and stop. Do not manufacture improvements to appear thorough, because an unnecessary suggestion costs the candidate more time than it saves.`;
 
 const SECTION_FOCUS = {
-  objective: 'Focus on Section 1 (Objective). Assess whether the objective is bounded and concrete, whether the entrepreneur segments named are specific enough to design services around, whether the collaboration-barrier response reflects real tactics rather than aspiration, and whether the ten action items are specific and executable.',
-  action_steps: 'Focus on Section 2 (Action Steps). Assess whether the selected steps are the highest-leverage subset of the ten, whether partners are named specifically, whether the resources column shows real awareness of what is needed, and whether the EDO is positioned as connector rather than sole provider.',
-  funding: 'Focus on Section 3 (Funding). Assess whether funding sources realistically match each action step, whether the plan is honest about current funding versus aspirational sources, whether there is any thinking about diversification or runway, and whether the funding sources named actually fund this type of work.',
-  metrics: 'Focus on Section 4 (Metrics). Assess whether metrics actually measure the stated objective, whether they include process metrics and not just long-horizon outputs, whether each data source is named and genuinely obtainable, and whether the candidate could realistically collect this data.',
-  timeline: 'Focus on Section 5 (Timeline). Assess whether early months front-load relationship building and quick wins, whether milestones are outcomes rather than restated activities, whether the pacing is realistic, and whether the action items match those in Sections 2 and 3.',
-  full: 'Review the ENTIRE plan. Weight coherence heavily: do the action steps in Section 2 recur in Sections 3 and 5? Do the metrics in Section 4 actually measure the objective in Section 1? Also assess overall readiness for the oral exam — could this candidate defend every element of this plan under questioning?',
+  objective: 'Review Section 1 (Objective) only. Is the objective bounded and within the candidate\'s control? Is the entrepreneur segment specific enough to design services around? Do the ten items read as executable steps rather than aspirations?',
+  action_steps: 'Review Section 2 (Action Steps) only. Are partners named specifically rather than described generically? Does the resources column show real awareness of what is needed? Is the EDO positioned as connector rather than sole provider?',
+  funding: 'Review Section 3 (Funding) only. Do the sources plausibly match each action step? Is the plan honest about what is currently funded versus aspirational? Note that repeating one real source across several steps is more credible than inventing variety.',
+  metrics: 'Review Section 4 (Metrics) only. Do the metrics measure the stated objective? Is each data source named and realistically obtainable by this candidate? Favor metrics collectable now over lagging outcomes.',
+  timeline: 'Review Section 5 (Timeline) only. Do early months front-load relationship building and quick wins? Are milestones written as outcomes rather than restated activities? Do the action items match those in Sections 2 and 3?',
+  full: 'Review the ENTIRE plan, weighting coherence above all: do the action steps in Section 2 recur in Sections 3 and 5, and do the metrics in Section 4 measure the objective in Section 1? Then give one sentence on readiness for the oral exam. Name at most two improvements across the whole plan.',
 };
 
 function renderPlan(plan) {
@@ -112,15 +106,38 @@ exports.handler = async function (event) {
       .limit(1)
       .single();
 
-    if (!license) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({ error: 'An active license is required for plan review.' }),
-      };
-    }
-
     const { section, plan } = JSON.parse(event.body || '{}');
     if (!plan) throw new Error('No plan data provided');
+
+    // Trial users get one review, and only of the objective section
+    let trialReview = false;
+    if (!license) {
+      if (section !== TRIAL_SECTION) {
+        return {
+          statusCode: 403,
+          body: JSON.stringify({
+            error: `Free trial includes one review of the Objective section. Unlock full access to review all five sections.`,
+            trialSection: TRIAL_SECTION,
+          }),
+        };
+      }
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('trial_reviews_used')
+        .eq('id', user.id)
+        .single();
+
+      if ((profile?.trial_reviews_used || 0) >= REVIEW_LIMIT) {
+        return {
+          statusCode: 403,
+          body: JSON.stringify({
+            error: 'You have used your free plan review. Unlock full access to review all five sections and export your plan.',
+            exhausted: true,
+          }),
+        };
+      }
+      trialReview = true;
+    }
 
     const focus = SECTION_FOCUS[section] || SECTION_FOCUS.full;
 
@@ -143,7 +160,7 @@ Give your feedback now.`;
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1200,
+        max_tokens: 600,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -160,6 +177,15 @@ Give your feedback now.`;
       .from('project_plans')
       .update({ last_reviewed_at: new Date().toISOString() })
       .eq('user_id', user.id);
+
+    if (trialReview) {
+      const { data: p } = await supabase
+        .from('profiles').select('trial_reviews_used').eq('id', user.id).single();
+      await supabase
+        .from('profiles')
+        .update({ trial_reviews_used: (p?.trial_reviews_used || 0) + 1 })
+        .eq('id', user.id);
+    }
 
     return {
       statusCode: 200,
