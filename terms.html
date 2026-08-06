@@ -7,26 +7,42 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
     :root {
-      --navy: #1C3A2A;
-      --blue: #2E6B48;
-      --amber: #D4A017;
-      --ink: #1C3A2A;
-      --muted: #5F7A6A;
-      --border: #DCEADF;
-      --surface: #F5FAF6;
-      --white: #ffffff;
+      /* --teal        surfaces, borders, accent-color. Never text.
+         --teal-text   all text on any background. AA everywhere.
+         --teal-dark   button hover fills.
+         --muted       secondary text. AA on all surfaces.        */
+      --bg: #F8FAFC;
+      --card: #FFFFFF;
+      --surface: #F8FAFC;
+      --surface2: #F1F5F9;
+      --teal: #17809D;
+      --teal-dark: #0F6480;
+      --teal-deep: #00374C;
+      --teal-tint: #E9F5F8;
+      --teal-border: #C1DFE4;
+      --teal-text: #0F6480;
+      --coral: #E79881;
+      --ink: #0F172A;
+      --muted: #5A6B80;
+      --border: #E2E8F0;
+      --good: #047857;
+      --good-bg: #ECFDF5;
+      --good-border: #A7F3D0;
+      --bad: #B91C1C;
+      --bad-bg: #FEF2F2;
+      --bad-border: #FECACA;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', system-ui, sans-serif;
       color: var(--ink);
-      background: var(--white);
+      background: var(--card);
       font-size: 16px;
       line-height: 1.7;
     }
     nav {
-      background: var(--white);
+      background: var(--card);
       border-bottom: 1px solid var(--border);
       padding: 0 24px;
       position: sticky;
@@ -41,27 +57,27 @@
       justify-content: space-between;
       height: 56px;
     }
-    .nav-logo { font-size: 14px; font-weight: 700; color: var(--blue); text-decoration: none; }
+    .nav-logo { font-size: 14px; font-weight: 700; color: var(--teal-text); text-decoration: none; }
     .nav-back { font-size: 13px; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; }
-    .nav-back:hover { color: var(--blue); }
+    .nav-back:hover { color: var(--teal-text); }
 
     .page { max-width: 800px; margin: 0 auto; padding: 56px 24px 80px; }
-    .page-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--blue); margin-bottom: 12px; }
-    .page-title { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(28px, 5vw, 42px); color: var(--navy); font-weight: 400; line-height: 1.15; margin-bottom: 12px; }
+    .page-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--teal-text); margin-bottom: 12px; }
+    .page-title { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(28px, 5vw, 42px); color: var(--teal-deep); font-weight: 400; line-height: 1.15; margin-bottom: 12px; }
     .page-meta { font-size: 14px; color: var(--muted); margin-bottom: 48px; padding-bottom: 32px; border-bottom: 2px solid var(--border); }
 
     .doc-section { margin-bottom: 40px; }
-    .doc-section h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 22px; font-weight: 400; color: var(--navy); margin-bottom: 14px; padding-top: 8px; }
+    .doc-section h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 22px; font-weight: 400; color: var(--teal-deep); margin-bottom: 14px; padding-top: 8px; }
     .doc-section p { color: #334155; margin-bottom: 14px; font-size: 15px; }
     .doc-section p:last-child { margin-bottom: 0; }
     .doc-section ul { margin: 10px 0 14px 20px; color: #334155; font-size: 15px; }
     .doc-section ul li { margin-bottom: 8px; }
-    .doc-section a { color: var(--blue); }
+    .doc-section a { color: var(--teal-text); }
 
     .highlight-box {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-left: 4px solid var(--amber);
+      border-left: 4px solid var(--teal);
       border-radius: 0 10px 10px 0;
       padding: 16px 20px;
       margin-bottom: 14px;
@@ -79,9 +95,9 @@
       color: #742a2a;
     }
 
-    footer { background: var(--navy); padding: 24px; text-align: center; }
-    .footer-text { font-size: 12px; color: #9CBFA8; }
-    .footer-text a { color: #9CBFA8; }
+    footer { background: var(--surface); padding: 24px; text-align: center; border-top: 1px solid var(--border); }
+    .footer-text { font-size: 12px; color: var(--muted); }
+    .footer-text a { color: var(--muted); }
   </style>
 </head>
 <body>

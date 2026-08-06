@@ -11,29 +11,38 @@
   <meta property="og:type" content="website" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --navy: #1C3A2A;
-      --navy2: #245239;
-      --blue: #2E6B48;
-      --blue-light: #E6F2EA;
-      --amber: #D4A017;
-      --amber-dark: #B8890F;
-      --amber-light: #FBF3DC;
-      --ink: #1C3A2A;
-      --muted: #5F7A6A;
-      --border: #DCEADF;
-      --surface: #F5FAF6;
-      --white: #ffffff;
-      --good: #27AE60;
-      --good-bg: #E8F5EA;
-      --good-border: #8CDDAA;
+    :root{
+      /* --teal        surfaces, borders, accent-color. Never text.
+         --teal-text   all text on any background. AA everywhere.
+         --teal-dark   button hover fills.
+         --muted       secondary text. AA on all surfaces.        */
+      --bg:#F8FAFC;
+      --card:#FFFFFF;
+      --surface:#F8FAFC;
+      --surface2:#F1F5F9;
+      --teal:#17809D;
+      --teal-dark:#0F6480;
+      --teal-deep:#00374C;
+      --teal-tint:#E9F5F8;
+      --teal-border:#C1DFE4;
+      --teal-text:#0F6480;
+      --coral:#E79881;
+      --ink:#0F172A;
+      --muted:#5A6B80;
+      --border:#E2E8F0;
+      --good:#047857;
+      --good-bg:#ECFDF5;
+      --good-border:#A7F3D0;
+      --bad:#B91C1C;
+      --bad-bg:#FEF2F2;
+      --bad-border:#FECACA;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', system-ui, sans-serif;
       color: var(--ink);
-      background: var(--white);
+      background: var(--card);
       line-height: 1.6;
       font-size: 16px;
     }
@@ -65,7 +74,7 @@
     .nav-logo-title {
       font-size: 15px;
       font-weight: 700;
-      color: var(--blue);
+      color: var(--teal-text);
       line-height: 1.1;
     }
     .nav-logo-sub {
@@ -88,13 +97,13 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-nav-ghost:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-nav-ghost:hover { border-color: var(--teal); color: var(--teal-text); }
     .btn-nav-primary {
       padding: 7px 16px;
       border: none;
       border-radius: 8px;
-      background: var(--amber);
-      color: var(--navy);
+      background: var(--teal);
+      color: #fff;
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
@@ -102,33 +111,37 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-nav-primary:hover { background: #B8890F; }
+    .btn-nav-primary:hover { background: var(--teal-dark); }
 
     /* ── Hero ── */
-    .hero {
-      background: linear-gradient(160deg, #1C3A2A 0%, #245239 50%, #2E6B48 100%);
-      padding: 80px 24px 0;
-      overflow: hidden;
+    .hero{
+      position:relative;
+      background:#fff;
+      overflow:hidden;
+      padding:80px 24px 90px;
     }
-    .hero-inner {
-      max-width: 1080px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-      align-items: end;
+    .hero::after{
+      content:'';
+      position:absolute;
+      top:0; right:0;
+      width:62%; height:100%;
+      background:url('/hero-gradient.png') no-repeat right center;
+      background-size:cover;
+      opacity:.9;
+      pointer-events:none;
+      z-index:0;
     }
-    @media (max-width: 768px) {
-      .hero-inner { grid-template-columns: 1fr; }
-      .hero-visual { display: none; }
+    .hero-inner{ position:relative; z-index:1; max-width:560px; }
+    @media(max-width:860px){
+      .hero::after{ width:100%; opacity:.28; }
     }
     .hero-eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(212,160,23,.15);
-      border: 1px solid rgba(212,160,23,.3);
-      color: var(--amber);
+      background: var(--teal-tint);
+      border: 1px solid var(--teal-border);
+      color: var(--teal-text);
       font-size: 12px;
       font-weight: 700;
       letter-spacing: .8px;
@@ -140,18 +153,18 @@
     .hero-title {
       font-family: 'DM Serif Display', Georgia, serif;
       font-size: clamp(32px, 5vw, 52px);
-      color: #ffffff;
+      color: var(--ink);
       line-height: 1.15;
       margin-bottom: 18px;
       font-weight: 400;
     }
     .hero-title em {
-      color: var(--amber);
+      color: var(--teal-text);
       font-style: normal;
     }
     .hero-sub {
       font-size: 17px;
-      color: #9CBFA8;
+      color: var(--muted);
       line-height: 1.7;
       margin-bottom: 32px;
       max-width: 480px;
@@ -167,8 +180,8 @@
       align-items: center;
       gap: 8px;
       padding: 14px 28px;
-      background: var(--amber);
-      color: var(--navy);
+      background: var(--teal);
+      color: #fff;
       border: none;
       border-radius: 10px;
       font-size: 15px;
@@ -178,15 +191,15 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-hero-primary:hover { background: #B8890F; transform: translateY(-1px); }
+    .btn-hero-primary:hover { background: var(--teal-dark); transform: translateY(-1px); }
     .btn-hero-ghost {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 14px 28px;
-      background: rgba(255,255,255,.08);
-      color: #ffffff;
-      border: 1px solid rgba(255,255,255,.2);
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--border);
       border-radius: 10px;
       font-size: 15px;
       font-weight: 600;
@@ -195,7 +208,7 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-hero-ghost:hover { background: rgba(255,255,255,.14); }
+    .btn-hero-ghost:hover { background: var(--surface2); }
     .hero-trust {
       display: flex;
       align-items: center;
@@ -207,12 +220,12 @@
       align-items: center;
       gap: 6px;
       font-size: 13px;
-      color: #9CBFA8;
+      color: var(--muted);
     }
     .trust-check {
       width: 16px;
       height: 16px;
-      background: rgba(212,160,23,.2);
+      background: var(--teal-tint);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -222,100 +235,8 @@
     .trust-check::after {
       content: '✓';
       font-size: 9px;
-      color: var(--amber);
+      color: var(--teal-text);
       font-weight: 700;
-    }
-
-    /* ── Hero visual: animated screenshot stack ── */
-    .hero-visual {
-      position: relative;
-      height: 460px;
-      align-self: end;
-    }
-    .screen-card {
-      position: absolute;
-      background: #245239;
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,.4);
-    }
-    .screen-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: top;
-      display: block;
-    }
-    .screen-main {
-      width: 420px;
-      height: 320px;
-      bottom: 0;
-      right: 0;
-      animation: floatMain 4s ease-in-out infinite;
-    }
-    .screen-float {
-      width: 240px;
-      height: 180px;
-      top: 20px;
-      left: 0;
-      animation: floatSecond 4s ease-in-out infinite 1s;
-    }
-    .screen-pill {
-      position: absolute;
-      bottom: 80px;
-      left: -10px;
-      background: #0a2318;
-      border: 1px solid #4A9E6F;
-      border-radius: 10px;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      animation: floatPill 4s ease-in-out infinite .5s;
-      white-space: nowrap;
-      z-index: 10;
-    }
-    .screen-pill-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #4A9E6F;
-      flex-shrink: 0;
-    }
-    .screen-pill-text { font-size: 12px; color: #6fcf97; font-weight: 600; }
-    .screen-badge {
-      position: absolute;
-      top: 160px;
-      right: -10px;
-      background: #1F1A08;
-      border: 1px solid #B8890F;
-      border-radius: 10px;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      animation: floatBadge 4s ease-in-out infinite 2s;
-      white-space: nowrap;
-      z-index: 10;
-    }
-    .screen-badge-icon { font-size: 18px; }
-    .screen-badge-text { font-size: 12px; color: #D4A017; font-weight: 600; }
-    @keyframes floatMain {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    @keyframes floatSecond {
-      0%, 100% { transform: translateY(0) rotate(-3deg); }
-      50% { transform: translateY(-6px) rotate(-3deg); }
-    }
-    @keyframes floatPill {
-      0%, 100% { transform: translateY(0) translateX(0); }
-      50% { transform: translateY(-5px) translateX(3px); }
-    }
-    @keyframes floatBadge {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
     }
 
     /* ── Sections ── */
@@ -326,13 +247,13 @@
       font-weight: 700;
       letter-spacing: .8px;
       text-transform: uppercase;
-      color: var(--blue);
+      color: var(--teal-text);
       margin-bottom: 12px;
     }
     .section-title {
       font-family: 'DM Serif Display', Georgia, serif;
       font-size: clamp(26px, 4vw, 38px);
-      color: var(--navy);
+      color: var(--teal-deep);
       font-weight: 400;
       line-height: 1.2;
       margin-bottom: 16px;
@@ -353,7 +274,7 @@
       margin-top: 48px;
     }
     .step-card {
-      background: var(--white);
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 28px 24px;
@@ -362,8 +283,8 @@
       width: 40px;
       height: 40px;
       border-radius: 10px;
-      background: var(--blue-light);
-      color: var(--blue);
+      background: var(--teal-tint);
+      color: var(--teal-text);
       font-size: 16px;
       font-weight: 700;
       display: flex;
@@ -374,7 +295,7 @@
     .step-title {
       font-size: 16px;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--teal-deep);
       margin-bottom: 8px;
     }
     .step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
@@ -391,7 +312,7 @@
       width: 44px;
       height: 44px;
       border-radius: 10px;
-      background: var(--blue-light);
+      background: var(--teal-tint);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -401,16 +322,16 @@
     .feature-title {
       font-size: 15px;
       font-weight: 700;
-      color: var(--navy);
+      color: var(--teal-deep);
       margin-bottom: 6px;
     }
     .feature-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
 
     /* ── Screenshots showcase ── */
-    .screenshots-bg { background: var(--navy); }
-    .screenshots-bg .section-title { color: #ffffff; }
-    .screenshots-bg .section-sub { color: #9CBFA8; }
-    .screenshots-bg .section-eyebrow { color: var(--amber); }
+    .screenshots-bg { background: var(--teal-tint); }
+    .screenshots-bg .section-title { color: var(--teal-deep); }
+    .screenshots-bg .section-sub { color: var(--muted); }
+    .screenshots-bg .section-eyebrow { color: var(--teal-text); }
     .screenshots-tabs {
       display: flex;
       gap: 8px;
@@ -420,9 +341,9 @@
     .ss-tab {
       padding: 8px 16px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,.15);
-      background: transparent;
-      color: #9CBFA8;
+      border: 1px solid var(--teal-border);
+      background: var(--card);
+      color: var(--muted);
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
@@ -430,17 +351,17 @@
       font-family: inherit;
     }
     .ss-tab.active {
-      background: var(--amber);
-      border-color: var(--amber);
-      color: var(--navy);
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
     }
-    .ss-tab:hover:not(.active) { border-color: rgba(255,255,255,.35); color: #ffffff; }
+    .ss-tab:hover:not(.active) { border-color: var(--teal); color: var(--teal-text); }
     .ss-display {
       border-radius: 16px;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,.1);
-      box-shadow: 0 30px 80px rgba(0,0,0,.5);
-      background: #1C3A2A;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(15,23,42,.12);
+      background: var(--card);
       max-width: 880px;
       margin: 0 auto;
     }
@@ -451,8 +372,8 @@
     }
     .ss-caption {
       padding: 16px 20px;
-      background: rgba(255,255,255,.04);
-      border-top: 1px solid rgba(255,255,255,.08);
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 10px;
@@ -461,10 +382,10 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--amber);
+      background: var(--teal);
       flex-shrink: 0;
     }
-    .ss-caption-text { font-size: 13px; color: #9CBFA8; }
+    .ss-caption-text { font-size: 13px; color: var(--muted); }
 
     /* ── Pricing ── */
     .pricing-grid {
@@ -475,21 +396,21 @@
       max-width: 720px;
     }
     .pricing-card {
-      background: var(--white);
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 32px 28px;
       position: relative;
     }
     .pricing-card.featured {
-      border: 2px solid var(--blue);
+      border: 2px solid var(--teal);
     }
     .pricing-badge {
       position: absolute;
       top: -12px;
       left: 50%;
       transform: translateX(-50%);
-      background: var(--blue);
+      background: var(--teal);
       color: #ffffff;
       font-size: 11px;
       font-weight: 700;
@@ -510,7 +431,7 @@
     .pricing-price {
       font-family: 'DM Serif Display', Georgia, serif;
       font-size: 48px;
-      color: var(--navy);
+      color: var(--teal-deep);
       line-height: 1;
       margin-bottom: 4px;
     }
@@ -539,7 +460,7 @@
       display: block;
       width: 100%;
       padding: 13px;
-      background: var(--blue);
+      background: var(--teal);
       color: #ffffff;
       border: none;
       border-radius: 10px;
@@ -551,13 +472,13 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-pricing-primary:hover { background: #245239; }
+    .btn-pricing-primary:hover { background: var(--teal-dark); }
     .btn-pricing-ghost {
       display: block;
       width: 100%;
       padding: 13px;
       background: transparent;
-      color: var(--blue);
+      color: var(--teal-text);
       border: 1.5px solid var(--border);
       border-radius: 10px;
       font-size: 14px;
@@ -568,39 +489,41 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-pricing-ghost:hover { border-color: var(--blue); background: var(--blue-light); }
+    .btn-pricing-ghost:hover { border-color: var(--teal); background: var(--teal-tint); color: var(--teal-text); }
 
     /* ── CTA band ── */
     .cta-band {
-      background: linear-gradient(135deg, #1C3A2A, #2E6B48);
+      background: var(--surface);
       padding: 80px 24px;
       text-align: center;
+      border-top: 1px solid var(--border);
     }
     .cta-band h2 {
       font-family: 'DM Serif Display', Georgia, serif;
       font-size: clamp(26px, 4vw, 40px);
-      color: #ffffff;
+      color: var(--teal-deep);
       font-weight: 400;
       margin-bottom: 14px;
     }
-    .cta-band p { font-size: 17px; color: #9CBFA8; margin-bottom: 32px; }
+    .cta-band p { font-size: 17px; color: var(--muted); margin-bottom: 32px; }
     .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
     /* ── Footer ── */
     footer {
-      background: var(--navy);
+      background: var(--card);
       padding: 32px 24px;
       text-align: center;
+      border-top: 1px solid var(--border);
     }
     .footer-inner { max-width: 1080px; margin: 0 auto; }
-    .footer-logo { font-size: 14px; font-weight: 700; color: #9CBFA8; margin-bottom: 8px; }
-    .footer-sub { font-size: 12px; color: #9CBFA8; }
+    .footer-logo { font-size: 14px; font-weight: 700; color: var(--muted); margin-bottom: 8px; }
+    .footer-sub { font-size: 12px; color: var(--muted); }
 
     /* ── Auth Modal ── */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.65);
+      background: rgba(15,23,42,.5);
       z-index: 100;
       display: flex;
       align-items: center;
@@ -610,20 +533,20 @@
     }
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
     .modal {
-      background: #ffffff;
+      background: var(--card);
       border-radius: 20px;
       padding: 32px;
       width: 100%;
       max-width: 420px;
-      box-shadow: 0 30px 80px rgba(0,0,0,.25);
+      box-shadow: 0 30px 80px rgba(15,23,42,.18);
     }
     .modal-header { margin-bottom: 24px; }
-    .modal-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+    .modal-title { font-size: 22px; font-weight: 700; color: var(--teal-deep); margin-bottom: 6px; }
     .modal-sub { font-size: 14px; color: var(--muted); }
     .modal-tabs {
       display: flex;
       gap: 4px;
-      background: var(--surface);
+      background: var(--surface2);
       border-radius: 10px;
       padding: 4px;
       margin-bottom: 24px;
@@ -641,7 +564,7 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .modal-tab.active { background: var(--white); color: var(--navy); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .modal-tab.active { background: var(--card); color: var(--teal-deep); box-shadow: 0 1px 3px rgba(15,23,42,.08); }
     .form-group { margin-bottom: 16px; }
     .form-label {
       display: block;
@@ -662,12 +585,12 @@
       outline: none;
       transition: border-color .12s;
       font-family: inherit;
-      background: var(--white);
+      background: var(--card);
     }
-    .form-input:focus { border-color: var(--blue); }
+    .form-input:focus { border-color: var(--teal); }
     .form-error {
       font-size: 13px;
-      color: #dc2626;
+      color: var(--bad);
       margin-top: 8px;
       display: none;
     }
@@ -675,7 +598,7 @@
     .btn-modal-primary {
       width: 100%;
       padding: 13px;
-      background: var(--blue);
+      background: var(--teal);
       color: #ffffff;
       border: none;
       border-radius: 10px;
@@ -687,13 +610,13 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-modal-primary:hover { background: #245239; }
+    .btn-modal-primary:hover { background: var(--teal-dark); }
     .btn-modal-primary:disabled { opacity: .5; cursor: not-allowed; }
     .btn-modal-amber {
       width: 100%;
       padding: 13px;
-      background: var(--amber);
-      color: var(--navy);
+      background: var(--teal);
+      color: #ffffff;
       border: none;
       border-radius: 10px;
       font-size: 15px;
@@ -703,7 +626,7 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-modal-amber:hover { background: #B8890F; }
+    .btn-modal-amber:hover { background: var(--teal-dark); }
     .btn-modal-amber:disabled { opacity: .5; cursor: not-allowed; }
     .btn-modal-ghost {
       width: 100%;
@@ -718,7 +641,7 @@
       transition: all .12s;
       font-family: inherit;
     }
-    .btn-modal-ghost:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-modal-ghost:hover { border-color: var(--teal); color: var(--teal-text); }
     .modal-divider {
       display: flex;
       align-items: center;
@@ -756,7 +679,7 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    .price-big { font-size: 42px; font-weight: 800; color: var(--navy); line-height: 1; }
+    .price-big { font-size: 42px; font-weight: 800; color: var(--teal-deep); line-height: 1; }
     .price-period { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
     /* ── Misc ── */
@@ -800,16 +723,6 @@
         <div class="trust-item"><div class="trust-check"></div>2-year license</div>
         <div class="trust-item"><div class="trust-check"></div>Over 150 practice questions</div>
       </div>
-    </div>
-
-    <div class="hero-visual">
-      <div class="screen-card screen-float">
-        <img src="Quiz_Results_Screenshot.png" alt="Quiz results with percentile ranking" />
-      </div>
-      <div class="screen-card screen-main">
-        <img src="Wrong_Answer.png" alt="Wrong answer with Explain This feature" />
-      </div>
-
     </div>
   </div>
 </div>
@@ -953,7 +866,7 @@
       </div>
     </div>
     <p style="margin-top:24px;font-size:13px;color:var(--muted)">
-      Coordinating a cohort? <a href="mailto:info@cherryandelm.com" style="color:var(--blue);font-weight:600">Contact us</a> about bulk licensing at $99/seat.
+      Coordinating a cohort? <a href="mailto:info@cherryandelm.com" style="color:var(--teal-text);font-weight:600">Contact us</a> about bulk licensing at $99/seat.
     </p>
   </div>
 </section>
@@ -977,7 +890,7 @@
 <footer>
   <div class="footer-inner">
     <div class="footer-logo">EDP Study Tool</div>
-    <div class="footer-sub">© 2026 Cherry &amp; Elm LLC · Helena, Arkansas · <a href="mailto:info@cherryandelm.com" style="color:#9CBFA8">info@cherryandelm.com</a> · <a href="/privacy.html" style="color:#9CBFA8">Privacy</a> · <a href="/terms.html" style="color:#9CBFA8">Terms</a></div>
+    <div class="footer-sub">© 2026 Cherry &amp; Elm LLC · Helena, Arkansas · <a href="mailto:info@cherryandelm.com" style="color:#5A6B80">info@cherryandelm.com</a> · <a href="/privacy.html" style="color:#5A6B80">Privacy</a> · <a href="/terms.html" style="color:#5A6B80">Terms</a></div>
   </div>
 </footer>
 
@@ -1088,7 +1001,7 @@
         </div>
         <div class="form-error" id="purchaseError"></div>
         <button class="btn-modal-amber" id="purchaseBtn" onclick="doPurchase()">Create Account &amp; Continue to Payment</button>
-        <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px">Already have an account? <a href="#" style="color:var(--blue)" onclick="switchView('trial');switchModalTab('trial','login');return false">Sign in first</a>, then purchase.</p>
+        <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px">Already have an account? <a href="#" style="color:var(--teal-text)" onclick="switchView('trial');switchModalTab('trial','login');return false">Sign in first</a>, then purchase.</p>
       </div>
       <div id="purchaseLoggedInStep" class="hidden">
         <p style="font-size:14px;color:var(--muted);margin-bottom:16px">You're signed in as <strong id="purchaseLoggedEmail" style="color:var(--ink)"></strong>. Click below to complete your purchase.</p>

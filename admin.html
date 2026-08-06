@@ -8,18 +8,30 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <style>
     :root {
-      --navy: #0f2744;
-      --blue: #1a5496;
-      --amber: #f0b429;
-      --ink: #0f2744;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --surface: #f8fafc;
-      --white: #ffffff;
-      --good: #15803d;
-      --good-bg: #f0fdf4;
-      --bad: #b91c1c;
-      --bad-bg: #fef2f2;
+      /* --teal        surfaces, borders, accent-color. Never text.
+         --teal-text   all text on any background. AA everywhere.
+         --teal-dark   button hover fills.
+         --muted       secondary text. AA on all surfaces.        */
+      --bg: #F8FAFC;
+      --card: #FFFFFF;
+      --surface: #F8FAFC;
+      --surface2: #F1F5F9;
+      --teal: #17809D;
+      --teal-dark: #0F6480;
+      --teal-deep: #00374C;
+      --teal-tint: #E9F5F8;
+      --teal-border: #C1DFE4;
+      --teal-text: #0F6480;
+      --coral: #E79881;
+      --ink: #0F172A;
+      --muted: #5A6B80;
+      --border: #E2E8F0;
+      --good: #047857;
+      --good-bg: #ECFDF5;
+      --good-border: #A7F3D0;
+      --bad: #B91C1C;
+      --bad-bg: #FEF2F2;
+      --bad-border: #FECACA;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', system-ui, sans-serif; color: var(--ink); background: var(--surface); font-size: 14px; }
@@ -29,24 +41,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(160deg, #0f2744, #1a5496);
+      background: var(--surface);
     }
     .login-box {
-      background: white;
+      background: var(--card);
       border-radius: 16px;
       padding: 36px;
       width: 100%;
       max-width: 360px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      box-shadow: 0 20px 60px rgba(15,23,42,.12);
+      border: 1px solid var(--border);
     }
-    .login-box h1 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--navy); margin-bottom: 6px; }
+    .login-box h1 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--teal-deep); margin-bottom: 6px; }
     .login-box p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
     .login-box input {
       width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
       border-radius: 10px; font-size: 14px; margin-bottom: 14px; font-family: inherit;
     }
     .login-box button {
-      width: 100%; padding: 12px; background: var(--blue); color: white;
+      width: 100%; padding: 12px; background: var(--teal); color: white;
       border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
     }
     .login-error { color: var(--bad); font-size: 13px; margin-top: 10px; display: none; }
@@ -56,21 +69,21 @@
     .dashboard.show { display: block; }
 
     .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-    .dash-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); }
+    .dash-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--teal-deep); }
     .dash-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
     .refresh-btn {
-      padding: 8px 16px; background: white; border: 1px solid var(--border);
-      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--blue);
+      padding: 8px 16px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--teal-text);
     }
 
     .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
-    .stat-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
     .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 6px; }
-    .stat-value { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; }
+    .stat-value { font-size: 28px; font-weight: 800; color: var(--teal-deep); line-height: 1; }
     .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-    .section { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-    .section h2 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 14px; }
+    .section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 15px; font-weight: 700; color: var(--teal-deep); margin-bottom: 14px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th { text-align: left; padding: 8px 10px; color: var(--muted); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; border-bottom: 1.5px solid var(--border); }
@@ -81,7 +94,7 @@
     .pill.bad { background: var(--bad-bg); color: var(--bad); }
 
     .progress-bar-bg { background: var(--border); border-radius: 6px; height: 6px; width: 100%; overflow: hidden; }
-    .progress-bar-fill { background: var(--blue); height: 100%; border-radius: 6px; }
+    .progress-bar-fill { background: var(--teal); height: 100%; border-radius: 6px; }
 
     .loading { text-align: center; padding: 40px; color: var(--muted); }
   </style>
@@ -158,7 +171,7 @@ function render(data){
   // Top stat cards
   const trackStart = new Date(data.traffic.trackingStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   let html = `
-    <div style="background:#fffbeb;border:1px solid #f6e05e;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:12px;color:#92600a">
+    <div style="background:#FBEEE9;border:1px solid #E79881;border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:12px;color:#0F172A">
       📊 Visit tracking began ${trackStart}. Conversion rate and visit counts will become more meaningful as more data accumulates.
     </div>
     <div class="stat-grid">
@@ -211,7 +224,7 @@ function render(data){
       const h = Math.max(4, Math.round((v / maxVisits) * 90));
       const label = new Date(day).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
       html += `<div style="flex:1;text-align:center">
-        <div style="background:var(--blue);height:${h}px;border-radius:3px 3px 0 0;margin:0 auto;width:70%" title="${v} visits"></div>
+        <div style="background:var(--teal);height:${h}px;border-radius:3px 3px 0 0;margin:0 auto;width:70%" title="${v} visits"></div>
         <div style="font-size:9px;color:var(--muted);margin-top:4px">${label}</div>
       </div>`;
     });
