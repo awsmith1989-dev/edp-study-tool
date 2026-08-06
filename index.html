@@ -127,9 +127,9 @@
       width:62%; height:100%;
       background:url('/hero-gradient.png') no-repeat right center;
       background-size:cover;
-      opacity:.9;
+      -webkit-mask-image:linear-gradient(to right, transparent 0%, #000 22%, #000 100%);
+      mask-image:linear-gradient(to right, transparent 0%, #000 22%, #000 100%);
       pointer-events:none;
-      z-index:0;
     }
     .hero-inner{ position:relative; z-index:1; max-width:560px; }
     @media(max-width:860px){
