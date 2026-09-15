@@ -98,17 +98,47 @@ exports.handler = async function(event) {
       if (a.correct) userActivityMap[a.user_id].correct++;
     });
 
-    const userEmailMap = {};
-    users.forEach(u => { userEmailMap[u.id] = u.email; });
+    const userInfoMap = {};
+    users.forEach(u => {
+      const name = [u.user_metadata?.first_name, u.user_metadata?.last_name].filter(Boolean).join(' ');
+      userInfoMap[u.id] = { email: u.email, name: name || null };
+    });
 
     const topUsers = Object.entries(userActivityMap)
       .map(([userId, stats]) => ({
-        email: userEmailMap[userId] || 'Unknown',
+        email: userInfoMap[userId]?.email || 'Unknown',
         questionsAnswered: stats.total,
         accuracy: stats.total ? Math.round((stats.correct / stats.total) * 100) : 0,
       }))
       .sort((a, b) => b.questionsAnswered - a.questionsAnswered)
       .slice(0, 20);
+
+    // ── Daily active users (last 14 days, named/emailed) ────────
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    fourteenDaysAgo.setHours(0, 0, 0, 0);
+
+    const { data: recentActivity } = await supabase
+      .from('study_activity')
+      .select('user_id, created_at')
+      .gte('created_at', fourteenDaysAgo.toISOString());
+
+    const dailyActiveUserIds = {};
+    (recentActivity || []).forEach(a => {
+      const day = new Date(a.created_at).toISOString().split('T')[0];
+      if (!dailyActiveUserIds[day]) dailyActiveUserIds[day] = new Set();
+      dailyActiveUserIds[day].add(a.user_id);
+    });
+
+    const dailyActiveUsers = {};
+    Object.entries(dailyActiveUserIds).forEach(([day, idSet]) => {
+      dailyActiveUsers[day] = Array.from(idSet)
+        .map(id => userInfoMap[id] || { email: 'Unknown', name: null })
+        .sort((a, b) => a.email.localeCompare(b.email));
+    });
+
+    const today = now.split('T')[0];
+    const activeTodayCount = dailyActiveUsers[today]?.length || 0;
 
     // ── Page visits & conversion ────────────────────────────────
     // Conversion rate only counts signups since visit tracking began —
@@ -169,6 +199,10 @@ exports.handler = async function(event) {
           totalAnswered: totalAnswered || 0,
           overallAccuracy,
           topUsers,
+        },
+        engagement: {
+          activeTodayCount,
+          dailyActiveUsers,
         },
         traffic: {
           totalVisits30d: totalVisits || 0,
