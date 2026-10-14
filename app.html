@@ -225,8 +225,8 @@
     .modal-tab.active{background:var(--card);color:var(--ink)}
     .form-group{margin-bottom:14px}
     .form-group label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-    .form-group input{width:100%;padding:10px 12px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;color:var(--ink);font-size:14px;outline:none;transition:border-color .12s}
-    .form-group input:focus{border-color:var(--teal)}
+    .form-group input,.form-group select{width:100%;padding:10px 12px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;color:var(--ink);font-size:14px;outline:none;transition:border-color .12s;font-family:inherit}
+    .form-group input:focus,.form-group select:focus{border-color:var(--teal)}
     .form-error{color:var(--bad);font-size:13px;margin-top:8px;display:none}
     .form-error.show{display:block}
     .modal-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--muted);font-size:13px}
@@ -242,9 +242,22 @@
     .trial-bar{background:var(--teal-tint);border:1px solid var(--teal-border);border-radius:10px;padding:8px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
     .trial-bar strong{color:var(--teal-deep)}
 
+    /* ── Beta banner ── */
+    .beta-banner{background:var(--teal-tint);border:1px solid var(--teal-border);border-radius:10px;padding:8px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--teal-deep)}
+    .beta-banner button{background:none;border:none;color:var(--teal-text);cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;padding:0 2px}
+
     /* ── License info ── */
     .license-info{font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
     .license-info strong{color:var(--good)}
+
+    /* ── Flag this question ── */
+    .flag-row{margin-top:10px}
+    .flag-toggle{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:2px 0;text-decoration:underline}
+    .flag-toggle:hover{color:var(--ink)}
+    .flag-form{margin-top:8px;border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:12px}
+    .flag-form select,.flag-form textarea{width:100%;padding:8px 10px;background:var(--card);border:1.5px solid var(--border);border-radius:8px;color:var(--ink);font-size:13px;font-family:inherit;outline:none;margin-bottom:8px}
+    .flag-form textarea{resize:vertical;min-height:50px}
+    .flag-form .row{justify-content:flex-end}
 
     footer{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
   </style>
@@ -271,6 +284,12 @@
   </nav>
 
   <div id="appShell">
+    <!-- Beta mode banner -->
+    <div class="beta-banner" id="betaBanner" style="display:none">
+      <div id="betaBannerText"></div>
+      <button onclick="dismissBetaBanner()" aria-label="Dismiss">&times;</button>
+    </div>
+
     <!-- Trial bar shown during trial mode -->
     <div class="trial-bar" id="trialBar" style="display:none">
       <div>🎓 <strong>Free Trial</strong> — <span id="trialCount">20</span> questions remaining</div>
@@ -412,6 +431,17 @@
         <label>Password</label>
         <input type="password" id="regPassword" placeholder="At least 8 characters" autocomplete="new-password" />
       </div>
+      <div class="form-group">
+        <label>Which certification are you working toward?</label>
+        <select id="regCertPathway">
+          <option value="" disabled selected>Select one…</option>
+          <option value="EDP">EDP</option>
+          <option value="CEcD">CEcD</option>
+          <option value="CED">CED</option>
+          <option value="Other">Other</option>
+          <option value="Just learning">Just learning</option>
+        </select>
+      </div>
       <div class="form-error" id="regError"></div>
       <button class="btn primary" style="width:100%;margin-top:4px" id="regBtn" onclick="doRegister()">Create Account</button>
       <div class="modal-divider">or</div>
@@ -460,6 +490,59 @@
     <div style="text-align:center;margin-top:14px">
       <button class="btn ghost btn-sm" onclick="closePaywall()" style="font-size:13px">Continue free trial</button>
     </div>
+  </div>
+</div>
+
+<!-- Certification Pathway Modal (existing-user one-time prompt) -->
+<div class="modal-overlay" id="certPathwayModal" style="display:none">
+  <div class="modal">
+    <h2 style="color:var(--teal-deep)">One quick question</h2>
+    <p>Which certification are you working toward? This helps us tailor the tool to you.</p>
+    <div class="form-group">
+      <select id="certPathwaySelect">
+        <option value="" disabled selected>Select one…</option>
+        <option value="EDP">EDP</option>
+        <option value="CEcD">CEcD</option>
+        <option value="CED">CED</option>
+        <option value="Other">Other</option>
+        <option value="Just learning">Just learning</option>
+      </select>
+    </div>
+    <button class="btn primary" style="width:100%;margin-bottom:8px" id="certPathwaySubmitBtn" onclick="submitCertPathway()">Continue</button>
+    <button class="btn ghost" style="width:100%;font-size:13px" onclick="skipCertPathway()">Skip for now</button>
+  </div>
+</div>
+
+<!-- In-app Survey Modal -->
+<div class="modal-overlay" id="surveyModal" style="display:none">
+  <div class="modal">
+    <h2 style="color:var(--teal-deep)">Quick feedback?</h2>
+    <p>You're one of our first beta users — three short questions, then back to studying.</p>
+    <div class="form-group">
+      <label>How useful is this for your exam prep?</label>
+      <select id="surveyUsefulness">
+        <option value="5">5 — Extremely useful</option>
+        <option value="4">4</option>
+        <option value="3" selected>3</option>
+        <option value="2">2</option>
+        <option value="1">1 — Not useful</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>What's missing or frustrating? (optional)</label>
+      <textarea id="surveyFeedback" rows="3" style="width:100%;padding:10px 12px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;color:var(--ink);font-size:14px;font-family:inherit;resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label>If this weren't free, would you pay for it?</label>
+      <select id="surveyWouldPay">
+        <option value="yes">Yes</option>
+        <option value="maybe" selected>Maybe</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+    <div class="form-error" id="surveyError"></div>
+    <button class="btn primary" style="width:100%;margin-bottom:8px" id="surveySubmitBtn" onclick="submitSurvey()">Submit Feedback</button>
+    <button class="btn ghost" style="width:100%;font-size:13px" onclick="dismissSurvey()">No thanks</button>
   </div>
 </div>
 
@@ -578,6 +661,26 @@ function updateTrialBar(){
   if (countEl) countEl.textContent = trialStatus.trial.questionsRemaining;
 }
 
+// ── Beta mode banner ─────────────────────────────────────────────
+const BETA_BANNER_DISMISS_KEY = 'edp-beta-banner-dismissed';
+function isOnBetaLicense(){ return session?.license?.license_type === 'beta'; }
+function updateBetaBanner(){
+  const el = $('betaBanner');
+  if (!el) return;
+  if (!isOnBetaLicense() || localStorage.getItem(BETA_BANNER_DISMISS_KEY)){
+    el.style.display = 'none';
+    return;
+  }
+  const exp = new Date(session.license.expires_at);
+  const fmt = exp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  $('betaBannerText').textContent = `Free beta access through ${fmt}. Your feedback shapes the tool.`;
+  el.style.display = 'flex';
+}
+function dismissBetaBanner(){
+  localStorage.setItem(BETA_BANNER_DISMISS_KEY, '1');
+  updateBetaBanner();
+}
+
 // ── Quiz state ────────────────────────────────────────────────
 const state = loadState();
 
@@ -616,6 +719,59 @@ function showPaywall(){
 }
 function closePaywall(){
   $('paywallModal').style.display = 'none';
+}
+
+// ── Certification pathway prompt (existing users) ────────────────
+function showCertPathwayModalIfNeeded(needsCertPathway){
+  if (needsCertPathway) $('certPathwayModal').style.display = 'flex';
+}
+async function updateCertPathway(certPathway){
+  try {
+    await fetch('/.netlify/functions/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+      body: JSON.stringify({ action: 'update-cert-pathway', certPathway: certPathway || undefined }),
+    });
+  } catch(_){}
+}
+function submitCertPathway(){
+  const val = $('certPathwaySelect').value;
+  if (!val) return;
+  $('certPathwayModal').style.display = 'none';
+  updateCertPathway(val);
+}
+function skipCertPathway(){
+  $('certPathwayModal').style.display = 'none';
+  updateCertPathway(null);
+}
+
+// ── In-app beta survey ────────────────────────────────────────────
+function showSurveyModal(){
+  $('surveyModal').style.display = 'flex';
+}
+function dismissSurvey(){
+  $('surveyModal').style.display = 'none';
+}
+async function submitSurvey(){
+  const usefulness = Number($('surveyUsefulness').value);
+  const feedback = $('surveyFeedback').value.trim();
+  const wouldPay = $('surveyWouldPay').value;
+  setFormError('surveyError', '');
+  setButtonLoading('surveySubmitBtn', true, 'Submit Feedback');
+  try {
+    const res = await fetch('/.netlify/functions/submit-survey', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.token },
+      body: JSON.stringify({ usefulness, feedback, wouldPay }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not submit feedback');
+    $('surveyModal').style.display = 'none';
+  } catch(err){
+    setFormError('surveyError', err.message);
+  } finally {
+    setButtonLoading('surveySubmitBtn', false, 'Submit Feedback');
+  }
 }
 
 function switchTab(tab){
@@ -665,6 +821,8 @@ async function doLogin(){
     updateHeaderAuth();
     await loadTrialStatus();
     updateLicenseInfo();
+    updateBetaBanner();
+    showCertPathwayModalIfNeeded(data.needsCertPathway);
 
     if (!data.license) {
       showPaywall();
@@ -679,16 +837,18 @@ async function doLogin(){
 async function doRegister(){
   const email = $('regEmail').value.trim();
   const password = $('regPassword').value;
+  const certPathway = $('regCertPathway').value;
   setFormError('regError', '');
   if (!email || !password){ setFormError('regError', 'Email and password required.'); return; }
   if (password.length < 8){ setFormError('regError', 'Password must be at least 8 characters.'); return; }
+  if (!certPathway){ setFormError('regError', "Please select which certification you're working toward."); return; }
   setButtonLoading('regBtn', true, 'Create Account');
 
   try {
     const res = await fetch('/.netlify/functions/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'register', email, password }),
+      body: JSON.stringify({ action: 'register', email, password, certPathway }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Registration failed');
@@ -707,6 +867,7 @@ async function doRegister(){
     closeModal();
     updateHeaderAuth();
     await loadTrialStatus();
+    updateBetaBanner();
     // Show redeem or paywall
     if (!loginData.license) switchTab('redeem'), $('authModal').style.display = 'flex';
 
@@ -1027,6 +1188,24 @@ function renderQ(q){
     <h3>${q.question}</h3>
     <div class="options">${opts}</div>
     <div id="feedback" class="small"></div>
+    <div class="flag-row">
+      <button class="flag-toggle" id="flagToggleBtn">🚩 Flag this question</button>
+      <div class="flag-form" id="flagForm" style="display:none">
+        <select id="flagReason">
+          <option value="Wrong answer">Wrong answer</option>
+          <option value="Unclear wording">Unclear wording</option>
+          <option value="Outdated">Outdated</option>
+          <option value="Too easy">Too easy</option>
+          <option value="Other">Other</option>
+        </select>
+        <textarea id="flagComment" placeholder="Optional comment"></textarea>
+        <div class="row">
+          <button class="btn sm ghost" id="flagCancelBtn">Cancel</button>
+          <button class="btn sm primary" id="flagSubmitBtn">Submit</button>
+        </div>
+      </div>
+      <div class="small muted" id="flagThanks" style="display:none">Thanks — flagged for review.</div>
+    </div>
   `;
   document.querySelectorAll('.opt').forEach(el=>{
     el.addEventListener('click',()=>{
@@ -1040,6 +1219,32 @@ function renderQ(q){
       renderStats();
     });
   });
+  $('flagToggleBtn')?.addEventListener('click',()=>{
+    $('flagForm').style.display='block';
+    $('flagToggleBtn').style.display='none';
+  });
+  $('flagCancelBtn')?.addEventListener('click',()=>{
+    $('flagForm').style.display='none';
+    $('flagToggleBtn').style.display='inline';
+  });
+  $('flagSubmitBtn')?.addEventListener('click',()=>submitFlag(q));
+}
+
+async function submitFlag(q){
+  if(!q?.id||!isLoggedIn())return;
+  const reason=$('flagReason').value;
+  const comment=$('flagComment').value.trim();
+  const btn=$('flagSubmitBtn');
+  if(btn){btn.disabled=true;btn.textContent='Submitting…';}
+  try{
+    await fetch('/.netlify/functions/flag-question',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.token},
+      body:JSON.stringify({questionId:q.id,reason,comment}),
+    });
+  }catch(_){}
+  const form=$('flagForm');if(form)form.style.display='none';
+  const thanks=$('flagThanks');if(thanks)thanks.style.display='block';
 }
 
 const ACCURACY_RING_CIRCUMFERENCE = 2 * Math.PI * 18;
@@ -1212,6 +1417,7 @@ async function logActivity(payload, isRetry){
       trialStatus = { licensed: true };
       updateTrialBar();
     }
+    if(data.survey?.shouldShow) showSurveyModal();
   }catch(_){}
 }
 
@@ -1425,6 +1631,7 @@ async function loadBankFromUrl(url){
 
   // Always verify license status from server on page load
   // This catches revocations that happened since last login
+  let needsCertPathway = false;
   if(isLoggedIn() && session.token){
     try{
       const res = await fetch('/.netlify/functions/auth', {
@@ -1436,6 +1643,7 @@ async function loadBankFromUrl(url){
         const data = await res.json();
         // Update session with fresh license data from server
         saveSession({ ...session, license: data.license || null });
+        needsCertPathway = !!data.needsCertPathway;
       }
     } catch(_){
       // Non-fatal — continue with cached session if server check fails
@@ -1446,6 +1654,8 @@ async function loadBankFromUrl(url){
   updateHeaderAuth();
   await loadTrialStatus();
   updateLicenseInfo();
+  updateBetaBanner();
+  showCertPathwayModalIfNeeded(needsCertPathway);
   buildModeRadios();
   setNextButtonLabel();
   renderStats();

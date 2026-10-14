@@ -65,6 +65,9 @@
   .btn.danger{background:transparent;border-color:var(--bad-border);color:var(--bad);padding:4px 9px;font-size:12px;border-radius:7px}
   .btn.danger:hover{background:var(--bad-bg)}
 
+  .beta-banner{background:var(--teal-tint);border:1px solid var(--teal-border);border-radius:10px;padding:8px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--teal-deep)}
+  .beta-banner button{background:none;border:none;color:var(--teal-text);cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;padding:0 2px}
+
   .savebar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 14px;margin-bottom:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
   .savebar strong{color:var(--teal-deep)}
   #saveStatus{font-weight:600}
@@ -171,6 +174,11 @@
     <a href="/overview.html" class="tab">Exam Overview</a>
     <a href="/plan.html" class="tab active">Project Plan</a>
   </nav>
+
+  <div class="beta-banner no-print" id="betaBanner" style="display:none">
+    <div id="betaBannerText"></div>
+    <button onclick="dismissBetaBanner()" aria-label="Dismiss">&times;</button>
+  </div>
 
   <div class="print-title">Entrepreneurship-Led Economic Development Project Plan</div>
   <div class="print-sub" id="printName"></div>
@@ -362,6 +370,26 @@ async function fetchTrialStatus(isRetry){
 async function loadTrialStatus(){
   try { const data = await fetchTrialStatus(); if (data) trialStatus = data; }
   catch(_){}
+}
+
+// ── Beta mode banner ─────────────────────────────────────────────
+const BETA_BANNER_DISMISS_KEY = 'edp-beta-banner-dismissed';
+function updateBetaBanner(){
+  const el = $('betaBanner');
+  if (!el) return;
+  const isOnBeta = trialStatus?.licensed && trialStatus?.license?.license_type === 'beta';
+  if (!isOnBeta || localStorage.getItem(BETA_BANNER_DISMISS_KEY)){
+    el.style.display = 'none';
+    return;
+  }
+  const exp = new Date(trialStatus.license.expires_at);
+  const fmt = exp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  $('betaBannerText').textContent = `Free beta access through ${fmt}. Your feedback shapes the tool.`;
+  el.style.display = 'flex';
+}
+function dismissBetaBanner(){
+  localStorage.setItem(BETA_BANNER_DISMISS_KEY, '1');
+  updateBetaBanner();
 }
 
 const MILESTONES = ['One month','Three month','Six month','12 month'];
@@ -584,6 +612,7 @@ function applyTrialGating(){
   }
 
   await loadTrialStatus();
+  updateBetaBanner();
 
   try {
     const res = await fetch('/.netlify/functions/plan-crud', {

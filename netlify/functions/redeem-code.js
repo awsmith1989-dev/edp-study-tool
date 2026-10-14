@@ -102,6 +102,7 @@ exports.handler = async function (event) {
         user_id: user.id,
         auth_code: clean,
         status: 'active',
+        license_type: 'code',
         expires_at: authCode.expires_at,
       })
       .select()
