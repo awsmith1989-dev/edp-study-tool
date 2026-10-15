@@ -1,11 +1,49 @@
 // netlify/functions/log-activity.js
 // Logs individual question activity and increments the trial counter
 // for unlicensed users. Returns remaining trial allowance so the UI
-// can gate without a second round trip.
+// can gate without a second round trip. Also checks whether this is
+// the moment to offer the in-app beta survey.
 
 const { createClient } = require('@supabase/supabase-js');
 
 const QUESTION_LIMIT = 20;
+const SURVEY_INTERVAL = 25;   // offer after the 25th, then the 50th, question
+const SURVEY_MAX_OFFERS = 2;  // never offer a third time
+
+// Decides whether to surface the survey on this answer. An "offer" is
+// counted the moment we decide to show it — whether the user goes on to
+// submit it or dismiss it — which is what caps this at two tries total.
+async function checkSurveyTrigger(supabase, userId) {
+  const { data: existingResponse } = await supabase
+    .from('survey_responses')
+    .select('id')
+    .eq('user_id', userId)
+    .single();
+  if (existingResponse) return false;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('survey_offers_shown')
+    .eq('id', userId)
+    .single();
+  const offersShown = profile?.survey_offers_shown || 0;
+  if (offersShown >= SURVEY_MAX_OFFERS) return false;
+
+  const { count: totalAnswered } = await supabase
+    .from('study_activity')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  const nextThreshold = SURVEY_INTERVAL * (offersShown + 1);
+  if ((totalAnswered || 0) < nextThreshold) return false;
+
+  await supabase
+    .from('profiles')
+    .update({ survey_offers_shown: offersShown + 1 })
+    .eq('id', userId);
+
+  return true;
+}
 
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
@@ -39,7 +77,9 @@ exports.handler = async function (event) {
       correct: !!correct,
     });
 
-    // Licensed users need no counting
+    const showSurvey = await checkSurveyTrigger(supabase, user.id);
+
+    // Licensed users (paid, code, or beta) need no counting
     const now = new Date().toISOString();
     const { data: license } = await supabase
       .from('licenses')
@@ -51,7 +91,10 @@ exports.handler = async function (event) {
       .single();
 
     if (license) {
-      return { statusCode: 200, body: JSON.stringify({ success: true, licensed: true }) };
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ success: true, licensed: true, survey: { shouldShow: showSurvey } }),
+      };
     }
 
     // Trial user — increment and report what's left
@@ -80,6 +123,7 @@ exports.handler = async function (event) {
           questionsRemaining: Math.max(0, QUESTION_LIMIT - used),
           exhausted: used >= QUESTION_LIMIT,
         },
+        survey: { shouldShow: showSurvey },
       }),
     };
 

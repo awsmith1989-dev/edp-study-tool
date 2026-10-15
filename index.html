@@ -1019,6 +1019,17 @@
           <label class="form-label">Password</label>
           <input type="password" class="form-input" id="trialPassword" placeholder="At least 8 characters" autocomplete="new-password" />
         </div>
+        <div class="form-group">
+          <label class="form-label">Which certification are you working toward?</label>
+          <select class="form-input" id="trialCertPathway">
+            <option value="" disabled selected>Select one…</option>
+            <option value="EDP">EDP</option>
+            <option value="CEcD">CEcD</option>
+            <option value="CED">CED</option>
+            <option value="Other">Other</option>
+            <option value="Just learning">Just learning</option>
+          </select>
+        </div>
         <div class="form-error" id="trialRegError"></div>
         <button class="btn-modal-primary" id="trialRegBtn" onclick="doTrialRegister()">Create Account &amp; Start Trial</button>
       </div>
@@ -1070,6 +1081,17 @@
         <div class="form-group">
           <label class="form-label">Password</label>
           <input type="password" class="form-input" id="purchasePassword" placeholder="At least 8 characters" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Which certification are you working toward?</label>
+          <select class="form-input" id="purchaseCertPathway">
+            <option value="" disabled selected>Select one…</option>
+            <option value="EDP">EDP</option>
+            <option value="CEcD">CEcD</option>
+            <option value="CED">CED</option>
+            <option value="Other">Other</option>
+            <option value="Just learning">Just learning</option>
+          </select>
         </div>
         <div class="form-error" id="purchaseError"></div>
         <button class="btn-modal-amber" id="purchaseBtn" onclick="doPurchase()">Create Account &amp; Continue to Payment</button>
@@ -1170,15 +1192,17 @@ async function doTrialRegister(){
   const lastName = document.getElementById('trialLastName').value.trim();
   const email = document.getElementById('trialEmail').value.trim();
   const password = document.getElementById('trialPassword').value;
+  const certPathway = document.getElementById('trialCertPathway').value;
   setErr('trialRegError', '');
   if(!firstName || !lastName){ setErr('trialRegError', 'First and last name required.'); return; }
   if(!email || !password){ setErr('trialRegError', 'Email and password required.'); return; }
   if(password.length < 8){ setErr('trialRegError', 'Password must be at least 8 characters.'); return; }
+  if(!certPathway){ setErr('trialRegError', 'Please select which certification you\'re working toward.'); return; }
   setBtnLoading('trialRegBtn', true, 'Create Account & Start Trial');
   try {
     const res = await fetch('/.netlify/functions/auth', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ action: 'register', email, password, firstName, lastName })
+      body: JSON.stringify({ action: 'register', email, password, firstName, lastName, certPathway })
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Registration failed');
@@ -1195,7 +1219,7 @@ async function doTrialRegister(){
     fetch('/.netlify/functions/hubspot-sync', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ action: 'trial', email, properties: { edp_license_status: 'trial', firstname: firstName, lastname: lastName } })
+      body: JSON.stringify({ action: 'trial', email, properties: { edp_license_status: 'trial', firstname: firstName, lastname: lastName, cert_pathway: certPathway } })
     }).catch(() => {});
 
     closeModal();
@@ -1250,16 +1274,18 @@ async function doPurchase(){
   const lastName = document.getElementById('purchaseLastName').value.trim();
   const email = document.getElementById('purchaseEmail').value.trim();
   const password = document.getElementById('purchasePassword').value;
+  const certPathway = document.getElementById('purchaseCertPathway').value;
   setErr('purchaseError', '');
   if(!firstName || !lastName){ setErr('purchaseError', 'First and last name required.'); return; }
   if(!email || !password){ setErr('purchaseError', 'Email and password required.'); return; }
   if(password.length < 8){ setErr('purchaseError', 'Password must be at least 8 characters.'); return; }
+  if(!certPathway){ setErr('purchaseError', 'Please select which certification you\'re working toward.'); return; }
   setBtnLoading('purchaseBtn', true, 'Creating account...');
   try {
     // Step 1: Register
     const regRes = await fetch('/.netlify/functions/auth', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ action: 'register', email, password })
+      body: JSON.stringify({ action: 'register', email, password, certPathway })
     });
     const regData = await regRes.json();
     if(!regRes.ok) throw new Error(regData.error || 'Could not create account');
@@ -1278,7 +1304,7 @@ async function doPurchase(){
     fetch('/.netlify/functions/hubspot-sync', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ action: 'purchase', email, properties: { edp_license_status: 'purchased', firstname: firstName, lastname: lastName } })
+      body: JSON.stringify({ action: 'purchase', email, properties: { edp_license_status: 'purchased', firstname: firstName, lastname: lastName, cert_pathway: certPathway } })
     }).catch(() => {});
 
     // Step 3: Go to Stripe checkout

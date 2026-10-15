@@ -196,6 +196,11 @@ function render(data){
         <div class="stat-sub">${data.licenses.revoked} revoked · ${data.licenses.total} total ever</div>
       </div>
       <div class="stat-card">
+        <div class="stat-label">Beta vs. Paid</div>
+        <div class="stat-value">${data.licenses.activeByType.beta}<span style="font-size:16px;color:var(--muted)"> beta</span></div>
+        <div class="stat-sub">${data.licenses.activeByType.paid} paid · ${data.licenses.activeByType.code} code</div>
+      </div>
+      <div class="stat-card">
         <div class="stat-label">Codes Redeemed</div>
         <div class="stat-value">${data.codes.totalRedeemed}<span style="font-size:16px;color:var(--muted)">/${data.codes.totalCodes}</span></div>
         <div class="stat-sub">${data.codes.totalCodes - data.codes.totalRedeemed} remaining</div>
@@ -290,6 +295,49 @@ function render(data){
   }
   html += `</div>`;
 
+  // Certification pathway breakdown
+  html += `<div class="section"><h2>Certification Pathway</h2><table>
+    <tr><th>Pathway</th><th>Users</th></tr>`;
+  Object.entries(data.pathways)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([pathway, count]) => {
+      html += `<tr><td>${pathway}</td><td>${count}</td></tr>`;
+    });
+  html += `</table></div>`;
+
+  // Question flags — sortable by question ID or flag count
+  currentFlags = data.questionFlags;
+  html += `<div class="section"><h2>Question Flags</h2><table id="flagsTable">
+    <tr>
+      <th style="cursor:pointer" onclick="sortFlags('questionId')">Question ID</th>
+      <th style="cursor:pointer" onclick="sortFlags('count')">Flags</th>
+      <th>Reasons &amp; Comments</th>
+    </tr>
+    <tbody id="flagsBody"></tbody>
+  </table></div>`;
+
+  // Beta survey results
+  const wp = data.survey.wouldPayCounts;
+  html += `<div class="section"><h2>Beta Survey Results</h2>
+    <div class="stat-grid" style="margin-bottom:18px">
+      <div class="stat-card">
+        <div class="stat-label">Responses</div>
+        <div class="stat-value">${data.survey.total}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Usefulness</div>
+        <div class="stat-value">${data.survey.avgUsefulness ?? '—'}${data.survey.avgUsefulness != null ? '<span style="font-size:16px;color:var(--muted)">/5</span>' : ''}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Would Pay</div>
+        <div class="stat-value">${wp.yes}<span style="font-size:16px;color:var(--muted)"> yes</span></div>
+        <div class="stat-sub">${wp.maybe} maybe · ${wp.no} no</div>
+      </div>
+    </div>
+    <h3 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px">Written feedback</h3>
+    <div id="surveyFeedback"></div>
+  </div>`;
+
   // Recent signups
   html += `<div class="section"><h2>Recent Signups</h2><table>
     <tr><th>Name</th><th>Email</th><th>Date</th></tr>`;
@@ -312,6 +360,67 @@ function render(data){
   html += `</table></div>`;
 
   content.innerHTML = html;
+  renderFlagsBody();
+  renderSurveyFeedback(data.survey.feedback);
+}
+
+// ── Question flags table (sortable) ─────────────────────────────
+let currentFlags = [];
+let flagsSortKey = 'count';
+let flagsSortDir = 'desc';
+
+function sortFlags(key){
+  if (flagsSortKey === key) flagsSortDir = flagsSortDir === 'asc' ? 'desc' : 'asc';
+  else { flagsSortKey = key; flagsSortDir = key === 'questionId' ? 'asc' : 'desc'; }
+  renderFlagsBody();
+}
+
+function renderFlagsBody(){
+  const tbody = document.getElementById('flagsBody');
+  if (!tbody) return;
+  const sorted = [...currentFlags].sort((a, b) => {
+    const av = a[flagsSortKey], bv = b[flagsSortKey];
+    const cmp = typeof av === 'string' ? av.localeCompare(bv) : av - bv;
+    return flagsSortDir === 'asc' ? cmp : -cmp;
+  });
+  tbody.innerHTML = sorted.map(f => {
+    const reasonCounts = {};
+    f.entries.forEach(e => { reasonCounts[e.reason] = (reasonCounts[e.reason] || 0) + 1; });
+    const reasonSummary = Object.entries(reasonCounts).map(([r, c]) => `${r} (${c})`).join(', ');
+    const commentsHtml = f.entries.map(e => {
+      const date = new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+        <strong>${e.reason}</strong> · ${e.email} · ${date}
+        ${e.comment ? `<div class="muted" style="margin-top:2px">${e.comment}</div>` : ''}
+      </div>`;
+    }).join('');
+    return `<tr>
+      <td style="font-family:monospace;font-size:12px">${f.questionId}</td>
+      <td>${f.count}</td>
+      <td><details><summary style="cursor:pointer">${reasonSummary}</summary><div style="margin-top:8px">${commentsHtml}</div></details></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="3" style="color:var(--muted)">No flags yet</td></tr>`;
+}
+
+// ── Survey written feedback ──────────────────────────────────────
+function renderSurveyFeedback(feedback){
+  const el = document.getElementById('surveyFeedback');
+  if (!el) return;
+  if (!feedback.length){
+    el.innerHTML = `<div style="color:var(--muted);font-size:13px">No written feedback yet</div>`;
+    return;
+  }
+  el.innerHTML = feedback.map(f => {
+    const date = new Date(f.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const payClass = f.wouldPay === 'yes' ? 'good' : (f.wouldPay === 'no' ? 'bad' : '');
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;font-size:12px;color:var(--muted)">
+        <span>${f.email}</span> · <span>${date}</span> · <span>Usefulness: ${f.usefulness}/5</span>
+        ${payClass ? `<span class="pill ${payClass}">Would pay: ${f.wouldPay}</span>` : `<span class="pill">Would pay: ${f.wouldPay}</span>`}
+      </div>
+      <div style="font-size:13px">${f.feedback}</div>
+    </div>`;
+  }).join('');
 }
 
 // Allow Enter key to submit login

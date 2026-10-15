@@ -27,7 +27,7 @@ exports.handler = async function(event) {
     const now = new Date().toISOString();
     const { data: activeLicenses } = await supabase
       .from('licenses')
-      .select('id, user_id, status, expires_at, stripe_session_id, auth_code, created_at')
+      .select('id, user_id, status, expires_at, stripe_session_id, auth_code, license_type, created_at')
       .eq('status', 'active')
       .gte('expires_at', now);
 
@@ -42,6 +42,14 @@ exports.handler = async function(event) {
     };
 
     const trialUsers = totalUsers - (activeLicenses?.length || 0);
+
+    // Beta vs. paid vs. code, among currently-active licenses only
+    const activeByType = { beta: 0, paid: 0, code: 0 };
+    (activeLicenses || []).forEach(l => {
+      const t = l.license_type || 'paid';
+      if (activeByType[t] == null) activeByType[t] = 0;
+      activeByType[t]++;
+    });
 
     // ── Recent signups (last 20) ──────────────────────────────
     const recentSignups = users
@@ -174,6 +182,63 @@ exports.handler = async function(event) {
       dailyVisits[day] = (dailyVisits[day] || 0) + 1;
     });
 
+    // ── Certification pathway breakdown ──────────────────────────
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('cert_pathway');
+
+    const pathwayCounts = {};
+    (profiles || []).forEach(p => {
+      const key = p.cert_pathway || 'Not set';
+      pathwayCounts[key] = (pathwayCounts[key] || 0) + 1;
+    });
+
+    // ── Question flags ────────────────────────────────────────────
+    const { data: flags } = await supabase
+      .from('question_flags')
+      .select('question_id, user_id, reason, comment, created_at')
+      .order('created_at', { ascending: false });
+
+    const flagsByQuestion = {};
+    (flags || []).forEach(f => {
+      if (!flagsByQuestion[f.question_id]) flagsByQuestion[f.question_id] = [];
+      flagsByQuestion[f.question_id].push({
+        email: userInfoMap[f.user_id]?.email || 'Unknown',
+        reason: f.reason,
+        comment: f.comment,
+        created_at: f.created_at,
+      });
+    });
+
+    const questionFlags = Object.entries(flagsByQuestion)
+      .map(([questionId, entries]) => ({ questionId, count: entries.length, entries }))
+      .sort((a, b) => b.count - a.count);
+
+    // ── Survey results ────────────────────────────────────────────
+    const { data: surveyResponses } = await supabase
+      .from('survey_responses')
+      .select('user_id, usefulness, feedback, would_pay, created_at')
+      .order('created_at', { ascending: false });
+
+    const avgUsefulness = surveyResponses?.length
+      ? Math.round((surveyResponses.reduce((sum, s) => sum + s.usefulness, 0) / surveyResponses.length) * 10) / 10
+      : null;
+
+    const wouldPayCounts = { yes: 0, maybe: 0, no: 0 };
+    (surveyResponses || []).forEach(s => {
+      if (wouldPayCounts[s.would_pay] != null) wouldPayCounts[s.would_pay]++;
+    });
+
+    const surveyFeedback = (surveyResponses || [])
+      .filter(s => s.feedback)
+      .map(s => ({
+        email: userInfoMap[s.user_id]?.email || 'Unknown',
+        usefulness: s.usefulness,
+        wouldPay: s.would_pay,
+        feedback: s.feedback,
+        created_at: s.created_at,
+      }));
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -183,7 +248,7 @@ exports.handler = async function(event) {
           licensed: activeLicenses?.length || 0,
           trial: trialUsers,
         },
-        licenses: licenseCounts,
+        licenses: { ...licenseCounts, activeByType },
         recentSignups,
         codes: {
           byBatch: codesByBatch,
@@ -211,6 +276,14 @@ exports.handler = async function(event) {
           conversionRate,
           dailyVisits,
           trackingStart,
+        },
+        pathways: pathwayCounts,
+        questionFlags,
+        survey: {
+          total: surveyResponses?.length || 0,
+          avgUsefulness,
+          wouldPayCounts,
+          feedback: surveyFeedback,
         },
       }),
     };

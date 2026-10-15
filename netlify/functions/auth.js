@@ -3,6 +3,56 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
+const BETA_MODE = process.env.BETA_MODE === 'true';
+const BETA_END_DATE = process.env.BETA_END_DATE;
+
+// Returns the user's current active license (any type), auto-granting a
+// beta license first if BETA_MODE is on, the beta window hasn't closed,
+// and they don't already have an active license of any kind. Paid and
+// cohort-code licenses are untouched either way.
+async function getLicense(supabase, userId) {
+  const now = new Date().toISOString();
+  const { data: license } = await supabase
+    .from('licenses')
+    .select('id, expires_at, status, license_type')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .gte('expires_at', now)
+    .order('expires_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (license) return license;
+
+  if (BETA_MODE && BETA_END_DATE && new Date(BETA_END_DATE) > new Date()) {
+    const { data: betaLicense } = await supabase
+      .from('licenses')
+      .insert({
+        user_id: userId,
+        status: 'active',
+        license_type: 'beta',
+        expires_at: new Date(BETA_END_DATE).toISOString(),
+      })
+      .select('id, expires_at, status, license_type')
+      .single();
+    return betaLicense || null;
+  }
+
+  return null;
+}
+
+// Existing users without a cert_pathway value get asked once, on their
+// next login, after which cert_pathway_asked is set regardless of
+// whether they answered or skipped.
+async function getNeedsCertPathway(supabase, userId) {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('cert_pathway, cert_pathway_asked')
+    .eq('id', userId)
+    .single();
+  return !!profile && !profile.cert_pathway && !profile.cert_pathway_asked;
+}
+
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -22,18 +72,8 @@ exports.handler = async function(event) {
       if (error) throw error;
 
       const userId = data.user.id;
-
-      // Check for active license
-      const now = new Date().toISOString();
-      const { data: license } = await supabase
-        .from('licenses')
-        .select('id, expires_at, status')
-        .eq('user_id', userId)
-        .eq('status', 'active')
-        .gte('expires_at', now)
-        .order('expires_at', { ascending: false })
-        .limit(1)
-        .single();
+      const license = await getLicense(supabase, userId);
+      const needsCertPathway = await getNeedsCertPathway(supabase, userId);
 
       return {
         statusCode: 200,
@@ -42,6 +82,7 @@ exports.handler = async function(event) {
           user: { id: userId, email: data.user.email },
           session: data.session,
           license: license || null,
+          needsCertPathway,
         }),
       };
 
@@ -56,16 +97,7 @@ exports.handler = async function(event) {
       if (error || !data.session) throw error || new Error('Refresh failed');
 
       const userId = data.user.id;
-      const now = new Date().toISOString();
-      const { data: license } = await supabase
-        .from('licenses')
-        .select('id, expires_at, status')
-        .eq('user_id', userId)
-        .eq('status', 'active')
-        .gte('expires_at', now)
-        .order('expires_at', { ascending: false })
-        .limit(1)
-        .single();
+      const license = await getLicense(supabase, userId);
 
       return {
         statusCode: 200,
@@ -86,16 +118,8 @@ exports.handler = async function(event) {
       const { data: { user }, error } = await supabase.auth.getUser(token);
       if (error || !user) throw new Error('Invalid token');
 
-      const now = new Date().toISOString();
-      const { data: license } = await supabase
-        .from('licenses')
-        .select('id, expires_at, status')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .gte('expires_at', now)
-        .order('expires_at', { ascending: false })
-        .limit(1)
-        .single();
+      const license = await getLicense(supabase, user.id);
+      const needsCertPathway = await getNeedsCertPathway(supabase, user.id);
 
       return {
         statusCode: 200,
@@ -103,12 +127,13 @@ exports.handler = async function(event) {
         body: JSON.stringify({
           user: { id: user.id, email: user.email },
           license: license || null,
+          needsCertPathway,
         }),
       };
 
     } else if (action === 'register') {
       // Register new account
-      const { firstName, lastName } = JSON.parse(event.body || '{}');
+      const { firstName, lastName, certPathway } = JSON.parse(event.body || '{}');
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -123,6 +148,8 @@ exports.handler = async function(event) {
         await supabase.from('profiles').upsert({
           id: data.user.id,
           email,
+          cert_pathway: certPathway || null,
+          cert_pathway_asked: true,
         });
       }
 
@@ -130,6 +157,29 @@ exports.handler = async function(event) {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ success: true, user: data.user }),
+      };
+
+    } else if (action === 'update-cert-pathway') {
+      // Answers (or skips) the one-time existing-user prompt, or lets a
+      // fresh signup correct their answer later. Either way,
+      // cert_pathway_asked is set so the prompt never nags again.
+      const authHeader = event.headers['authorization'];
+      if (!authHeader) throw new Error('No auth token');
+
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      if (error || !user) throw new Error('Invalid token');
+
+      const { certPathway } = JSON.parse(event.body || '{}');
+      const update = { cert_pathway_asked: true };
+      if (certPathway) update.cert_pathway = certPathway;
+
+      await supabase.from('profiles').update(update).eq('id', user.id);
+
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: true }),
       };
 
     } else if (action === 'set-password') {
@@ -145,17 +195,7 @@ exports.handler = async function(event) {
       const { error: updateError } = await supabase.auth.admin.updateUserById(user.id, { password });
       if (updateError) throw updateError;
 
-      // Check for active license
-      const now = new Date().toISOString();
-      const { data: license } = await supabase
-        .from('licenses')
-        .select('id, expires_at, status')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .gte('expires_at', now)
-        .order('expires_at', { ascending: false })
-        .limit(1)
-        .single();
+      const license = await getLicense(supabase, user.id);
 
       return {
         statusCode: 200,

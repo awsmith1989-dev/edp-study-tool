@@ -96,6 +96,7 @@ exports.handler = async function(event) {
         user_id: userId,
         stripe_session_id: session.id,
         status: 'active',
+        license_type: 'paid',
         expires_at: expiresAt.toISOString(),
       });
 
@@ -140,7 +141,9 @@ exports.handler = async function(event) {
         if (error) throw error;
         console.log(`🚫 License revoked for session ${sessionId}`);
       } else if (email) {
-        // Fallback: revoke by email if we can't find the session
+        // Fallback: revoke by email if we can't find the session. Scoped
+        // to license_type 'paid' so this can never touch a beta or
+        // cohort-code license that happens to belong to the same user.
         const { data: existingUsers } = await supabase.auth.admin.listUsers();
         const user = existingUsers?.users?.find(u => u.email === email);
         if (user) {
@@ -148,7 +151,8 @@ exports.handler = async function(event) {
             .from('licenses')
             .update({ status: 'revoked' })
             .eq('user_id', user.id)
-            .eq('status', 'active');
+            .eq('status', 'active')
+            .eq('license_type', 'paid');
           if (error) throw error;
           console.log(`🚫 License revoked for user ${email}`);
         }

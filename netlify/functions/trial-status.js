@@ -31,7 +31,7 @@ exports.handler = async function (event) {
     const now = new Date().toISOString();
     const { data: license } = await supabase
       .from('licenses')
-      .select('id, expires_at')
+      .select('id, expires_at, license_type')
       .eq('user_id', user.id)
       .eq('status', 'active')
       .gte('expires_at', now)
