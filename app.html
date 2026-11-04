@@ -691,7 +691,7 @@ function loadState(){
     progress: saved.progress || { attempts:0, correct:0, perManual:{}, perDomain:{}, seen:{}, missed:{} },
     settings: saved.settings || { manuals:[], domains:[], mode:'random' },
     lastQ: null, selectedIndex: null, checked: false,
-    lastPickedId: null, started: false, autoAdvanceTimer: null,
+    lastPickedId: null, started: false,
     quiz: null,
     sessionProgress: { count: 0 },
   };
@@ -1210,7 +1210,6 @@ function renderQ(q){
   document.querySelectorAll('.opt').forEach(el=>{
     el.addEventListener('click',()=>{
       if(state.checked)return;
-      if(state.autoAdvanceTimer){clearTimeout(state.autoAdvanceTimer);state.autoAdvanceTimer=null;}
       state.selectedIndex=+el.dataset.index;
       document.querySelectorAll('.opt').forEach(e=>e.classList.remove('correct','incorrect'));
       const radio=el.querySelector('input[type="radio"]');
@@ -1339,11 +1338,6 @@ function pickQuestion(){
   updateSessionProgressBar();
 }
 
-function scheduleAutoAdvance(){
-  if(state.autoAdvanceTimer){clearTimeout(state.autoAdvanceTimer);state.autoAdvanceTimer=null;}
-  state.autoAdvanceTimer=setTimeout(()=>{state.autoAdvanceTimer=null;pickQuestion();renderStats();},AUTO_ADVANCE_MS);
-}
-
 function checkAndMaybeAdvance(){
   const q=state.lastQ;
   if(!q||state.selectedIndex==null||state.checked)return;
@@ -1376,21 +1370,18 @@ function checkAndMaybeAdvance(){
   opts[q.answerIndex]?.classList.add('correct');
   if(!correct)opts[state.selectedIndex]?.classList.add('incorrect');
   const fb=$('feedback');if(!fb)return;
-  if(correct){
-    fb.innerHTML=`<div class="feedback-row"><span class="pill good">Correct ✓</span></div>`;
-    scheduleAutoAdvance();
-  } else {
-    // Explain This is available to trial users too — gated server-side
-    // by claude.js against the same 20-question allowance.
-    fb.innerHTML=`
-      <div class="feedback-row">
-        <span class="pill bad">Incorrect</span>
-        <button class="btn explain-btn" id="explainBtn">✦ Explain This</button>
-        <button class="btn next-inline" id="nextInlineBtn">Next →</button>
-      </div>`;
-    $('explainBtn').addEventListener('click',()=>fetchExplanation(q));
-    $('nextInlineBtn').addEventListener('click',()=>{pickQuestion();renderStats();});
-  }
+  // No auto-advance on either outcome — a right answer can still be a
+  // guess, so the learner always gets a chance to ask why before moving on.
+  // Explain This is available to trial users too — gated server-side
+  // by claude.js against the same 20-question allowance.
+  fb.innerHTML=`
+    <div class="feedback-row">
+      <span class="pill ${correct?'good':'bad'}">${correct?'Correct ✓':'Incorrect'}</span>
+      <button class="btn explain-btn" id="explainBtn">✦ Explain This</button>
+      <button class="btn next-inline" id="nextInlineBtn">Next →</button>
+    </div>`;
+  $('explainBtn').addEventListener('click',()=>fetchExplanation(q,false,correct));
+  $('nextInlineBtn').addEventListener('click',()=>{pickQuestion();renderStats();});
 }
 
 async function logActivity(payload, isRetry){
@@ -1421,7 +1412,7 @@ async function logActivity(payload, isRetry){
   }catch(_){}
 }
 
-async function fetchExplanation(q,isRetry){
+async function fetchExplanation(q,isRetry,wasCorrect){
   const btn=$('explainBtn');
   if(btn){btn.disabled=true;btn.textContent='Loading…';}
   const existing=$('explanationBox');if(existing)existing.remove();
@@ -1430,15 +1421,17 @@ async function fetchExplanation(q,isRetry){
   box.id='explanationBox';box.className='loading';
   box.innerHTML=`
     <div class="explain-header"><span class="explain-dot pulse"></span>AI Tutor · Generating explanation…</div>
-    <div id="explanationText" class="thinking">Asking Claude why the correct answer is right and yours was wrong…</div>`;
+    <div id="explanationText" class="thinking">${wasCorrect?'Asking Claude to explain why that answer is correct…':'Asking Claude why the correct answer is right and yours was wrong…'}</div>`;
   fb.after(box);
-  const wrongAnswer=q.options[state.selectedIndex];
+  const pickedAnswer=q.options[state.selectedIndex];
   const correctAnswer=q.options[q.answerIndex];
   const chapterInfo=q.chapter?`Chapter ${q.chapter}`:'';
   const chapterTag=q.chapter_tag?` — ${q.chapter_tag}`:'';
   const prompt=`You are an EDP (Entrepreneurship Development Professional) exam tutor helping someone study for the IEDC certification.
 
-The student just answered this question INCORRECTLY.
+${wasCorrect
+  ? "The student just answered this question CORRECTLY, but asked for an explanation — they may have guessed and want to understand the reasoning, not just the outcome."
+  : "The student just answered this question INCORRECTLY."}
 
 Manual: "${manualKey(q)}"
 ${chapterInfo}${chapterTag}
@@ -1450,11 +1443,13 @@ ANSWER CHOICES:
 ${q.options.map((o,i)=>`${String.fromCharCode(65+i)}. ${o}`).join('\n')}
 
 CORRECT ANSWER: ${String.fromCharCode(65+q.answerIndex)}. ${correctAnswer}
-STUDENT'S WRONG ANSWER: ${String.fromCharCode(65+state.selectedIndex)}. ${wrongAnswer}
+${wasCorrect
+  ? `STUDENT'S ANSWER (correct): ${String.fromCharCode(65+state.selectedIndex)}. ${pickedAnswer}`
+  : `STUDENT'S WRONG ANSWER: ${String.fromCharCode(65+state.selectedIndex)}. ${pickedAnswer}`}
 
 Write a clear explanation (3–5 sentences) that:
 1. Explains WHY the correct answer is right, grounded in what the IEDC manual teaches
-2. Explains WHY the student's chosen answer is wrong
+2. ${wasCorrect ? 'Briefly notes why each of the other answer choices is wrong, so a lucky guess still leaves them with real understanding' : "Explains WHY the student's chosen answer is wrong"}
 3. Ends with a short memorable takeaway they can use to remember this concept on exam day
 
 Write in plain, direct prose. No bullet points. Be specific.`;
@@ -1464,7 +1459,7 @@ Write in plain, direct prose. No bullet points. Be specific.`;
     const res=await fetch('/.netlify/functions/claude',{method:'POST',headers,body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
     if(res.status===401 && !isRetry && session?.refreshToken){
       const refreshed=await refreshAuthToken();
-      if(refreshed)return fetchExplanation(q,true);
+      if(refreshed)return fetchExplanation(q,true,wasCorrect);
     }
     if(!res.ok){
       const e=await res.json().catch(()=>({}));
