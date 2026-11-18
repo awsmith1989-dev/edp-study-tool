@@ -740,15 +740,14 @@
       with expert-calibrated feedback for the oral.</p>
       <div class="hero-actions">
         <button class="btn-hero-primary" onclick="showModal('trial')">
-          Start Free Trial
+          Get Started — Free
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
-        <button class="btn-hero-ghost" onclick="showModal('purchase')">Buy License — $199</button>
       </div>
       <div class="hero-trust">
-        <div class="trust-item"><div class="trust-check"></div>20 free questions with AI explanations, no card required</div>
-        <div class="trust-item"><div class="trust-check"></div>2-year license</div>
+        <div class="trust-item"><div class="trust-check"></div>Full access, no card required</div>
         <div class="trust-item"><div class="trust-check"></div>182 questions across 9 domains</div>
+        <div class="trust-item"><div class="trust-check"></div>AI-powered explanations</div>
       </div>
     </div>
   </div>
@@ -900,45 +899,28 @@
   </div>
 </section>
 
-<!-- Pricing -->
+<!-- Access -->
 <section>
   <div class="section-inner">
-    <div class="section-eyebrow">Pricing</div>
-    <h2 class="section-title">Simple, transparent pricing</h2>
-    <p class="section-sub">One license covers your entire EDP journey — most candidates take 1–2 years, and your license lasts 2 years from the day you activate it.</p>
+    <div class="section-eyebrow">Access</div>
+    <h2 class="section-title">Free, full access</h2>
+    <p class="section-sub">Create an account and get everything — all 182 questions, AI-powered explanations, domain tracking, scored quizzes, and the project plan builder. No credit card, no limits.</p>
     <div class="pricing-grid">
-      <div class="pricing-card">
-        <div class="pricing-label">Free Trial</div>
-        <div class="pricing-price">$0</div>
-        <div class="pricing-period">No credit card required</div>
-        <ul class="pricing-features">
-          <li>20 practice questions</li>
-          <li>All 9 study domains</li>
-          <li>AI explanations on trial questions</li>
-          <li class="no">Domain accuracy tracking</li>
-          <li class="no">10-question scored quizzes</li>
-          <li>Project plan builder (Objective review)</li>
-        </ul>
-        <button class="btn-pricing-ghost" onclick="showModal('trial')">Start Free Trial</button>
-      </div>
-      <div class="pricing-card featured">
-        <div class="pricing-badge">Most Popular</div>
-        <div class="pricing-label">Full License</div>
-        <div class="pricing-price">$199</div>
-        <div class="pricing-period">2-year individual license</div>
+      <div class="pricing-card featured" style="max-width:420px;margin:0 auto">
+        <div class="pricing-label">Full Access</div>
         <ul class="pricing-features">
           <li>All 182 questions, unlimited practice</li>
-          <li>AI explanations on every wrong answer</li>
+          <li>AI explanations on every question</li>
           <li>Domain filtering and accuracy tracking</li>
           <li>10-question quizzes with percentile ranking</li>
           <li>Project plan builder with AI review</li>
           <li>PDF export for your application</li>
         </ul>
-        <button class="btn-pricing-primary" onclick="showModal('purchase')">Buy License — $199</button>
+        <button class="btn-pricing-primary" onclick="showModal('trial')">Create Free Account</button>
       </div>
     </div>
     <p style="margin-top:24px;font-size:13px;color:var(--muted)">
-      Coordinating a cohort? <a href="mailto:info@cherryandelm.com" style="color:var(--teal-text);font-weight:600">Contact us</a> about bulk licensing at $99/seat.
+      Coordinating a cohort? <a href="mailto:info@cherryandelm.com" style="color:var(--teal-text);font-weight:600">Contact us</a>.
     </p>
   </div>
 </section>
@@ -950,10 +932,9 @@
     <p>Join economic developers preparing for both parts of the IEDC EDP certification.</p>
     <div class="cta-actions">
       <button class="btn-hero-primary" onclick="showModal('trial')">
-        Start Free — 20 Questions
+        Get Started — Free
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
-      <button class="btn-hero-ghost" onclick="showModal('purchase')">Buy License — $199</button>
     </div>
   </div>
 </div>
@@ -993,8 +974,8 @@
     <!-- Trial / Register view -->
     <div id="viewTrial">
       <div class="modal-header">
-        <div class="modal-title">Start your free trial</div>
-        <div class="modal-sub">Create an account to get 20 free practice questions with AI explanations — no credit card needed.</div>
+        <div class="modal-title">Create your free account</div>
+        <div class="modal-sub">Get full access to all 182 practice questions and AI-powered explanations — no credit card needed.</div>
       </div>
       <div class="modal-tabs">
         <button class="modal-tab active" onclick="switchModalTab('trial','register')">Create Account</button>
@@ -1031,7 +1012,7 @@
           </select>
         </div>
         <div class="form-error" id="trialRegError"></div>
-        <button class="btn-modal-primary" id="trialRegBtn" onclick="doTrialRegister()">Create Account &amp; Start Trial</button>
+        <button class="btn-modal-primary" id="trialRegBtn" onclick="doTrialRegister()">Create Free Account</button>
       </div>
       <div id="trialLogin" class="hidden">
         <div class="form-group">
@@ -1053,62 +1034,6 @@
       </div>
     </div>
 
-    <!-- Purchase view -->
-    <div id="viewPurchase" class="hidden">
-      <div class="modal-header">
-        <div class="modal-title">Get full access</div>
-        <div class="modal-sub">Create your account first, then complete payment. Your license activates instantly after checkout.</div>
-      </div>
-      <div class="price-highlight">
-        <div class="price-big">$199</div>
-        <div class="price-period">2-year individual license</div>
-      </div>
-      <div id="purchaseRegisterStep">
-        <div style="display:flex;gap:10px">
-          <div class="form-group" style="flex:1">
-            <label class="form-label">First Name</label>
-            <input type="text" class="form-input" id="purchaseFirstName" placeholder="Jane" autocomplete="given-name" />
-          </div>
-          <div class="form-group" style="flex:1">
-            <label class="form-label">Last Name</label>
-            <input type="text" class="form-input" id="purchaseLastName" placeholder="Smith" autocomplete="family-name" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input type="email" class="form-input" id="purchaseEmail" placeholder="you@example.com" autocomplete="email" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" class="form-input" id="purchasePassword" placeholder="At least 8 characters" autocomplete="new-password" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Which certification are you working toward?</label>
-          <select class="form-input" id="purchaseCertPathway">
-            <option value="" disabled selected>Select one…</option>
-            <option value="EDP">EDP</option>
-            <option value="CEcD">CEcD</option>
-            <option value="CED">CED</option>
-            <option value="Other">Other</option>
-            <option value="Just learning">Just learning</option>
-          </select>
-        </div>
-        <div class="form-error" id="purchaseError"></div>
-        <button class="btn-modal-amber" id="purchaseBtn" onclick="doPurchase()">Create Account &amp; Continue to Payment</button>
-        <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px">Already have an account? <a href="#" style="color:var(--teal-text)" onclick="switchView('trial');switchModalTab('trial','login');return false">Sign in first</a>, then purchase.</p>
-      </div>
-      <div id="purchaseLoggedInStep" class="hidden">
-        <p style="font-size:14px;color:var(--muted);margin-bottom:16px">You're signed in as <strong id="purchaseLoggedEmail" style="color:var(--ink)"></strong>. Click below to complete your purchase.</p>
-        <div class="form-error" id="purchaseLoggedError"></div>
-        <button class="btn-modal-amber" id="purchaseLoggedBtn" onclick="doCheckout()">Continue to Payment — $199</button>
-      </div>
-      <div class="modal-divider">have a code?</div>
-      <button class="btn-modal-ghost" onclick="switchView('redeem')">Redeem a License Code</button>
-      <div class="modal-close-row">
-        <button class="modal-close-btn" onclick="closeModal()">Close</button>
-      </div>
-    </div>
-
     <!-- Redeem code view -->
     <div id="viewRedeem" class="hidden">
       <div class="modal-header">
@@ -1122,7 +1047,7 @@
       <div class="form-error" id="redeemError"></div>
       <button class="btn-modal-primary" id="redeemBtn" onclick="doRedeem()">Redeem Code</button>
       <div class="modal-divider">or</div>
-      <button class="btn-modal-ghost" onclick="switchView('purchase')">Purchase a license instead</button>
+      <button class="btn-modal-ghost" onclick="switchView('trial')">Create a free account instead</button>
       <div class="modal-close-row">
         <button class="modal-close-btn" onclick="closeModal()">Close</button>
       </div>
@@ -1147,21 +1072,7 @@ function hasLicense(){
 
 function showModal(type){
   document.getElementById('modalOverlay').classList.remove('hidden');
-  if(type === 'purchase'){
-    switchView('purchase');
-    // If already logged in, show the logged-in step instead of register form
-    const regStep = document.getElementById('purchaseRegisterStep');
-    const loggedStep = document.getElementById('purchaseLoggedInStep');
-    const loggedEmail = document.getElementById('purchaseLoggedEmail');
-    if(isLoggedIn()){
-      if(regStep) regStep.classList.add('hidden');
-      if(loggedStep) loggedStep.classList.remove('hidden');
-      if(loggedEmail) loggedEmail.textContent = session.user.email;
-    } else {
-      if(regStep) regStep.classList.remove('hidden');
-      if(loggedStep) loggedStep.classList.add('hidden');
-    }
-  } else if(type === 'redeem') switchView('redeem');
+  if(type === 'redeem') switchView('redeem');
   else {
     switchView('trial');
     if(type === 'login') switchModalTab('trial', 'login');
@@ -1171,7 +1082,7 @@ function closeModal(){ document.getElementById('modalOverlay').classList.add('hi
 function handleOverlayClick(e){ if(e.target === document.getElementById('modalOverlay')) closeModal(); }
 
 function switchView(v){
-  ['trial','purchase','redeem'].forEach(x => {
+  ['trial','redeem'].forEach(x => {
     document.getElementById('view' + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle('hidden', x !== v);
   });
 }
@@ -1198,7 +1109,7 @@ async function doTrialRegister(){
   if(!email || !password){ setErr('trialRegError', 'Email and password required.'); return; }
   if(password.length < 8){ setErr('trialRegError', 'Password must be at least 8 characters.'); return; }
   if(!certPathway){ setErr('trialRegError', 'Please select which certification you\'re working toward.'); return; }
-  setBtnLoading('trialRegBtn', true, 'Create Account & Start Trial');
+  setBtnLoading('trialRegBtn', true, 'Create Free Account');
   try {
     const res = await fetch('/.netlify/functions/auth', {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -1227,7 +1138,7 @@ async function doTrialRegister(){
   } catch(err){
     setErr('trialRegError', err.message);
   } finally {
-    setBtnLoading('trialRegBtn', false, 'Create Account & Start Trial');
+    setBtnLoading('trialRegBtn', false, 'Create Free Account');
   }
 }
 
@@ -1262,79 +1173,6 @@ async function doForgotPassword(){
     body: JSON.stringify({ action: 'reset-password', email })
   });
   alert(`Password reset email sent to ${email}.`);
-}
-
-async function doPurchase(){
-  // If already logged in, skip registration and go straight to checkout
-  if(isLoggedIn()){
-    doCheckout();
-    return;
-  }
-  const firstName = document.getElementById('purchaseFirstName').value.trim();
-  const lastName = document.getElementById('purchaseLastName').value.trim();
-  const email = document.getElementById('purchaseEmail').value.trim();
-  const password = document.getElementById('purchasePassword').value;
-  const certPathway = document.getElementById('purchaseCertPathway').value;
-  setErr('purchaseError', '');
-  if(!firstName || !lastName){ setErr('purchaseError', 'First and last name required.'); return; }
-  if(!email || !password){ setErr('purchaseError', 'Email and password required.'); return; }
-  if(password.length < 8){ setErr('purchaseError', 'Password must be at least 8 characters.'); return; }
-  if(!certPathway){ setErr('purchaseError', 'Please select which certification you\'re working toward.'); return; }
-  setBtnLoading('purchaseBtn', true, 'Creating account...');
-  try {
-    // Step 1: Register
-    const regRes = await fetch('/.netlify/functions/auth', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ action: 'register', email, password, certPathway })
-    });
-    const regData = await regRes.json();
-    if(!regRes.ok) throw new Error(regData.error || 'Could not create account');
-
-    // Step 2: Auto-login
-    const loginRes = await fetch('/.netlify/functions/auth', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ action: 'login', email, password })
-    });
-    const loginData = await loginRes.json();
-    if(loginRes.ok && loginData.session){
-      saveSession({ user: loginData.user, token: loginData.session.access_token, refreshToken: loginData.session.refresh_token, license: loginData.license });
-    }
-
-    // Sync to HubSpot (non-blocking)
-    fetch('/.netlify/functions/hubspot-sync', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ action: 'purchase', email, properties: { edp_license_status: 'purchased', firstname: firstName, lastname: lastName, cert_pathway: certPathway } })
-    }).catch(() => {});
-
-    // Step 3: Go to Stripe checkout
-    setBtnLoading('purchaseBtn', true, 'Redirecting to payment...');
-    await doCheckout();
-
-  } catch(err){
-    setErr('purchaseError', err.message);
-    setBtnLoading('purchaseBtn', false, 'Create Account & Continue to Payment');
-  }
-}
-
-async function doCheckout(){
-  const email = session?.user?.email;
-  if(!email){ switchView('trial'); return; }
-  const errId = document.getElementById('purchaseLoggedError') ? 'purchaseLoggedError' : 'purchaseError';
-  const btnId = document.getElementById('purchaseLoggedBtn') ? 'purchaseLoggedBtn' : 'purchaseBtn';
-  setBtnLoading(btnId, true, 'Redirecting to payment...');
-  try {
-    const res = await fetch('/.netlify/functions/create-checkout', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email })
-    });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error || 'Could not start checkout');
-    window.location.href = data.url;
-  } catch(err){
-    setErr(errId, err.message);
-    setBtnLoading(btnId, false, 'Continue to Payment — $199');
-  }
 }
 
 async function doRedeem(){

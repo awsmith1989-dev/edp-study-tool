@@ -43,8 +43,8 @@ exports.handler = async function(event) {
 
     const trialUsers = totalUsers - (activeLicenses?.length || 0);
 
-    // Beta vs. paid vs. code, among currently-active licenses only
-    const activeByType = { beta: 0, paid: 0, code: 0 };
+    // Free vs. paid vs. code vs. legacy beta, among currently-active licenses only
+    const activeByType = { free: 0, paid: 0, code: 0, beta: 0 };
     (activeLicenses || []).forEach(l => {
       const t = l.license_type || 'paid';
       if (activeByType[t] == null) activeByType[t] = 0;

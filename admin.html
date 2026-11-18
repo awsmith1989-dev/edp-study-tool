@@ -196,9 +196,9 @@ function render(data){
         <div class="stat-sub">${data.licenses.revoked} revoked · ${data.licenses.total} total ever</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Beta vs. Paid</div>
-        <div class="stat-value">${data.licenses.activeByType.beta}<span style="font-size:16px;color:var(--muted)"> beta</span></div>
-        <div class="stat-sub">${data.licenses.activeByType.paid} paid · ${data.licenses.activeByType.code} code</div>
+        <div class="stat-label">Free vs. Paid</div>
+        <div class="stat-value">${data.licenses.activeByType.free}<span style="font-size:16px;color:var(--muted)"> free</span></div>
+        <div class="stat-sub">${data.licenses.activeByType.paid} paid · ${data.licenses.activeByType.code} code · ${data.licenses.activeByType.beta} legacy beta</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Codes Redeemed</div>

@@ -243,8 +243,6 @@
     .trial-bar strong{color:var(--teal-deep)}
 
     /* ── Beta banner ── */
-    .beta-banner{background:var(--teal-tint);border:1px solid var(--teal-border);border-radius:10px;padding:8px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--teal-deep)}
-    .beta-banner button{background:none;border:none;color:var(--teal-text);cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;padding:0 2px}
 
     /* ── License info ── */
     .license-info{font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
@@ -284,16 +282,10 @@
   </nav>
 
   <div id="appShell">
-    <!-- Beta mode banner -->
-    <div class="beta-banner" id="betaBanner" style="display:none">
-      <div id="betaBannerText"></div>
-      <button onclick="dismissBetaBanner()" aria-label="Dismiss">&times;</button>
-    </div>
-
     <!-- Trial bar shown during trial mode -->
     <div class="trial-bar" id="trialBar" style="display:none">
       <div>🎓 <strong>Free Trial</strong> — <span id="trialCount">20</span> questions remaining</div>
-      <button class="btn primary" style="padding:5px 12px;font-size:12px" onclick="showPaywall()">Unlock Full Access</button>
+      <button class="btn primary" style="padding:5px 12px;font-size:12px" onclick="showAuthModal('redeem')">Get Full Access</button>
     </div>
 
     <div class="session-progress" id="sessionProgress">
@@ -466,29 +458,19 @@
   </div>
 </div>
 
-<!-- Paywall Modal -->
+<!-- Access Modal -->
 <div class="modal-overlay" id="paywallModal" style="display:none">
   <div class="modal">
-    <h2 style="color:var(--teal-deep)">Unlock Full Access</h2>
-    <p>Get unlimited practice questions, AI-powered explanations, 10-question scored quizzes, and spaced repetition — for 2 years.</p>
+    <h2 style="color:var(--teal-deep)">Get Full Access</h2>
+    <p>Create a free account to unlock unlimited practice questions, AI-powered explanations, scored quizzes, and spaced repetition.</p>
 
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;text-align:center">
-      <div style="font-size:2.4rem;font-weight:800;color:var(--ink)">$199</div>
-      <div style="color:var(--muted);font-size:13px">2-year individual license</div>
-    </div>
-
-    <div class="form-group">
-      <label>Your Email</label>
-      <input type="email" id="purchaseEmail" placeholder="you@example.com" autocomplete="email" />
-    </div>
-    <div class="form-error" id="purchaseError"></div>
-    <button class="btn primary" style="width:100%;margin-bottom:10px" id="purchaseBtn" onclick="doPurchase()">Purchase License — $199</button>
+    <button class="btn primary" style="width:100%;margin-bottom:10px" onclick="closePaywall();showAuthModal('register')">Create Free Account</button>
 
     <div class="modal-divider">have a code?</div>
     <button class="btn ghost" style="width:100%;font-size:13px" onclick="closePaywall();showAuthModal('redeem')">Redeem a License Code</button>
 
     <div style="text-align:center;margin-top:14px">
-      <button class="btn ghost btn-sm" onclick="closePaywall()" style="font-size:13px">Continue free trial</button>
+      <button class="btn ghost btn-sm" onclick="closePaywall()" style="font-size:13px">Close</button>
     </div>
   </div>
 </div>
@@ -661,26 +643,6 @@ function updateTrialBar(){
   if (countEl) countEl.textContent = trialStatus.trial.questionsRemaining;
 }
 
-// ── Beta mode banner ─────────────────────────────────────────────
-const BETA_BANNER_DISMISS_KEY = 'edp-beta-banner-dismissed';
-function isOnBetaLicense(){ return session?.license?.license_type === 'beta'; }
-function updateBetaBanner(){
-  const el = $('betaBanner');
-  if (!el) return;
-  if (!isOnBetaLicense() || localStorage.getItem(BETA_BANNER_DISMISS_KEY)){
-    el.style.display = 'none';
-    return;
-  }
-  const exp = new Date(session.license.expires_at);
-  const fmt = exp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  $('betaBannerText').textContent = `Free beta access through ${fmt}. Your feedback shapes the tool.`;
-  el.style.display = 'flex';
-}
-function dismissBetaBanner(){
-  localStorage.setItem(BETA_BANNER_DISMISS_KEY, '1');
-  updateBetaBanner();
-}
-
 // ── Quiz state ────────────────────────────────────────────────
 const state = loadState();
 
@@ -821,7 +783,6 @@ async function doLogin(){
     updateHeaderAuth();
     await loadTrialStatus();
     updateLicenseInfo();
-    updateBetaBanner();
     showCertPathwayModalIfNeeded(data.needsCertPathway);
 
     if (!data.license) {
@@ -867,8 +828,7 @@ async function doRegister(){
     closeModal();
     updateHeaderAuth();
     await loadTrialStatus();
-    updateBetaBanner();
-    // Show redeem or paywall
+    // Show redeem if the free license grant somehow didn't happen
     if (!loginData.license) switchTab('redeem'), $('authModal').style.display = 'flex';
 
   } catch(err){
@@ -909,27 +869,6 @@ async function doRedeem(){
     setFormError('redeemError', err.message);
   } finally {
     setButtonLoading('redeemBtn', false, 'Redeem Code');
-  }
-}
-
-async function doPurchase(){
-  const email = $('purchaseEmail').value.trim();
-  setFormError('purchaseError', '');
-  if (!email){ setFormError('purchaseError', 'Email required to purchase.'); return; }
-  setButtonLoading('purchaseBtn', true, 'Purchase License — $199');
-
-  try {
-    const res = await fetch('/.netlify/functions/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Could not create checkout session');
-    window.location.href = data.url;
-  } catch(err){
-    setFormError('purchaseError', err.message);
-    setButtonLoading('purchaseBtn', false, 'Purchase License — $199');
   }
 }
 
@@ -989,7 +928,7 @@ function updateHeaderAuth(){
   } else {
     el.innerHTML = `
       <button class="btn sm" onclick="showAuthModal('login')">Sign In</button>
-      <button class="btn primary sm" onclick="showPaywall()">Get Access</button>
+      <button class="btn primary sm" onclick="showAuthModal('register')">Create Free Account</button>
     `;
     if (footerLink){ footerLink.textContent = 'Sign in'; footerLink.style.display = ''; }
   }
@@ -1649,7 +1588,6 @@ async function loadBankFromUrl(url){
   updateHeaderAuth();
   await loadTrialStatus();
   updateLicenseInfo();
-  updateBetaBanner();
   showCertPathwayModalIfNeeded(needsCertPathway);
   buildModeRadios();
   setNextButtonLabel();

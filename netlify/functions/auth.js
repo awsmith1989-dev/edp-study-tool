@@ -3,13 +3,16 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-const BETA_MODE = process.env.BETA_MODE === 'true';
-const BETA_END_DATE = process.env.BETA_END_DATE;
+// The paywall is off: set FREE_MODE=false in Netlify env vars to restore
+// paid-only access (Stripe checkout and cohort codes are untouched either
+// way and keep working as before).
+const FREE_MODE = process.env.FREE_MODE !== 'false';
+const FREE_LICENSE_YEARS = 10;
 
 // Returns the user's current active license (any type), auto-granting a
-// beta license first if BETA_MODE is on, the beta window hasn't closed,
-// and they don't already have an active license of any kind. Paid and
-// cohort-code licenses are untouched either way.
+// long-lived free license first if FREE_MODE is on and they don't already
+// have an active license of any kind. Paid and cohort-code licenses are
+// untouched either way.
 async function getLicense(supabase, userId) {
   const now = new Date().toISOString();
   const { data: license } = await supabase
@@ -24,18 +27,20 @@ async function getLicense(supabase, userId) {
 
   if (license) return license;
 
-  if (BETA_MODE && BETA_END_DATE && new Date(BETA_END_DATE) > new Date()) {
-    const { data: betaLicense } = await supabase
+  if (FREE_MODE) {
+    const expires = new Date();
+    expires.setFullYear(expires.getFullYear() + FREE_LICENSE_YEARS);
+    const { data: freeLicense } = await supabase
       .from('licenses')
       .insert({
         user_id: userId,
         status: 'active',
-        license_type: 'beta',
-        expires_at: new Date(BETA_END_DATE).toISOString(),
+        license_type: 'free',
+        expires_at: expires.toISOString(),
       })
       .select('id, expires_at, status, license_type')
       .single();
-    return betaLicense || null;
+    return freeLicense || null;
   }
 
   return null;

@@ -8,3 +8,4 @@ database before deploying the matching app code.
 - `0002_cert_pathway.sql` — certification pathway question
 - `0003_question_flags.sql` — per-question flagging
 - `0004_survey_responses.sql` — in-app survey
+- `0005_free_license_type.sql` — paywall removed; adds 'free' license type
